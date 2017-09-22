@@ -114,24 +114,31 @@ public class StateMachineTest {
         machine.addEventListener("moveOut", a -> Assert.assertEquals(5, this.event));
 
         machine.changeState(IDLE);
+        Assert.assertEquals(IDLE, machine.getCurrState().getName());
 
         this.event = 1;
         machine.run(null, "validateLot", null);
+        Assert.assertEquals(IDLE, machine.getCurrState().getName());
 
         this.event = 2;
         machine.run(null, "moveIn", null);
+        Assert.assertEquals(PRE_PROCESS, machine.getCurrState().getName());
 
         this.event = 3;
         machine.run(null, "trackIn", null);
+        Assert.assertEquals(PROCESSING, machine.getCurrState().getName());
 
         this.event = 4;
         machine.run(null, "trackOut", null);
+        Assert.assertEquals(POST_PROCESS, machine.getCurrState().getName());
 
         this.event = 5;
         machine.run(null, "moveOut", null);
+        Assert.assertEquals(NEXT, machine.getCurrState().getName());
 
         this.event = 6;
         machine.run(null, "ready", null);
+        Assert.assertEquals(IDLE, machine.getCurrState().getName());
     }
 
     private String validateLot(Object controller, Object args) {
