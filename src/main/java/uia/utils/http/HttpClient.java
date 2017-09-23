@@ -44,29 +44,29 @@ public class HttpClient {
         this.retryCount = retryCount;
     }
 
-    public HttpClientResponse get(String command) throws IOException {
-        HttpGet getMethod = new HttpGet(this.url + command);
+    public HttpClientResponse get(String action) throws IOException {
+        HttpGet getMethod = new HttpGet(this.url + action);
         return execute(getMethod);
     }
 
-    public HttpClientResponse postJson(String command, String json) throws IOException {
+    public HttpClientResponse postJson(String action, String json) throws IOException {
         StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
-        HttpPost postMethod = new HttpPost(this.url + command);
+        HttpPost postMethod = new HttpPost(this.url + action);
         postMethod.setEntity(requestEntity);
 
         return execute(postMethod);
     }
 
-    public HttpClientResponse postXml(String command, String json) throws IOException {
+    public HttpClientResponse postXml(String action, String json) throws IOException {
         StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_XML);
-        HttpPost postMethod = new HttpPost(this.url + command);
+        HttpPost postMethod = new HttpPost(this.url + action);
         postMethod.setEntity(requestEntity);
 
         return execute(postMethod);
     }
 
-    public HttpClientResponse delete(String command) throws IOException {
-        HttpDelete deleteMethod = new HttpDelete(this.url + command);
+    public HttpClientResponse delete(String action) throws IOException {
+        HttpDelete deleteMethod = new HttpDelete(this.url + action);
         return execute(deleteMethod);
     }
 

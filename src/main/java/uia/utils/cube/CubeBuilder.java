@@ -6,7 +6,7 @@ import uia.utils.cube.Cube.Data;
 
 public class CubeBuilder<T> {
 
-    private ArrayList<Data<T>> data;
+    private final ArrayList<Data<T>> data;
 
     public CubeBuilder() {
         this.data = new ArrayList<Data<T>>();

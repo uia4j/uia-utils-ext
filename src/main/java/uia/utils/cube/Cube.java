@@ -3,19 +3,24 @@ package uia.utils.cube;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 public interface Cube<T> {
 
+    public Cube<T> select(Function<Data<T>, Boolean> function);
+
     public Cube<T> select(String tagName, String tagValue);
 
-    public Map<String, List<T>> mapping(final String tagName);
-
-    public Map<String, T> mappingFirst(final String tagName);
-
-    public T firstValue();
+    public Cube<T> selectNot(String tagName, String tagValue);
 
     public Stream<T> values();
+
+    public Map<String, List<T>> valuesMapping(final String tagName);
+
+    public T single();
+
+    public Map<String, T> singleMapping(final String tagName);
 
     public static class Data<T> {
 
