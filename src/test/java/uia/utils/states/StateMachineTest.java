@@ -141,6 +141,19 @@ public class StateMachineTest {
         Assert.assertEquals(IDLE, machine.getCurrState().getName());
     }
 
+    @Test
+    public void testEx() {
+        try {
+            StateMachine<Object> machine = new StateMachine<Object>("FOUP");
+            machine.changeState("unknown");
+        }
+        catch (StateException ex) {
+            Assert.assertEquals("unknown", ex.eventName);
+            Assert.assertEquals("Event:unknown not found in StateMachine:FOUP", ex.getMessage());
+
+        }
+    }
+
     private String validateLot(Object controller, Object args) {
         return null;
     }

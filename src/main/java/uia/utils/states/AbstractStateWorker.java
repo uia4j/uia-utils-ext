@@ -1,5 +1,7 @@
 package uia.utils.states;
 
+import uia.utils.states.StateMachine.RunResultType;
+
 /**
  * Abstract worker using state machine.
  *
@@ -7,21 +9,21 @@ package uia.utils.states;
  *
  * @param <C> Controller.
  */
-public abstract class AbstractStateWorker<C> {
+public abstract class AbstractStateWorker {
 
     /**
      * Allow to print debug information
      */
     public static boolean PRINTABLE = true;
 
-    protected StateMachine<C> stateMachine;
+    protected StateMachine<AbstractStateWorker> stateMachine;
 
     /**
      * Constructor.
      * @param workerName Name.
      */
     protected AbstractStateWorker(String workerName) {
-        this.stateMachine = new StateMachine<C>(workerName);
+        this.stateMachine = new StateMachine<AbstractStateWorker>(workerName);
         this.initial();
     }
 
@@ -84,6 +86,17 @@ public abstract class AbstractStateWorker<C> {
                     this.stateMachine.getCurrState(),
                     extra));
         }
+    }
+
+    /**
+     *
+     * @param controller
+     * @param eventName
+     * @param args
+     * @return
+     */
+    protected RunResultType run(String eventName, Object args) {
+        return this.stateMachine.run(this, eventName, args);
     }
 
     /**

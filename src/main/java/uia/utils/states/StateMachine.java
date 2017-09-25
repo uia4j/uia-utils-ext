@@ -13,19 +13,13 @@ import java.util.TreeMap;
  */
 public class StateMachine<C> {
 
-    public enum RunType {
-        /**
-         * No event.
-         */
-        NOEVENT,
-        /**
-         * No changed.
-         */
-        STATE_NOCHANGE,
-        /**
-         * Changed.
-         */
-        STATE_CHANGE
+    public enum RunResultType {
+
+        EVENT_NOT_SUPPORT,
+
+        STATE_KEEP,
+
+        STATE_CHANGED
     }
 
     private final String name;
@@ -143,7 +137,12 @@ public class StateMachine<C> {
 
         State<C> temp = this.states.get(stateName);
         if (temp == null) {
-            throw new StateException(String.format("%s not found in StateMachin:%s", stateName, this.name));
+            String message = String.format("Event:%s not found in StateMachine:%s", stateName, this.name);
+            throw new StateException(
+                    stateName,
+                    this.currState.getName(),
+                    message,
+                    new IllegalArgumentException(message));
         }
 
         this.prevState = this.currState;
@@ -159,10 +158,10 @@ public class StateMachine<C> {
      * @param args Arguments.
      * @throws StateException Raise if state control failed.
      */
-    public RunType run(C controller, String eventName, Object args) throws StateException {
+    public RunResultType run(C controller, String eventName, Object args) throws StateException {
         if (!this.currState.containsEvent(eventName)) {
             raiseEvent(eventName);
-            return RunType.NOEVENT;
+            return RunResultType.EVENT_NOT_SUPPORT;
         }
         String nextState = this.currState.execute(controller, eventName, args);
         if (changeState(nextState)) {
@@ -170,11 +169,11 @@ public class StateMachine<C> {
             this.currState.raiseIn(eventName, this.prevState.getName());
             raiseEvent(eventName);
             raiseStateChanged(eventName, this.prevState.getName(), this.currState.getName());
-            return RunType.STATE_CHANGE;
+            return RunResultType.STATE_CHANGED;
         }
         else {
             raiseEvent(eventName);
-            return RunType.STATE_NOCHANGE;
+            return RunResultType.STATE_KEEP;
         }
     }
 
