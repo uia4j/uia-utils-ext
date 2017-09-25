@@ -7,29 +7,113 @@ UIA Utils extension
 [![License](https://img.shields.io/github/license/gazer2kanlin/uia.utils4j.ext.svg)](LICENSE)
 
 
-Common utilities extension. Need JDK 1.8 or above.
+Common utilities extension. Need JDK 1.8 or above. extension includes 3 sub projects:
 
-## utils.cube
+* Cube
+* Http
+* States - Implement StateMachine pattern.
 
-## utils.http
+## Cube
+### key classes
+* CubeBuilder
+* Cube
 
-dependencies
-```xml
-<dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpclient</artifactId>
-  <version>4.5.1</version>
-</dependency>
-<dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpasyncclient</artifactId>
-  <version>4.1.1</version>
-</dependency>
-</dependencies>
+```java
+CubeBuilder builder = new CubeBuilder();
+builder.put("Kyle Lin")
+       .addTag("firstName", "Kan")
+       .addTag("lasttName", "Lin")
+       .addTag("sex", "M")
+       .addTag("job", "Engineer");
+builder.put("Patrick Lin")
+       .addTag("firstName", "Wei")
+       .addTag("lasttName", "Lin")
+       .addTag("sex", "M")
+       .addTag("job", "Manager");
+builder.put("Avril Lin")
+       .addTag("firstName", "Qin")
+       .addTag("lasttName", "Lin")
+       .addTag("sex", "F")
+       .addTag("job", "Student");
+builder.put("Amber Lin")
+       .addTag("firstName", "Yue")
+       .addTag("lasttName", "Lin")
+       .addTag("sex", "F")
+       .addTag("job", "Student");
+builder.put("Charlotte Chang")
+       .addTag("firstName", "Chiayu")
+       .addTag("lasttName", "Chang")
+       .addTag("sex", "F")
+       .addTag("job", "Engineer");
+builder.put("Cathy Tsa")
+       .addTag("firstName", "Chiahwei")
+       .addTag("lasttName", "Tsai")
+       .addTag("sex", "F")
+       .addTag("job", "Sales");
+
+Cube cube = builder.build();
+cube.select("job", "Student"); // Avril, Amber
+cube.select("sex", "F").valuesMapping("job"); // Student, Engineer, Sales
 ```
 
-## utils.states
+## Http
+### key classes
+* HttpClient
+* HttpAsyncClient
 
+```java
+/** Sync */
+HttpClient client1 = new HttpClient(url);
+client1.get(subURL);
+HttpClientResponse r1 = client1.postXml(subURL, xml);
+HttpClientResponse r2 = client1.postJson(subURL, json);
+
+/** Async */
+HttpAsyncClient client2 = new HttpAsyncClient(url);
+client2.get(subURL, callback);
+client2.postXml(subURL, xml, callback);
+client2.postJson(subURL, json, callback);
+
+```
+
+### dependencies
+
+```xml
+<groupId>org.apache.httpcomponents</groupId>
+<artifactId>httpclient</artifactId>
+<version>4.5.1</version>
+```
+```xml
+<groupId>org.apache.httpcomponents</groupId>
+<artifactId>httpasyncclient</artifactId>
+<version>4.1.1</version>
+```
+
+## States
+### key classes
+* StateMachine
+* AbstractStateWorker
+
+```java
+public class MyWokrer extends AbstractStateWorker {
+
+  @Override
+  protected void initial() {
+    this.stateMachine.register("STATE1")
+        .addEvent("E2", (c, a) -> return "STATE2")
+        .addEvent("E3", (c, a) -> return "STATE3");
+    this.stateMachine.register("STATE2")
+        .addEvent("E3", (c, a) -> return "STATE3");
+    this.stateMachine.register("STATE3");
+  }
+}
+
+MyWokrer worker = new MyWokrer();
+worker.changeState("STATE1");
+worker.run("E2", value);  // STATE2
+worker.run("E3", value);  // STATE3
+worker.run("E2", value);  // STATE3
+```
 
 ## Copyright and License
 
