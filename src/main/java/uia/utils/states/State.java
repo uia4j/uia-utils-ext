@@ -50,7 +50,7 @@ public class State<T> {
 
     public State<T> addEvent(String eventName, EventExecutor<T> executor) {
         if (eventName == null || executor == null) {
-            return this;
+            throw new NullPointerException("EventName or EventExecutor is null");
         }
         this.executors.put(eventName, executor);
         return this;
