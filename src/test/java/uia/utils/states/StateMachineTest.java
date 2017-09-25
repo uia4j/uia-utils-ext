@@ -48,31 +48,52 @@ public class StateMachineTest {
         machine.register(NEXT)
                 .addEvent("ready", StateMachineTest.this::ready);
 
-        // RUN_HOLD
-        machine.register(RUN_HOLD);
+        Assert.assertEquals("FOUP", machine.getName());
+        Assert.assertNotNull(machine.getState(IDLE));
+        Assert.assertNotNull(machine.getState(PRE_PROCESS));
+        Assert.assertNotNull(machine.getState(PROCESSING));
+        Assert.assertNotNull(machine.getState(POST_PROCESS));
+        Assert.assertNotNull(machine.getState(NEXT));
+        Assert.assertNull(machine.getState(RUN_HOLD));
 
         machine.changeState(IDLE);
+        machine.println();
+        Assert.assertEquals("NULL", machine.getPrevState().getName());
         Assert.assertEquals(IDLE, machine.getCurrState().getName());
 
         machine.run(null, "validateLot", null);
+        machine.println();
+        Assert.assertEquals("NULL", machine.getPrevState().getName());
         Assert.assertEquals(IDLE, machine.getCurrState().getName());
 
         machine.run(null, "trackIn", null); // NO CHANGED
+        machine.println();
+        Assert.assertEquals("NULL", machine.getPrevState().getName());
         Assert.assertEquals(IDLE, machine.getCurrState().getName());
 
         machine.run(null, "moveIn", null);
+        machine.println();
+        Assert.assertEquals(IDLE, machine.getPrevState().getName());
         Assert.assertEquals(PRE_PROCESS, machine.getCurrState().getName());
 
         machine.run(null, "trackIn", null);
+        machine.println();
+        Assert.assertEquals(PRE_PROCESS, machine.getPrevState().getName());
         Assert.assertEquals(PROCESSING, machine.getCurrState().getName());
 
         machine.run(null, "trackOut", null);
+        machine.println();
+        Assert.assertEquals(PROCESSING, machine.getPrevState().getName());
         Assert.assertEquals(POST_PROCESS, machine.getCurrState().getName());
 
         machine.run(null, "moveOut", null);
+        machine.println();
+        Assert.assertEquals(POST_PROCESS, machine.getPrevState().getName());
         Assert.assertEquals(NEXT, machine.getCurrState().getName());
 
         machine.run(null, "ready", null);
+        machine.println();
+        Assert.assertEquals(NEXT, machine.getPrevState().getName());
         Assert.assertEquals(IDLE, machine.getCurrState().getName());
     }
 
