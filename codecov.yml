@@ -1,2 +1,2 @@
 ignore:
-  - "src/main/uia/utils/http/*.java"
+  - "src/main/java/uia/utils/http/*.java"
