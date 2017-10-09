@@ -1,6 +1,7 @@
 package uia.utils.http;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -21,10 +22,17 @@ public class HttpAsyncClient {
 
     private CloseableHttpAsyncClient client;
 
+    private Map<String, String> headersDefault;
+
     public HttpAsyncClient(String url) {
+        this(url, null);
+    }
+
+    public HttpAsyncClient(String url, Map<String, String> headersDefault) {
         this.retryCount = 3;
         this.url = url;
         this.client = HttpAsyncClients.createDefault();
+        this.headersDefault = headersDefault;
 
         this.client.start();
     }
@@ -41,37 +49,56 @@ public class HttpAsyncClient {
         this.retryCount = retryCount;
     }
 
-    public void get(String command, FutureCallback<HttpClientResponse> callback) throws IOException {
-        HttpGet getMethod = new HttpGet(this.url + command);
+    public void get(String action, FutureCallback<HttpClientResponse> callback) throws IOException {
+        get(action, null, callback);
+    }
+
+    public void get(String action, Map<String, String> headersOthers, FutureCallback<HttpClientResponse> callback) throws IOException {
+        HttpGet getMethod = new HttpGet(this.url + action);
         getMethod.addHeader("accept", "application/json");
-
-        execute(getMethod, callback);
+        execute(getMethod, headersOthers, callback);
     }
 
-    public void postJson(String command, String json, FutureCallback<HttpClientResponse> callback) throws IOException {
+    public void postJson(String action, String json, FutureCallback<HttpClientResponse> callback) throws IOException {
+        postJson(action, json, null, callback);
+    }
+
+    public void postJson(String action, String json, Map<String, String> headersOthers, FutureCallback<HttpClientResponse> callback) throws IOException {
         StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
-        HttpPost postMethod = new HttpPost(this.url + command);
+        HttpPost postMethod = new HttpPost(this.url + action);
         postMethod.setEntity(requestEntity);
-
-        execute(postMethod, callback);
+        execute(postMethod, headersOthers, callback);
     }
 
-    public void postXml(String command, String json, FutureCallback<HttpClientResponse> callback) throws IOException {
-        StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_XML);
-        HttpPost postMethod = new HttpPost(this.url + command);
-        postMethod.setEntity(requestEntity);
-
-        execute(postMethod, callback);
+    public void postXml(String action, String xml, FutureCallback<HttpClientResponse> callback) throws IOException {
+        postXml(action, xml, null, callback);
     }
 
-    public void delete(String command, FutureCallback<HttpClientResponse> callback) throws IOException {
-        HttpDelete deleteMethod = new HttpDelete(this.url + command);
+    public void postXml(String action, String xml, Map<String, String> headersOthers, FutureCallback<HttpClientResponse> callback) throws IOException {
+        StringEntity requestEntity = new StringEntity(xml, ContentType.APPLICATION_XML);
+        HttpPost postMethod = new HttpPost(this.url + action);
+        postMethod.setEntity(requestEntity);
+        execute(postMethod, headersOthers, callback);
+    }
+
+    public void delete(String action, FutureCallback<HttpClientResponse> callback) throws IOException {
+        delete(action, callback);
+    }
+
+    public void delete(String action, Map<String, String> headersOthers, FutureCallback<HttpClientResponse> callback) throws IOException {
+        HttpDelete deleteMethod = new HttpDelete(this.url + action);
         deleteMethod.addHeader("accept", "application/json");
-
-        execute(deleteMethod, callback);
+        execute(deleteMethod, headersOthers, callback);
     }
 
-    private void execute(HttpUriRequest request, final FutureCallback<HttpClientResponse> callback) throws IOException {
+    private void execute(HttpUriRequest request, Map<String, String> headersOthers, final FutureCallback<HttpClientResponse> callback) throws IOException {
+        if (this.headersDefault != null) {
+            this.headersDefault.forEach(request::addHeader);
+        }
+        if (headersOthers != null) {
+            headersOthers.forEach(request::addHeader);
+        }
+
         int rc = this.retryCount;
         while (true) {
             rc--;
