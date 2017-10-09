@@ -1,6 +1,6 @@
 package uia.utils.states;
 
-public interface StateListener {
+public interface StateListener<T> {
 
-    public void run(StateEventArgs args);
+    public void run(StateEventArgs<T> args);
 }

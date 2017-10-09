@@ -11,7 +11,7 @@ import java.util.TreeMap;
  *
  * @param <C> Controller.
  */
-public class StateMachine<C> {
+public class StateMachine<C, A> {
 
     public enum RunResultType {
 
@@ -24,15 +24,15 @@ public class StateMachine<C> {
 
     private final String name;
 
-    private final TreeMap<String, State<C>> states;
+    private final TreeMap<String, State<C, A>> states;
 
-    private final TreeMap<String, List<StateListener>> stateChangedListeners;
+    private final TreeMap<String, List<StateListener<A>>> stateChangedListeners;
 
-    private final TreeMap<String, List<StateListener>> eventListeners;
+    private final TreeMap<String, List<StateListener<A>>> eventListeners;
 
-    private State<C> prevState;
+    private State<C, A> prevState;
 
-    private State<C> currState;
+    private State<C, A> currState;
 
     /**
      * Constructor.
@@ -40,10 +40,10 @@ public class StateMachine<C> {
      */
     public StateMachine(String name) {
         this.name = name;
-        this.states = new TreeMap<String, State<C>>();
-        this.stateChangedListeners = new TreeMap<String, List<StateListener>>();
-        this.eventListeners = new TreeMap<String, List<StateListener>>();
-        this.prevState = new State<C>("NULL");
+        this.states = new TreeMap<String, State<C, A>>();
+        this.stateChangedListeners = new TreeMap<String, List<StateListener<A>>>();
+        this.eventListeners = new TreeMap<String, List<StateListener<A>>>();
+        this.prevState = new State<C, A>("NULL");
         this.currState = this.prevState;
     }
 
@@ -60,7 +60,7 @@ public class StateMachine<C> {
      * @param stateName State name.
      * @return State.
      */
-    public State<C> getState(String stateName) {
+    public State<C, A> getState(String stateName) {
         return this.states.get(stateName);
     }
 
@@ -69,10 +69,10 @@ public class StateMachine<C> {
      * @param stateName
      * @return
      */
-    public State<C> register(String stateName) {
-        State<C> state = this.states.get(stateName);
+    public State<C, A> register(String stateName) {
+        State<C, A> state = this.states.get(stateName);
         if (state == null) {
-            state = new State<C>(stateName);
+            state = new State<C, A>(stateName);
             this.states.put(stateName, state);
         }
         return state;
@@ -82,7 +82,7 @@ public class StateMachine<C> {
      *
      * @return
      */
-    public State<C> getPrevState() {
+    public State<C, A> getPrevState() {
         return this.prevState;
     }
 
@@ -90,7 +90,7 @@ public class StateMachine<C> {
      *
      * @return
      */
-    public State<C> getCurrState() {
+    public State<C, A> getCurrState() {
         return this.currState;
     }
 
@@ -99,10 +99,10 @@ public class StateMachine<C> {
      * @param eventName Event name.
      * @param listener The listener.
      */
-    public void addEventListener(String eventName, StateListener listener) {
-        List<StateListener> listeners = this.eventListeners.get(eventName);
+    public void addEventListener(String eventName, StateListener<A> listener) {
+        List<StateListener<A>> listeners = this.eventListeners.get(eventName);
         if (listeners == null) {
-            listeners = new ArrayList<StateListener>();
+            listeners = new ArrayList<StateListener<A>>();
             this.eventListeners.put(eventName, listeners);
         }
         listeners.add(listener);
@@ -114,11 +114,11 @@ public class StateMachine<C> {
      * @param toStateName State changed to.
      * @param listener The listener.
      */
-    public void addChangeListener(String fromStateName, String toStateName, StateListener listener) {
+    public void addChangeListener(String fromStateName, String toStateName, StateListener<A> listener) {
         String key = genKey(fromStateName, toStateName);
-        List<StateListener> listeners = this.stateChangedListeners.get(key);
+        List<StateListener<A>> listeners = this.stateChangedListeners.get(key);
         if (listeners == null) {
-            listeners = new ArrayList<StateListener>();
+            listeners = new ArrayList<StateListener<A>>();
             this.stateChangedListeners.put(key, listeners);
         }
         listeners.add(listener);
@@ -135,7 +135,7 @@ public class StateMachine<C> {
             return false;
         }
 
-        State<C> temp = this.states.get(stateName);
+        State<C, A> temp = this.states.get(stateName);
         if (temp == null) {
             String message = String.format("Event:%s not found in StateMachine:%s", stateName, this.name);
             throw new StateException(
@@ -158,21 +158,21 @@ public class StateMachine<C> {
      * @param args Arguments.
      * @throws StateException Raise if state control failed.
      */
-    public RunResultType run(C controller, String eventName, Object args) throws StateException {
+    public RunResultType run(C controller, String eventName, A args) throws StateException {
         if (!this.currState.containsEvent(eventName)) {
-            raiseEvent(eventName);
+            raiseEvent(eventName, args);
             return RunResultType.EVENT_NOT_SUPPORT;
         }
         String nextState = this.currState.execute(controller, eventName, args);
         if (changeState(nextState)) {
-            this.prevState.raiseOut(eventName, this.prevState.getName());
-            this.currState.raiseIn(eventName, this.prevState.getName());
-            raiseEvent(eventName);
-            raiseStateChanged(eventName, this.prevState.getName(), this.currState.getName());
+            this.prevState.raiseOut(eventName, this.prevState.getName(), args);
+            this.currState.raiseIn(eventName, this.prevState.getName(), args);
+            raiseEvent(eventName, args);
+            raiseStateChanged(eventName, this.prevState.getName(), this.currState.getName(), args);
             return RunResultType.STATE_CHANGED;
         }
         else {
-            raiseEvent(eventName);
+            raiseEvent(eventName, args);
             return RunResultType.STATE_KEEP;
         }
     }
@@ -186,24 +186,24 @@ public class StateMachine<C> {
                 this.prevState));
     }
 
-    private void raiseStateChanged(String eventName, String fromStateName, String toStateName) {
+    private void raiseStateChanged(String eventName, String fromStateName, String toStateName, A args) {
         String key = genKey(fromStateName, toStateName);
-        List<StateListener> listeners = this.stateChangedListeners.get(key);
+        List<StateListener<A>> listeners = this.stateChangedListeners.get(key);
         if (listeners == null) {
             return;
         }
-        for (StateListener listener : listeners) {
-            listener.run(new StateEventArgs(eventName));
+        for (StateListener<A> listener : listeners) {
+            listener.run(new StateEventArgs<A>(eventName, args));
         }
     }
 
-    private void raiseEvent(String eventName) {
-        List<StateListener> listeners = this.eventListeners.get(eventName);
+    private void raiseEvent(String eventName, A args) {
+        List<StateListener<A>> listeners = this.eventListeners.get(eventName);
         if (listeners == null) {
             return;
         }
-        for (StateListener listener : listeners) {
-            listener.run(new StateEventArgs(eventName));
+        for (StateListener<A> listener : listeners) {
+            listener.run(new StateEventArgs<A>(eventName, args));
         }
     }
 

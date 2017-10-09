@@ -6,8 +6,10 @@ package uia.utils.states;
  * @author Kyle K. Lin
  *
  * @param <C> Controller.
+ * @param <A>
+ *
  */
-public interface EventExecutor<C> {
+public interface EventExecutor<C, A> {
 
     /**
      * Run this event.
@@ -15,5 +17,5 @@ public interface EventExecutor<C> {
      * @param args Arguments.
      * @return State name changed to.
      */
-    public String run(C controller, Object args);
+    public String run(C controller, A args);
 }

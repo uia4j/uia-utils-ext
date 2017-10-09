@@ -8,17 +8,18 @@ import java.util.TreeMap;
  *
  * @author Kyle K. Lin
  *
- * @param <T>
+ * @param <C>
+ * @param <A>
  */
-public class State<T> {
+public class State<C, A> {
 
     private final String name;
 
-    private final TreeMap<String, EventExecutor<T>> executors;
+    private final TreeMap<String, EventExecutor<C, A>> executors;
 
-    private final ArrayList<StateListener> inListeners;
+    private final ArrayList<StateListener<A>> inListeners;
 
-    private final ArrayList<StateListener> outListeners;
+    private final ArrayList<StateListener<A>> outListeners;
 
     /**
      * Constructor.
@@ -27,20 +28,20 @@ public class State<T> {
      */
     public State(String name) {
         this.name = name;
-        this.executors = new TreeMap<String, EventExecutor<T>>();
-        this.inListeners = new ArrayList<StateListener>();
-        this.outListeners = new ArrayList<StateListener>();
+        this.executors = new TreeMap<String, EventExecutor<C, A>>();
+        this.inListeners = new ArrayList<StateListener<A>>();
+        this.outListeners = new ArrayList<StateListener<A>>();
     }
 
     public boolean containsEvent(String eventName) {
         return this.executors.containsKey(eventName);
     }
 
-    public void addInListener(StateListener listener) {
+    public void addInListener(StateListener<A> listener) {
         this.inListeners.add(listener);
     }
 
-    public void addOutListener(StateListener listener) {
+    public void addOutListener(StateListener<A> listener) {
         this.outListeners.add(listener);
     }
 
@@ -48,9 +49,9 @@ public class State<T> {
         return this.name;
     }
 
-    public State<T> addEvent(String eventName, EventExecutor<T> executor) {
+    public State<C, A> addEvent(String eventName, EventExecutor<C, A> executor) {
         if (eventName == null || executor == null) {
-            throw new NullPointerException("EventName or EventExecutor is null");
+            throw new IllegalArgumentException("EventName or EventExecutor is null");
         }
         this.executors.put(eventName, executor);
         return this;
@@ -65,15 +66,15 @@ public class State<T> {
         return this.name + ", events:{" + String.join(",", this.executors.keySet().toArray(new String[0])) + "}";
     }
 
-    String execute(T controller, String eventName, Object args) {
-        EventExecutor<T> executor = this.executors.get(eventName);
+    String execute(C controller, String eventName, A args) {
+        EventExecutor<C, A> executor = this.executors.get(eventName);
         return executor.run(controller, args);
     }
 
-    void raiseIn(String eventName, String prevState) {
-        for (StateListener l : this.inListeners) {
+    void raiseIn(String eventName, String prevState, A value) {
+        for (StateListener<A> l : this.inListeners) {
             try {
-                l.run(new StateEventArgs(eventName));
+                l.run(new StateEventArgs<A>(eventName, value));
             }
             catch (Exception ex) {
 
@@ -81,10 +82,10 @@ public class State<T> {
         }
     }
 
-    void raiseOut(String eventName, String prevState) {
-        for (StateListener l : this.outListeners) {
+    void raiseOut(String eventName, String prevState, A value) {
+        for (StateListener<A> l : this.outListeners) {
             try {
-                l.run(new StateEventArgs(eventName));
+                l.run(new StateEventArgs<A>(eventName, value));
             }
             catch (Exception ex) {
 

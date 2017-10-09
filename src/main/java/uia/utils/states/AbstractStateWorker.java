@@ -1,7 +1,5 @@
 package uia.utils.states;
 
-import uia.utils.states.StateMachine.RunResultType;
-
 /**
  * Abstract worker using state machine.
  *
@@ -9,22 +7,32 @@ import uia.utils.states.StateMachine.RunResultType;
  *
  * @param <C> Controller.
  */
-public abstract class AbstractStateWorker {
+public abstract class AbstractStateWorker<T, A> {
 
     /**
      * Allow to print debug information
      */
-    public static boolean PRINTABLE = true;
+    public static boolean PRINTABLE = false;
 
-    protected StateMachine<AbstractStateWorker> stateMachine;
+    protected StateMachine<T, A> stateMachine;
 
     /**
      * Constructor.
      * @param workerName Name.
      */
     protected AbstractStateWorker(String workerName) {
-        this.stateMachine = new StateMachine<AbstractStateWorker>(workerName);
-        this.initial();
+        this.stateMachine = new StateMachine<T, A>(workerName);
+        initial();
+    }
+
+    /**
+     * Constructor.
+     * @param workerName Name.
+     */
+    protected AbstractStateWorker(String workerName, String stateName) {
+        this.stateMachine = new StateMachine<T, A>(workerName);
+        initial();
+        changeState(stateName);
     }
 
     /**
@@ -47,30 +55,31 @@ public abstract class AbstractStateWorker {
      * change to new state.
      * @return New state.
      * @throws StateException Raise if state control failed.
-
+    
      */
     public boolean changeState(String stateName) throws StateException {
         return this.stateMachine.changeState(stateName);
     }
 
-    public void addStateInListener(String stateName, StateListener listener) {
+    public void addStateInListener(String stateName, StateListener<A> listener) {
         this.stateMachine.getState(stateName).addInListener(listener);
     }
 
-    public void addStateOutListener(String stateName, StateListener listener) {
+    public void addStateOutListener(String stateName, StateListener<A> listener) {
         this.stateMachine.getState(stateName).addOutListener(listener);
     }
 
-    public void addEventListener(String eventName, StateListener listener) {
+    public void addEventListener(String eventName, StateListener<A> listener) {
         this.stateMachine.addEventListener(eventName, listener);
     }
 
-    public void addStateChangedListener(String fromStateName, String toStateName, StateListener listener) {
+    public void addStateChangedListener(String fromStateName, String toStateName, StateListener<A> listener) {
         this.stateMachine.addChangeListener(fromStateName, toStateName, listener);
     }
 
     public static void printlnHeader() {
-        System.out.println(String.format("%-15s> %-20s, %-20s, %s",
+        System.out.println(String.format("%-25s, %-15s, %-20s, %-20s, %s",
+                "Class",
                 "Name",
                 "Event",
                 "State",
@@ -80,23 +89,13 @@ public abstract class AbstractStateWorker {
 
     public void println(String eventName, String extra) {
         if (PRINTABLE) {
-            System.out.println(String.format("%-15s> %-20s, %-20s, %s",
+            System.out.println(String.format("%-25s, %-15s, %-20s, %-20s, %s",
+                    getClass().getSimpleName(),
                     getName(),
                     eventName,
                     this.stateMachine.getCurrState(),
                     extra));
         }
-    }
-
-    /**
-     *
-     * @param controller
-     * @param eventName
-     * @param args
-     * @return
-     */
-    protected RunResultType run(String eventName, Object args) {
-        return this.stateMachine.run(this, eventName, args);
     }
 
     /**
