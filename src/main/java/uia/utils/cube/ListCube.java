@@ -34,9 +34,24 @@ public class ListCube<T> implements Cube<T> {
     }
 
     @Override
+    public <R> Map<String, List<R>> valuesMapping(String tagName, Function<T, R> f) {
+        return this.data.stream().collect(
+                Collectors.groupingBy(
+                        d -> d.getTag(tagName),
+                        Collectors.mapping(v -> f.apply(v.value), Collectors.toList())));
+    }
+
+    @Override
     public Map<String, T> singleMapping(final String tagName) {
         TreeMap<String, T> result = new TreeMap<String, T>();
         valuesMapping(tagName).forEach((k, v) -> result.put(k, v.get(0)));
+        return result;
+    }
+
+    @Override
+    public <R> Map<String, R> singleMapping(String tagName, Function<T, R> f) {
+        TreeMap<String, R> result = new TreeMap<String, R>();
+        valuesMapping(tagName).forEach((k, v) -> result.put(k, f.apply(v.get(0))));
         return result;
     }
 
@@ -53,5 +68,13 @@ public class ListCube<T> implements Cube<T> {
     @Override
     public Cube<T> select(Function<Data<T>, Boolean> function) {
         return new StreamCube<T>(this.data.stream().filter(function::apply));
+    }
+
+    @Override
+    public Map<String, Cube<T>> cubes(String tagName) {
+        final TreeMap<String, Cube<T>> result = new TreeMap<String, Cube<T>>();
+        Map<String, List<Data<T>>> data = this.data.stream().collect(Collectors.groupingBy(d -> d.getTag(tagName)));
+        data.forEach((k, v) -> result.put(k, new ListCube<T>(v)));
+        return result;
     }
 }

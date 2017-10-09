@@ -8,6 +8,8 @@ import java.util.stream.Stream;
 
 public interface Cube<T> {
 
+    public Map<String, Cube<T>> cubes(String tagName);
+
     public Cube<T> select(Function<Data<T>, Boolean> function);
 
     public Cube<T> select(String tagName, String tagValue);
@@ -18,9 +20,13 @@ public interface Cube<T> {
 
     public Map<String, List<T>> valuesMapping(final String tagName);
 
+    public <R> Map<String, List<R>> valuesMapping(final String tagName, Function<T, R> f);
+
     public T single();
 
     public Map<String, T> singleMapping(final String tagName);
+
+    public <R> Map<String, R> singleMapping(final String tagName, Function<T, R> f);
 
     public static class Data<T> {
 
