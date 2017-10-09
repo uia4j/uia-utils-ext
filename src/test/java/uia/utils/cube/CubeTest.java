@@ -37,6 +37,9 @@ public class CubeTest {
 
         Cube<String> c = b.build();
 
+        System.out.println(c.cubes("lastName"));
+        System.out.println(c.select("lastName", "Lin").cubes("Job"));
+
         Assert.assertEquals(4, c.select(d -> d.value.contains("Lin")).values().count());
         Assert.assertEquals(1, c.select(d -> d.value.contains("Lin")).select(d -> d.value.contains("Kan")).values().count());
 

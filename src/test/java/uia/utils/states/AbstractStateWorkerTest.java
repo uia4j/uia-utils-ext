@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import uia.utils.states.StateMachine.RunResultType;
 
-public class AbstractStateWorkerTest extends AbstractStateWorker {
+public class AbstractStateWorkerTest extends AbstractStateWorker<AbstractStateWorkerTest, Object> {
 
     private static String IDLE = "IDLE";
 
@@ -31,25 +31,21 @@ public class AbstractStateWorkerTest extends AbstractStateWorker {
 
         addEventListener("moveIn", a -> {
             Assert.assertEquals(4, this.seqNo);
-            System.out.println("Event:" + a.eventName);
         });
         addStateInListener(PRE_PROCESS, a -> {
             Assert.assertEquals(4, this.seqNo);
-            System.out.println("In:" + a.eventName);
         });
         addStateOutListener(PRE_PROCESS, a -> {
             Assert.assertEquals(5, this.seqNo);
-            System.out.println("Out:" + a.eventName);
         });
         addStateChangedListener(PROCESSING, POST_PROCESS, a -> {
             Assert.assertEquals(6, this.seqNo);
-            System.out.println("Change" + a.eventName);
         });
 
         RunResultType rt;
 
         changeState(IDLE);
-        Assert.assertEquals(IDLE, this.stateMachine.getCurrState().getName());
+        Assert.assertEquals(IDLE, getCurrState());
 
         this.seqNo++;
         rt = run("???", null);
@@ -59,48 +55,50 @@ public class AbstractStateWorkerTest extends AbstractStateWorker {
         this.seqNo++;
         rt = run("validateLot", null);
         Assert.assertEquals(RunResultType.STATE_KEEP, rt);
-        Assert.assertEquals(IDLE, this.stateMachine.getCurrState().getName());
+        Assert.assertEquals(IDLE, getCurrState());
         println("validateLot", null);
 
         this.seqNo++;
         rt = run("trackIn", null);
         Assert.assertEquals(RunResultType.EVENT_NOT_SUPPORT, rt);
-        Assert.assertEquals(IDLE, this.stateMachine.getCurrState().getName());
+        Assert.assertEquals(IDLE, getCurrState());
         println("trackIn", null);
 
         this.seqNo++;
         rt = run("moveIn", null);
         Assert.assertEquals(RunResultType.STATE_CHANGED, rt);
-        Assert.assertEquals(PRE_PROCESS, this.stateMachine.getCurrState().getName());
+        Assert.assertEquals(PRE_PROCESS, getCurrState());
         println("moveIn", null);
 
         this.seqNo++;
         rt = run("trackIn", null);
         Assert.assertEquals(RunResultType.STATE_CHANGED, rt);
-        Assert.assertEquals(PROCESSING, this.stateMachine.getCurrState().getName());
+        Assert.assertEquals(PROCESSING, getCurrState());
         println("trackIn", null);
 
         this.seqNo++;
         rt = run("trackOut", null);
         Assert.assertEquals(RunResultType.STATE_CHANGED, rt);
-        Assert.assertEquals(POST_PROCESS, this.stateMachine.getCurrState().getName());
+        Assert.assertEquals(POST_PROCESS, getCurrState());
         println("trackOut", null);
 
         this.seqNo++;
         rt = run("moveOut", null);
         Assert.assertEquals(RunResultType.STATE_CHANGED, rt);
-        Assert.assertEquals(NEXT, this.stateMachine.getCurrState().getName());
+        Assert.assertEquals(NEXT, getCurrState());
         println("moveOut", null);
 
         this.seqNo++;
         rt = run("ready", null);
         Assert.assertEquals(RunResultType.STATE_CHANGED, rt);
-        Assert.assertEquals(IDLE, this.stateMachine.getCurrState().getName());
+        Assert.assertEquals(IDLE, getCurrState());
         println("ready", null);
     }
 
     @Override
     protected void initial() {
+        AbstractStateWorker.PRINTABLE = true;
+
         // IDLE
         this.stateMachine.register(IDLE)
                 .addEvent("validateLot", AbstractStateWorkerTest.this::validateLot)
@@ -131,31 +129,35 @@ public class AbstractStateWorkerTest extends AbstractStateWorker {
         this.stateMachine.register(RUN_HOLD);
     }
 
-    private String validateLot(AbstractStateWorker controller, Object args) {
+    private RunResultType run(String eventName, Object args) {
+        return this.stateMachine.run(this, eventName, args);
+    }
+
+    private String validateLot(AbstractStateWorker<AbstractStateWorkerTest, Object> controller, Object args) {
         return null;
     }
 
-    private String moveIn(AbstractStateWorker controller, Object args) {
+    private String moveIn(AbstractStateWorker<AbstractStateWorkerTest, Object> controller, Object args) {
         return PRE_PROCESS;
     }
 
-    private String moveOut(AbstractStateWorker controller, Object args) {
+    private String moveOut(AbstractStateWorker<AbstractStateWorkerTest, Object> controller, Object args) {
         return NEXT;
     }
 
-    private String trackIn(AbstractStateWorker controller, Object args) {
+    private String trackIn(AbstractStateWorker<AbstractStateWorkerTest, Object> controller, Object args) {
         return PROCESSING;
     }
 
-    private String trackOut(AbstractStateWorker controller, Object args) {
+    private String trackOut(AbstractStateWorker<AbstractStateWorkerTest, Object> controller, Object args) {
         return POST_PROCESS;
     }
 
-    private String runHold(AbstractStateWorker controller, Object args) {
+    private String runHold(AbstractStateWorker<AbstractStateWorkerTest, Object> controller, Object args) {
         return RUN_HOLD;
     }
 
-    private String ready(AbstractStateWorker controller, Object args) {
+    private String ready(AbstractStateWorker<AbstractStateWorkerTest, Object> controller, Object args) {
         return IDLE;
     }
 

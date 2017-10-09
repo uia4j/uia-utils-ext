@@ -21,7 +21,7 @@ public class StateMachineTest {
 
     @Test
     public void testSimple() {
-        StateMachine<Object> machine = new StateMachine<Object>("FOUP");
+        StateMachine<Object, Object> machine = new StateMachine<Object, Object>("FOUP");
         // IDLE
         machine.register(IDLE)
                 .addEvent("validateLot", StateMachineTest.this::validateLot)
@@ -99,7 +99,7 @@ public class StateMachineTest {
 
     @Test
     public void testEventListener() {
-        StateMachine<Object> machine = new StateMachine<Object>("FOUP");
+        StateMachine<Object, Object> machine = new StateMachine<Object, Object>("FOUP");
         // IDLE
         machine.register(IDLE)
                 .addEvent("validateLot", StateMachineTest.this::validateLot)
@@ -165,7 +165,7 @@ public class StateMachineTest {
     @Test
     public void testEx() {
         try {
-            StateMachine<Object> machine = new StateMachine<Object>("FOUP");
+            StateMachine<Object, Object> machine = new StateMachine<Object, Object>("FOUP");
             machine.changeState("unknown");
         }
         catch (StateException ex) {

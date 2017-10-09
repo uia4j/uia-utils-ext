@@ -7,7 +7,7 @@ public class StateTest {
 
     @Test
     public void testNormal() {
-        State<Object> state = new State<Object>("RUN");
+        State<Object, Object> state = new State<Object, Object>("RUN");
         state.addEvent("E1", (c, a) -> {
             return "E2";
         });
@@ -29,7 +29,7 @@ public class StateTest {
 
     @Test
     public void testEx() {
-        State<Object> state = new State<Object>("RUN");
+        State<Object, Object> state = new State<Object, Object>("RUN");
         try {
             state.addEvent(null, (c, a) -> {
                 return "E2";
