@@ -78,6 +78,7 @@ public abstract class AbstractStateWorker<T, A> {
     }
 
     public static void printlnHeader() {
+        PRINTABLE = true;
         System.out.println(String.format("%-25s, %-15s, %-20s, %-20s, %s",
                 "Class",
                 "Name",

@@ -9,9 +9,9 @@ UIA Utils extension
 
 Common utilities extension. Need JDK 1.8 or above. extension includes 3 sub projects:
 
-* Cube
-* Http
-* States - Implement StateMachine pattern.
+* Cube - Multi dimension to query and view data.
+* Http - Simplified HttpClient of Apache HttpComponents.
+* States - Implementation of state machine pattern.
 
 ## Cube
 ### key classes
