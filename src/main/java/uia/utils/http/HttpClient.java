@@ -31,6 +31,12 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 
+/**
+ * HTTP client.
+ * 
+ * @author Kyle K. Lin
+ *
+ */
 public class HttpClient {
 
     private int retryCount;
@@ -41,10 +47,19 @@ public class HttpClient {
 
     private Map<String, String> headersDefault;
 
+    /**
+     * Constructor.
+     * @param url Root URL.
+     */
     public HttpClient(String url) {
         this(url, (Map<String, String>) null);
     }
 
+    /**
+     * Constructor.
+     * @param url Root URL.
+     * @param headersDefault Header information.
+     */
     public HttpClient(String url, Map<String, String> headersDefault) {
         this.retryCount = 3;
         this.url = url;
@@ -63,31 +78,71 @@ public class HttpClient {
         this.headersDefault = headersDefault;
     }
 
+    /**
+     * Shutdown.
+     * @throws IOException IO failed.
+     */
     public void shutdown() throws IOException {
         this.client.close();
     }
 
+    /**
+     * Get retry count.
+     * @return Retry count.
+     */
     public int getRetryCount() {
         return this.retryCount;
     }
 
+    /**
+     * Set retry count.
+     * @param retryCount Retry count
+     */
     public void setRetryCount(int retryCount) {
-        this.retryCount = retryCount;
+        this.retryCount = Math.max(1, retryCount);
     }
 
+    /**
+     * Execute HTTP get.
+     * @param action Action.
+     * @return Response.
+     * @throws IOException IO failed.
+     */
     public HttpClientResponse get(String action) throws IOException {
         return get(action, null);
     }
 
+    /**
+     * Execute HTTP get.
+     * @param action Action.
+     * @param headersOthers Header information.
+     * @return Response.
+     * @throws IOException IO failed.
+     */
     public HttpClientResponse get(String action, Map<String, String> headersOthers) throws IOException {
         HttpGet getMethod = new HttpGet(this.url + action);
         return execute(getMethod, headersOthers);
     }
 
+    /**
+     * Execute HTTP post.
+     * @param action Action.
+     * @param json JSON message.
+     * @return Response.
+     * @throws IOException IO failed.
+     */
     public HttpClientResponse postJson(String action, String json) throws IOException {
         return postJson(action, json, null);
     }
 
+    /**
+     * Execute HTTP post.
+     * @param action Action.
+     * @param json JSON message.
+     * @param headersOthers Header information.
+     * @return Response.
+     * @throws IOException IO failed.
+     */
     public HttpClientResponse postJson(String action, String json, Map<String, String> headersOthers) throws IOException {
         StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
         HttpPost postMethod = new HttpPost(this.url + action);
@@ -95,22 +150,50 @@ public class HttpClient {
         return execute(postMethod, headersOthers);
     }
 
-    public HttpClientResponse postXml(String action, String json) throws IOException {
-        return postXml(action, json, null);
+    /**
+     * Execute HTTP post.
+     * @param action Action.
+     * @param xml XML message.
+     * @return Response.
+     * @throws IOException IO failed.
+     */
+    public HttpClientResponse postXml(String action, String xml) throws IOException {
+        return postXml(action, xml, null);
     }
 
-    public HttpClientResponse postXml(String action, String json, Map<String, String> headersOthers) throws IOException {
-        StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_XML);
+    /**
+     * Execute HTTP post.
+     * @param action Action.
+     * @param xml XML message.
+     * @param headersOthers Header information.
+     * @return Response.
+     * @throws IOException IO failed.
+     */
+    public HttpClientResponse postXml(String action, String xml, Map<String, String> headersOthers) throws IOException {
+        StringEntity requestEntity = new StringEntity(xml, ContentType.APPLICATION_XML);
         HttpPost postMethod = new HttpPost(this.url + action);
         postMethod.setEntity(requestEntity);
 
         return execute(postMethod, headersOthers);
     }
 
+    /**
+     * Execute HTTP delete.
+     * @param action Action.
+     * @return Response.
+     * @throws IOException IO failed.
+     */
     public HttpClientResponse delete(String action) throws IOException {
         return delete(action, null);
     }
 
+    /**
+     * Execute HTTP delete.
+     * @param action Action.
+     * @param headersOthers Header information.
+     * @return Response.
+     * @throws IOException IO failed.
+     */
     public HttpClientResponse delete(String action, Map<String, String> headersOthers) throws IOException {
         HttpDelete deleteMethod = new HttpDelete(this.url + action);
         return execute(deleteMethod, headersOthers);

@@ -26,13 +26,13 @@ public class StateTest {
     @Test
     public void testNormal() {
         State<Object, Object> state = new State<Object, Object>("RUN");
-        state.addEvent("E1", (c, a) -> {
+        state.addEvent("E1", (c, x) -> {
             return "E2";
         });
-        state.addEvent("E2", (c, a) -> {
+        state.addEvent("E2", (c, x) -> {
             return "E3";
         });
-        state.addEvent("E3", (c, a) -> {
+        state.addEvent("E3", (c, x) -> {
             return null;
         });
 
@@ -49,18 +49,18 @@ public class StateTest {
     public void testEx() {
         State<Object, Object> state = new State<Object, Object>("RUN");
         try {
-            state.addEvent(null, (c, a) -> {
+            state.addEvent(null, (c, x) -> {
                 return "E2";
             });
         }
-        catch (NullPointerException ex) {
-            Assert.assertEquals(NullPointerException.class, ex.getClass());
+        catch (Exception ex) {
+            Assert.assertEquals(IllegalArgumentException.class, ex.getClass());
         }
         try {
             state.addEvent("E2", null);
         }
-        catch (NullPointerException ex) {
-            Assert.assertEquals(NullPointerException.class, ex.getClass());
+        catch (Exception ex) {
+            Assert.assertEquals(IllegalArgumentException.class, ex.getClass());
         }
     }
 }

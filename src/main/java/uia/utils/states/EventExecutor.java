@@ -24,16 +24,16 @@ package uia.utils.states;
  * @author Kyle K. Lin
  *
  * @param <C> Controller.
- * @param <A>
+ * @param <X> Context.
  *
  */
-public interface EventExecutor<C, A> {
+public interface EventExecutor<C, X> {
 
     /**
      * Run this event.
      * @param controller The controller.
-     * @param args Arguments.
-     * @return State name changed to.
+     * @param ctx Context.
+     * @return New state name. Null if state is not changed.
      */
-    public String run(C controller, A args);
+    public String run(C controller, X ctx);
 }

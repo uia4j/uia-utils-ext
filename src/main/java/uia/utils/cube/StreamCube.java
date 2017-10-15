@@ -26,6 +26,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Cube implementation.
+ * 
+ * @author Kyle K. Lin
+ *
+ * @param <T> Type of value.
+ */
 public class StreamCube<T> implements Cube<T> {
 
     private final Stream<Data<T>> data;

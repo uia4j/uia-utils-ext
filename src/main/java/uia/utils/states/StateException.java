@@ -18,14 +18,33 @@
  *******************************************************************************/
 package uia.utils.states;
 
+/**
+ * State exception.
+ * 
+ * @author Kyle K. Lin
+ *
+ */
 public class StateException extends RuntimeException {
 
     private static final long serialVersionUID = 8187383561451669713L;
 
+    /**
+     * Event name.
+     */
     public final String eventName;
 
+    /**
+     * State name.
+     */
     public final String stateName;
 
+    /**
+     * Constructor.
+     * @param eventName Event name.
+     * @param stateName State name.
+     * @param message Message.
+     * @param th Internal throwable object.
+     */
     public StateException(String eventName, String stateName, String message, Throwable th) {
         super(message, th);
         this.eventName = eventName;

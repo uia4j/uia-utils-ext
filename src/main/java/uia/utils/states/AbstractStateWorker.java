@@ -24,38 +24,40 @@ package uia.utils.states;
  * @author Kyle K. Lin
  *
  * @param <C> Controller.
+ * @param <X> Event context.
  */
-public abstract class AbstractStateWorker<T, A> {
+public abstract class AbstractStateWorker<C, X> {
 
     /**
-     * Allow to print debug information
+     * Allow to print debug information or not.
      */
     public static boolean PRINTABLE = false;
 
-    protected StateMachine<T, A> stateMachine;
+    protected StateMachine<C, X> stateMachine;
 
     /**
      * Constructor.
-     * @param workerName Name.
+     * @param workerName Worker name.
      */
     protected AbstractStateWorker(String workerName) {
-        this.stateMachine = new StateMachine<T, A>(workerName);
+        this.stateMachine = new StateMachine<C, X>(workerName);
         initial();
     }
 
     /**
      * Constructor.
-     * @param workerName Name.
+     * @param workerName Worker name.
+     * @param stateName State name.
      */
     protected AbstractStateWorker(String workerName, String stateName) {
-        this.stateMachine = new StateMachine<T, A>(workerName);
+        this.stateMachine = new StateMachine<C, X>(workerName);
         initial();
         changeState(stateName);
     }
 
     /**
-     * Get name.
-     * @return Name.
+     * Get worker name.
+     * @return Worker name.
      */
     public String getName() {
         return this.stateMachine.getName();
@@ -71,30 +73,54 @@ public abstract class AbstractStateWorker<T, A> {
 
     /**
      * change to new state.
+     * @param stateName New state name.
      * @return New state.
-     * @throws StateException Raise if state control failed.
-    
+     * @throws StateException Raise if failed.
      */
     public boolean changeState(String stateName) throws StateException {
         return this.stateMachine.changeState(stateName);
     }
 
-    public void addStateInListener(String stateName, StateListener<A> listener) {
+    /**
+     * Add state-in listener. 
+     * @param stateName State name.
+     * @param listener The listener.
+     */
+    public void addStateInListener(String stateName, StateListener<X> listener) {
         this.stateMachine.getState(stateName).addInListener(listener);
     }
 
-    public void addStateOutListener(String stateName, StateListener<A> listener) {
+    /**
+     * Add state-out listener. 
+     * @param stateName State name.
+     * @param listener The listener.
+     */
+    public void addStateOutListener(String stateName, StateListener<X> listener) {
         this.stateMachine.getState(stateName).addOutListener(listener);
     }
 
-    public void addEventListener(String eventName, StateListener<A> listener) {
+    /**
+     * Add event listener. 
+     * @param eventName Event name.
+     * @param listener The listener.
+     */
+    public void addEventListener(String eventName, StateListener<X> listener) {
         this.stateMachine.addEventListener(eventName, listener);
     }
 
-    public void addStateChangedListener(String fromStateName, String toStateName, StateListener<A> listener) {
+    /**
+     * Add state changed listener.
+     * @param fromStateName State from.
+     * @param toStateName State to.
+     * @param listener The listener.
+     */
+    public void addStateChangedListener(String fromStateName, String toStateName, StateListener<X> listener) {
         this.stateMachine.addChangeListener(fromStateName, toStateName, listener);
     }
 
+    /**
+     * Print internal information. Debug only.
+     */
     public static void printlnHeader() {
         PRINTABLE = true;
         System.out.println(String.format("%-25s, %-15s, %-20s, %-20s, %s",
@@ -106,6 +132,11 @@ public abstract class AbstractStateWorker<T, A> {
         System.out.println("=================================================================================================");
     }
 
+    /**
+     * Print internal information. Debug only.
+     * @param eventName Event name.
+     * @param extra Extra information.
+     */
     public void println(String eventName, String extra) {
         if (PRINTABLE) {
             System.out.println(String.format("%-25s, %-15s, %-20s, %-20s, %s",

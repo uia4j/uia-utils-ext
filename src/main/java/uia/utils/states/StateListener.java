@@ -18,7 +18,18 @@
  *******************************************************************************/
 package uia.utils.states;
 
+/**
+ * State listener.
+ * 
+ * @author Kyle K. Lin
+ *
+ * @param <T> Context data.
+ */
 public interface StateListener<T> {
 
-    public void run(StateEventArgs<T> args);
+	/**
+	 * Run the state.
+	 * @param ctx Event context.
+	 */
+    public void run(StateEventContext<T> ctx);
 }

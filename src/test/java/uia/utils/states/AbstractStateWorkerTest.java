@@ -47,16 +47,16 @@ public class AbstractStateWorkerTest extends AbstractStateWorker<AbstractStateWo
     public void testNormal() {
         printlnHeader();
 
-        addEventListener("moveIn", a -> {
+        addEventListener("moveIn", x -> {
             Assert.assertEquals(4, this.seqNo);
         });
-        addStateInListener(PRE_PROCESS, a -> {
+        addStateInListener(PRE_PROCESS, x -> {
             Assert.assertEquals(4, this.seqNo);
         });
-        addStateOutListener(PRE_PROCESS, a -> {
+        addStateOutListener(PRE_PROCESS, x -> {
             Assert.assertEquals(5, this.seqNo);
         });
-        addStateChangedListener(PROCESSING, POST_PROCESS, a -> {
+        addStateChangedListener(PROCESSING, POST_PROCESS, x -> {
             Assert.assertEquals(6, this.seqNo);
         });
 
@@ -147,35 +147,35 @@ public class AbstractStateWorkerTest extends AbstractStateWorker<AbstractStateWo
         this.stateMachine.register(RUN_HOLD);
     }
 
-    private RunResultType run(String eventName, Object args) {
-        return this.stateMachine.run(this, eventName, args);
+    private RunResultType run(String eventName, Object ctx) {
+        return this.stateMachine.run(this, eventName, ctx);
     }
 
-    private String validateLot(AbstractStateWorker<AbstractStateWorkerTest, Object> controller, Object args) {
+    private String validateLot(AbstractStateWorker<AbstractStateWorkerTest, Object> controller, Object ctx) {
         return null;
     }
 
-    private String moveIn(AbstractStateWorker<AbstractStateWorkerTest, Object> controller, Object args) {
+    private String moveIn(AbstractStateWorker<AbstractStateWorkerTest, Object> controller, Object ctx) {
         return PRE_PROCESS;
     }
 
-    private String moveOut(AbstractStateWorker<AbstractStateWorkerTest, Object> controller, Object args) {
+    private String moveOut(AbstractStateWorker<AbstractStateWorkerTest, Object> controller, Object ctx) {
         return NEXT;
     }
 
-    private String trackIn(AbstractStateWorker<AbstractStateWorkerTest, Object> controller, Object args) {
+    private String trackIn(AbstractStateWorker<AbstractStateWorkerTest, Object> controller, Object ctx) {
         return PROCESSING;
     }
 
-    private String trackOut(AbstractStateWorker<AbstractStateWorkerTest, Object> controller, Object args) {
+    private String trackOut(AbstractStateWorker<AbstractStateWorkerTest, Object> controller, Object ctx) {
         return POST_PROCESS;
     }
 
-    private String runHold(AbstractStateWorker<AbstractStateWorkerTest, Object> controller, Object args) {
+    private String runHold(AbstractStateWorker<AbstractStateWorkerTest, Object> controller, Object ctx) {
         return RUN_HOLD;
     }
 
-    private String ready(AbstractStateWorker<AbstractStateWorkerTest, Object> controller, Object args) {
+    private String ready(AbstractStateWorker<AbstractStateWorkerTest, Object> controller, Object ctx) {
         return IDLE;
     }
 

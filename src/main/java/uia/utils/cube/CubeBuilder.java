@@ -22,18 +22,37 @@ import java.util.ArrayList;
 
 import uia.utils.cube.Cube.Data;
 
+/**
+ * Cube builder.
+ * 
+ * @author Kyle K. Lin
+ *
+ * @param <T> Type of value.
+ */
 public class CubeBuilder<T> {
 
     private final ArrayList<Data<T>> data;
 
+    /**
+     * Constructor.
+     */
     public CubeBuilder() {
         this.data = new ArrayList<Data<T>>();
     }
 
+    /**
+     * Build a cube.
+     * @return Cube.
+     */
     public Cube<T> build() {
         return new ListCube<T>(this.data);
     }
 
+    /**
+     * Add a new value.
+     * @param value Value.
+     * @return Data.
+     */
     public Data<T> put(T value) {
         Data<T> data = new Data<T>(value);
         this.data.add(data);

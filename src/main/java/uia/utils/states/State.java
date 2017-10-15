@@ -26,18 +26,18 @@ import java.util.TreeMap;
  *
  * @author Kyle K. Lin
  *
- * @param <C>
- * @param <A>
+ * @param <C> Controller.
+ * @param <X> Event context.
  */
-public class State<C, A> {
+public class State<C, X> {
 
     private final String name;
 
-    private final TreeMap<String, EventExecutor<C, A>> executors;
+    private final TreeMap<String, EventExecutor<C, X>> executors;
 
-    private final ArrayList<StateListener<A>> inListeners;
+    private final ArrayList<StateListener<X>> inListeners;
 
-    private final ArrayList<StateListener<A>> outListeners;
+    private final ArrayList<StateListener<X>> outListeners;
 
     /**
      * Constructor.
@@ -46,28 +46,51 @@ public class State<C, A> {
      */
     public State(String name) {
         this.name = name;
-        this.executors = new TreeMap<String, EventExecutor<C, A>>();
-        this.inListeners = new ArrayList<StateListener<A>>();
-        this.outListeners = new ArrayList<StateListener<A>>();
+        this.executors = new TreeMap<String, EventExecutor<C, X>>();
+        this.inListeners = new ArrayList<StateListener<X>>();
+        this.outListeners = new ArrayList<StateListener<X>>();
     }
 
+    /**
+     * Check if the event will be handled or not.
+     * @param eventName Event name.
+     * @return Handled or not.
+     */
     public boolean containsEvent(String eventName) {
         return this.executors.containsKey(eventName);
     }
 
-    public void addInListener(StateListener<A> listener) {
+    /**
+     * Add state-in listener.
+     * @param listener State listener.
+     */
+    public void addInListener(StateListener<X> listener) {
         this.inListeners.add(listener);
     }
 
-    public void addOutListener(StateListener<A> listener) {
+    /**
+     * Add state-out listener.
+     * @param listener State listener.
+     */
+    public void addOutListener(StateListener<X> listener) {
         this.outListeners.add(listener);
     }
 
+    /**
+     * Get state name.
+     * @return State name.
+     */
     public String getName() {
         return this.name;
     }
 
-    public State<C, A> addEvent(String eventName, EventExecutor<C, A> executor) {
+    /**
+     * Add an event executor.
+     * @param eventName Event name.
+     * @param executor Event executor.
+     * @return State.
+     */
+    public State<C, X> addEvent(String eventName, EventExecutor<C, X> executor) {
         if (eventName == null || executor == null) {
             throw new IllegalArgumentException("EventName or EventExecutor is null");
         }
@@ -80,19 +103,23 @@ public class State<C, A> {
         return this.name;
     }
 
+    /**
+     * Another toString. Debug only.
+     * @return Message.
+     */
     public String toStringEx() {
         return this.name + ", events:{" + String.join(",", this.executors.keySet().toArray(new String[0])) + "}";
     }
 
-    String execute(C controller, String eventName, A args) {
-        EventExecutor<C, A> executor = this.executors.get(eventName);
-        return executor.run(controller, args);
+    String execute(C controller, String eventName, X ctx) {
+        EventExecutor<C, X> executor = this.executors.get(eventName);
+        return executor.run(controller, ctx);
     }
 
-    void raiseIn(String eventName, String prevState, A value) {
-        for (StateListener<A> l : this.inListeners) {
+    void raiseIn(String eventName, String prevState, X ctx) {
+        for (StateListener<X> l : this.inListeners) {
             try {
-                l.run(new StateEventArgs<A>(eventName, value));
+                l.run(new StateEventContext<X>(eventName, ctx));
             }
             catch (Exception ex) {
 
@@ -100,10 +127,10 @@ public class State<C, A> {
         }
     }
 
-    void raiseOut(String eventName, String prevState, A value) {
-        for (StateListener<A> l : this.outListeners) {
+    void raiseOut(String eventName, String prevState, X ctx) {
+        for (StateListener<X> l : this.outListeners) {
             try {
-                l.run(new StateEventArgs<A>(eventName, value));
+                l.run(new StateEventContext<X>(eventName, ctx));
             }
             catch (Exception ex) {
 

@@ -24,6 +24,12 @@ import java.io.InputStream;
 
 import org.apache.http.HttpResponse;
 
+/**
+ * HTTP client response.
+ * 
+ * @author Kyle K. Lin
+ *
+ */
 public class HttpClientResponse {
 
     private final HttpResponse heepResponse;
@@ -32,10 +38,20 @@ public class HttpClientResponse {
         this.heepResponse = httpResponse;
     }
 
+    /**
+     * Get status code.
+     * @return Status code.
+     */
     public int getStatusCode() {
         return this.heepResponse.getStatusLine().getStatusCode();
     }
 
+    /**
+     * Get content.
+     * @param charsetName Charset name.
+     * @return Content
+     * @throws IOException IO failed.
+     */
     public String getContent(String charsetName) throws IOException {
         if (this.heepResponse.getEntity() == null) {
             return null;
@@ -53,6 +69,11 @@ public class HttpClientResponse {
         return result.toString(charsetName);
     }
 
+    /**
+     * Get content.
+     * @return Content stream.
+     * @throws IOException IO failed.
+     */
     public InputStream getContentStream() throws IOException {
         if (this.heepResponse.getEntity() == null) {
             return null;

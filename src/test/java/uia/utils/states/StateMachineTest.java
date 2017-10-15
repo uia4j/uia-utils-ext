@@ -148,9 +148,9 @@ public class StateMachineTest {
         machine.register(RUN_HOLD);
 
         // EVENT LISTENERS
-        machine.addChangeListener(IDLE, PRE_PROCESS, a -> Assert.assertEquals(2, this.event));
-        machine.addEventListener("trackIn", a -> Assert.assertEquals(3, this.event));
-        machine.addEventListener("moveOut", a -> Assert.assertEquals(5, this.event));
+        machine.addChangeListener(IDLE, PRE_PROCESS, x -> Assert.assertEquals(2, this.event));
+        machine.addEventListener("trackIn", x -> Assert.assertEquals(3, this.event));
+        machine.addEventListener("moveOut", x -> Assert.assertEquals(5, this.event));
 
         machine.changeState(IDLE);
         Assert.assertEquals(IDLE, machine.getCurrState().getName());
@@ -193,31 +193,31 @@ public class StateMachineTest {
         }
     }
 
-    private String validateLot(Object controller, Object args) {
+    private String validateLot(Object controller, Object ctx) {
         return null;
     }
 
-    private String moveIn(Object controller, Object args) {
+    private String moveIn(Object controller, Object ctx) {
         return PRE_PROCESS;
     }
 
-    private String moveOut(Object controller, Object args) {
+    private String moveOut(Object controller, Object ctx) {
         return NEXT;
     }
 
-    private String trackIn(Object controller, Object args) {
+    private String trackIn(Object controller, Object ctx) {
         return PROCESSING;
     }
 
-    private String trackOut(Object controller, Object args) {
+    private String trackOut(Object controller, Object ctx) {
         return POST_PROCESS;
     }
 
-    private String runHold(Object controller, Object args) {
+    private String runHold(Object controller, Object ctx) {
         return RUN_HOLD;
     }
 
-    private String ready(Object controller, Object args) {
+    private String ready(Object controller, Object ctx) {
         return IDLE;
     }
 }

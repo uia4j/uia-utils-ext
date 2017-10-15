@@ -32,6 +32,12 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
 
+/**
+ * HTTP client.
+ * 
+ * @author Kyle K. Lin
+ *
+ */
 public class HttpAsyncClient {
 
     private int retryCount;
@@ -42,10 +48,19 @@ public class HttpAsyncClient {
 
     private Map<String, String> headersDefault;
 
+    /**
+     * Constructor.
+     * @param url Root URL.
+     */
     public HttpAsyncClient(String url) {
         this(url, null);
     }
 
+    /**
+     * Constructor.
+     * @param url Root URL.
+     * @param headersDefault Header information.
+     */
     public HttpAsyncClient(String url, Map<String, String> headersDefault) {
         this.retryCount = 3;
         this.url = url;
@@ -55,32 +70,72 @@ public class HttpAsyncClient {
         this.client.start();
     }
 
+    /**
+     * Shutdown.
+     * @throws IOException IO failed.
+     */
     public void shutdown() throws IOException {
         this.client.close();
     }
 
+    /**
+     * Get retry count.
+     * @return Retry count.
+     */
     public int getRetryCount() {
         return this.retryCount;
     }
 
+    /**
+     * Set retry count.
+     * @param retryCount Retry count
+     */
     public void setRetryCount(int retryCount) {
-        this.retryCount = retryCount;
+        this.retryCount = Math.max(1, retryCount);
     }
 
+    /**
+     * Execute HTTP get.
+     * @param action Action.
+     * @param callback Callback.
+     * @throws IOException IO failed.
+     */
     public void get(String action, FutureCallback<HttpClientResponse> callback) throws IOException {
         get(action, null, callback);
     }
 
+    /**
+     * Execute HTTP get.
+     * @param action Action.
+     * @param headersOthers Header information.
+     * @param callback Callback.
+     * @throws IOException IO failed.
+     */
     public void get(String action, Map<String, String> headersOthers, FutureCallback<HttpClientResponse> callback) throws IOException {
         HttpGet getMethod = new HttpGet(this.url + action);
         getMethod.addHeader("accept", "application/json");
         execute(getMethod, headersOthers, callback);
     }
 
+    /**
+     * Execute HTTP post.
+     * @param action Action.
+     * @param json JSON message.
+     * @param callback Callback.
+     * @throws IOException IO failed.
+     */
     public void postJson(String action, String json, FutureCallback<HttpClientResponse> callback) throws IOException {
         postJson(action, json, null, callback);
     }
 
+    /**
+     * Execute HTTP post.
+     * @param action Action.
+     * @param json JSON message.
+     * @param headersOthers Header information.
+     * @param callback Callback.
+     * @throws IOException IO failed.
+     */
     public void postJson(String action, String json, Map<String, String> headersOthers, FutureCallback<HttpClientResponse> callback) throws IOException {
         StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
         HttpPost postMethod = new HttpPost(this.url + action);
@@ -88,10 +143,25 @@ public class HttpAsyncClient {
         execute(postMethod, headersOthers, callback);
     }
 
+    /**
+     * Execute HTTP post.
+     * @param action Action.
+     * @param xml XML message.
+     * @param callback Callback.
+     * @throws IOException IO failed.
+     */
     public void postXml(String action, String xml, FutureCallback<HttpClientResponse> callback) throws IOException {
         postXml(action, xml, null, callback);
     }
 
+    /**
+     * Execute HTTP post.
+     * @param action Action.
+     * @param xml XML message.
+     * @param headersOthers Header information.
+     * @param callback Callback.
+     * @throws IOException IO failed.
+     */
     public void postXml(String action, String xml, Map<String, String> headersOthers, FutureCallback<HttpClientResponse> callback) throws IOException {
         StringEntity requestEntity = new StringEntity(xml, ContentType.APPLICATION_XML);
         HttpPost postMethod = new HttpPost(this.url + action);
@@ -99,10 +169,23 @@ public class HttpAsyncClient {
         execute(postMethod, headersOthers, callback);
     }
 
+    /**
+     * Execute HTTP delete
+     * @param action Action.
+     * @param callback Callback.
+     * @throws IOException IO failed.
+     */
     public void delete(String action, FutureCallback<HttpClientResponse> callback) throws IOException {
         delete(action, callback);
     }
 
+    /**
+     * Execute HTTP delete
+     * @param action Action.
+     * @param headersOthers Header information.
+     * @param callback Callback.
+     * @throws IOException IO failed.
+     */
     public void delete(String action, Map<String, String> headersOthers, FutureCallback<HttpClientResponse> callback) throws IOException {
         HttpDelete deleteMethod = new HttpDelete(this.url + action);
         deleteMethod.addHeader("accept", "application/json");

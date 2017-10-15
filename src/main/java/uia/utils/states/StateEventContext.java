@@ -18,13 +18,31 @@
  *******************************************************************************/
 package uia.utils.states;
 
-public class StateEventArgs<T> {
+/**
+ * State event arguments.
+ * 
+ * @author Kyle K. Lin
+ *
+ * @param <X> Context data.
+ */
+public class StateEventContext<X> {
 
+	/**
+	 * Event name.
+	 */
     public final String eventName;
 
-    public final T value;
+    /**
+     * Context data.
+     */
+    public final X value;
 
-    public StateEventArgs(String eventName, T value) {
+    /**
+     * Constructor.
+     * @param eventName Event name.
+     * @param value Context value.
+     */
+    public StateEventContext(String eventName, X value) {
         this.eventName = eventName;
         this.value = value;
     }
