@@ -1,6 +1,7 @@
 UIA Utils extension
 ================
 
+[![Download](https://api.bintray.com/packages/gazer2kanlin/maven/uia.utils4j.ext/images/download.svg) ](https://bintray.com/gazer2kanlin/maven/uia.utils4j.ext/_latestVersion)
 [![Build Status](https://travis-ci.org/gazer2kanlin/uia.utils4j.ext.svg?branch=master)](https://travis-ci.org/gazer2kanlin/uia.utils4j.ext)
 [![Codecov](https://img.shields.io/codecov/c/github/gazer2kanlin/uia.utils4j.ext.svg)](https://codecov.io/gh/gazer2kanlin/uia.utils4j.ext)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/4466fb1ecba5481691e8befeacb27d32)](https://www.codacy.com/app/gazer2kanlin/uia.utils4j.ext?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=gazer2kanlin/uia.utils4j.ext&amp;utm_campaign=Badge_Grade)
