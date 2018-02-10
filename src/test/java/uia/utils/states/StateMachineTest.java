@@ -21,6 +21,8 @@ package uia.utils.states;
 import org.junit.Assert;
 import org.junit.Test;
 
+import uia.utils.states.StateMachine.RunResultType;
+
 public class StateMachineTest {
 
     private static String IDLE = "IDLE";
@@ -41,29 +43,29 @@ public class StateMachineTest {
     public void testSimple() {
         StateMachine<Object, Object> machine = new StateMachine<Object, Object>("FOUP");
         // IDLE
-        machine.register(IDLE)
+        machine.registerState(IDLE)
                 .addEvent("validateLot", StateMachineTest.this::validateLot)
                 .addEvent("moveIn", StateMachineTest.this::moveIn);
 
         // PRE_PROCESS
-        machine.register(PRE_PROCESS)
+        machine.registerState(PRE_PROCESS)
                 .addEvent("trackIn", StateMachineTest.this::trackIn)
                 .addEvent("down", StateMachineTest.this::runHold)
                 .addEvent("trackOut", StateMachineTest.this::trackIn);
 
         // PROCESSING
-        machine.register(PROCESSING)
+        machine.registerState(PROCESSING)
                 .addEvent("trackIn", StateMachineTest.this::trackIn)
                 .addEvent("down", StateMachineTest.this::runHold)
                 .addEvent("trackOut", StateMachineTest.this::trackOut);
 
         // POST_PROCESS
-        machine.register(POST_PROCESS)
+        machine.registerState(POST_PROCESS)
                 .addEvent("down", StateMachineTest.this::runHold)
                 .addEvent("moveOut", StateMachineTest.this::moveOut);
 
         // NEXT
-        machine.register(NEXT)
+        machine.registerState(NEXT)
                 .addEvent("ready", StateMachineTest.this::ready);
 
         Assert.assertEquals("FOUP", machine.getName());
@@ -119,33 +121,33 @@ public class StateMachineTest {
     public void testEventListener() {
         StateMachine<Object, Object> machine = new StateMachine<Object, Object>("FOUP");
         // IDLE
-        machine.register(IDLE)
+        machine.registerState(IDLE)
                 .addEvent("validateLot", StateMachineTest.this::validateLot)
                 .addEvent("moveIn", StateMachineTest.this::moveIn);
 
         // PRE_PROCESS
-        machine.register(PRE_PROCESS)
+        machine.registerState(PRE_PROCESS)
                 .addEvent("trackIn", StateMachineTest.this::trackIn)
                 .addEvent("down", StateMachineTest.this::runHold)
                 .addEvent("trackOut", StateMachineTest.this::trackIn);
 
         // PROCESSING
-        machine.register(PROCESSING)
+        machine.registerState(PROCESSING)
                 .addEvent("trackIn", StateMachineTest.this::trackIn)
                 .addEvent("down", StateMachineTest.this::runHold)
                 .addEvent("trackOut", StateMachineTest.this::trackOut);
 
         // POST_PROCESS
-        machine.register(POST_PROCESS)
+        machine.registerState(POST_PROCESS)
                 .addEvent("down", StateMachineTest.this::runHold)
                 .addEvent("moveOut", StateMachineTest.this::moveOut);
 
         // NEXT
-        machine.register(NEXT)
+        machine.registerState(NEXT)
                 .addEvent("ready", StateMachineTest.this::ready);
 
         // RUN_HOLD
-        machine.register(RUN_HOLD);
+        machine.registerState(RUN_HOLD);
 
         // EVENT LISTENERS
         machine.addChangeListener(IDLE, PRE_PROCESS, x -> Assert.assertEquals(2, this.event));
@@ -188,8 +190,7 @@ public class StateMachineTest {
         }
         catch (StateException ex) {
             Assert.assertEquals("unknown", ex.eventName);
-            Assert.assertEquals("Event:unknown not found in StateMachine:FOUP", ex.getMessage());
-
+            Assert.assertEquals("State:unknown not found in StateMachine:FOUP", ex.getMessage());
         }
     }
 

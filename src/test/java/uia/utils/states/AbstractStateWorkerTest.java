@@ -118,33 +118,33 @@ public class AbstractStateWorkerTest extends AbstractStateWorker<AbstractStateWo
         AbstractStateWorker.PRINTABLE = true;
 
         // IDLE
-        this.stateMachine.register(IDLE)
+        this.stateMachine.registerState(IDLE)
                 .addEvent("validateLot", AbstractStateWorkerTest.this::validateLot)
                 .addEvent("moveIn", AbstractStateWorkerTest.this::moveIn);
 
         // PRE_PROCESS
-        this.stateMachine.register(PRE_PROCESS)
+        this.stateMachine.registerState(PRE_PROCESS)
                 .addEvent("trackIn", AbstractStateWorkerTest.this::trackIn)
                 .addEvent("down", AbstractStateWorkerTest.this::runHold)
                 .addEvent("trackOut", AbstractStateWorkerTest.this::trackIn);
 
         // PROCESSING
-        this.stateMachine.register(PROCESSING)
+        this.stateMachine.registerState(PROCESSING)
                 .addEvent("trackIn", AbstractStateWorkerTest.this::trackIn)
                 .addEvent("down", AbstractStateWorkerTest.this::runHold)
                 .addEvent("trackOut", AbstractStateWorkerTest.this::trackOut);
 
         // POST_PROCESS
-        this.stateMachine.register(POST_PROCESS)
+        this.stateMachine.registerState(POST_PROCESS)
                 .addEvent("down", AbstractStateWorkerTest.this::runHold)
                 .addEvent("moveOut", AbstractStateWorkerTest.this::moveOut);
 
         // NEXT
-        this.stateMachine.register(NEXT)
+        this.stateMachine.registerState(NEXT)
                 .addEvent("ready", AbstractStateWorkerTest.this::ready);
 
         // RUN_HOLD
-        this.stateMachine.register(RUN_HOLD);
+        this.stateMachine.registerState(RUN_HOLD);
     }
 
     private RunResultType run(String eventName, Object ctx) {

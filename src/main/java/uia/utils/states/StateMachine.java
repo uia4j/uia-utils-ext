@@ -88,10 +88,21 @@ public class StateMachine<C, X> {
      * @param stateName State name.
      * @return Registered state.
      */
-    public State<C, X> register(String stateName) {
+    public State<C, X> registerState(String stateName) {
+    	return registerState(stateName, 0);
+    }
+
+
+    /**
+     * Register a new state.
+     * @param stateName State name.
+     * @param seq Sequence No.
+     * @return Registered state.
+     */
+    public State<C, X> registerState(String stateName, int seq) {
         State<C, X> state = this.states.get(stateName);
         if (state == null) {
-            state = new State<C, X>(stateName);
+            state = new State<C, X>(stateName, seq);
             this.states.put(stateName, state);
         }
         return state;
@@ -142,6 +153,33 @@ public class StateMachine<C, X> {
         }
         listeners.add(listener);
     }
+    
+    /**
+     * Rollback to specific state.
+     * @param stateName State name rollback to.
+     * @param prevStateName
+     * @return
+     */
+    public boolean rollback(String stateName, String prevStateName) {
+    	State<C, X> state2 = this.states.get(stateName);
+    	if(state2 == null) {
+    		return false;
+    	}
+
+    	if(prevStateName != null) {
+        	State<C, X> state1 = this.states.get(prevStateName);
+        	if(state1 == null) {
+        		return false;
+        	}
+        	this.prevState = state1;
+    	}
+    	else {
+    		this.prevState = null;
+    	}
+
+    	this.currState = state2;
+    	return true;
+    }
 
     /**
      * Change to a new state. Listeners will not be notified.
@@ -150,13 +188,13 @@ public class StateMachine<C, X> {
      * @throws StateException Raise if state control failed.
      */
     public boolean changeState(String stateName) throws StateException {
-        if (stateName == null) {
+        if (stateName == null || stateName.equals(this.currState.getName())) {
             return false;
         }
 
         State<C, X> temp = this.states.get(stateName);
         if (temp == null) {
-            String message = String.format("Event:%s not found in StateMachine:%s", stateName, this.name);
+            String message = String.format("State:%s not found in StateMachine:%s", stateName, this.name);
             throw new StateException(
                     stateName,
                     this.currState.getName(),
@@ -180,9 +218,9 @@ public class StateMachine<C, X> {
      */
     public RunResultType run(C controller, String eventName, X ctx) throws StateException {
         if (!this.currState.containsEvent(eventName)) {
-            raiseEvent(eventName, ctx);
             return RunResultType.EVENT_NOT_SUPPORT;
         }
+
         String nextState = this.currState.execute(controller, eventName, ctx);
         if (changeState(nextState)) {
             this.prevState.raiseOut(eventName, this.prevState.getName(), ctx);
@@ -201,7 +239,7 @@ public class StateMachine<C, X> {
      * Print internal information. Debug only.
      */
     public void println() {
-        System.out.println(String.format("CurrState:%-20s, PrevState:%s",
+        System.out.println(String.format("CurrState:%-25s, PrevState:%s",
                 this.currState,
                 this.prevState));
     }
@@ -213,8 +251,8 @@ public class StateMachine<C, X> {
             return;
         }
         for (StateListener<X> listener : listeners) {
-            listener.run(new StateEventContext<X>(eventName, ctx));
-        }
+            listener.run(new StateEventContext<X>(eventName, ctx)); 
+        } 
     }
 
     private void raiseEvent(String eventName, X ctx) {

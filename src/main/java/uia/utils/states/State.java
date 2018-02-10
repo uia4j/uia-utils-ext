@@ -30,6 +30,8 @@ import java.util.TreeMap;
  * @param <X> Event context.
  */
 public class State<C, X> {
+	
+	private final int seq;
 
     private final String name;
 
@@ -45,7 +47,18 @@ public class State<C, X> {
      * @param name State name.
      */
     public State(String name) {
+    	this(name, 0);
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param name State name.
+     * @param seq Sequence No.
+     */
+    public State(String name, int seq) {
         this.name = name;
+        this.seq = seq;
         this.executors = new TreeMap<String, EventExecutor<C, X>>();
         this.inListeners = new ArrayList<StateListener<X>>();
         this.outListeners = new ArrayList<StateListener<X>>();
@@ -82,6 +95,14 @@ public class State<C, X> {
      */
     public String getName() {
         return this.name;
+    }
+    
+    /**
+     * Get sequence No.
+     * @return Sequence No,
+     */
+    public int getSeq() {
+    	return this.seq;
     }
 
     /**
