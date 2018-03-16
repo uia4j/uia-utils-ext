@@ -91,11 +91,6 @@
 		<developerConnection>Kyle K. Lin</developerConnection>
 		<url>https://github.com/gazer2kanlin/uia.utils4j.ext</url>
 	</scm>
-	<!-- <distributionManagement> <repository> <id>htks-sapme4j-public</id> 
-		<name>sapme-m2-releases</name> <url>http://10.160.1.56:17002/repository/sapme4j-releases/</url> 
-		</repository> <snapshotRepository> <id>htks-sapme4j-public</id> <name>sapme-m2-snapshots</name> 
-		<url>http://10.160.1.56:17002/repository/sapme4j-snapshots/</url> </snapshotRepository> 
-		</distributionManagement> -->
 	<distributionManagement>
 		<repository>
 			<id>bintray-my-maven</id>
