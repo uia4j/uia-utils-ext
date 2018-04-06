@@ -40,8 +40,7 @@ public abstract class AbstractStateWorker<C, X> {
      * @param workerName Worker name.
      */
     protected AbstractStateWorker(String workerName) {
-        this.stateMachine = new StateMachine<C, X>(workerName);
-        initial();
+    	this(workerName, null);
     }
 
     /**
