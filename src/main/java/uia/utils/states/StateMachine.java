@@ -157,8 +157,8 @@ public class StateMachine<C, X> {
     /**
      * Rollback to specific state.
      * @param stateName State name rollback to.
-     * @param prevStateName
-     * @return
+     * @param prevStateName Previous state name.
+     * @return Rollback or not.
      */
     public boolean rollback(String stateName, String prevStateName) {
     	State<C, X> state2 = this.states.get(stateName);

@@ -21,8 +21,6 @@ package uia.utils.states;
 import org.junit.Assert;
 import org.junit.Test;
 
-import uia.utils.states.StateMachine.RunResultType;
-
 public class RollbackTest {
 
     private static String ST_IDLE = "IDLE";
@@ -66,6 +64,8 @@ public class RollbackTest {
         Assert.assertNotNull(machine.getState(ST_POST_PROCESS));
         Assert.assertNotNull(machine.getState(ST_NEXT));
 
+        Assert.assertFalse(machine.rollback("NOT_EXIST", ST_IDLE));
+        
         machine.changeState(ST_IDLE);
         machine.println();
         Assert.assertEquals("NULL", machine.getPrevState().getName());
@@ -80,11 +80,20 @@ public class RollbackTest {
         machine.println();
         Assert.assertEquals(ST_PRE_PROCESS, machine.getPrevState().getName());
         Assert.assertEquals(ST_PROCESSING, machine.getCurrState().getName());
+        Assert.assertEquals(3, machine.getCurrState().getSeq());
         
         machine.rollback(ST_PRE_PROCESS, ST_IDLE);
         machine.println();
         Assert.assertEquals(ST_IDLE, machine.getPrevState().getName());
         Assert.assertEquals(ST_PRE_PROCESS, machine.getCurrState().getName());
+        Assert.assertEquals(2, machine.getCurrState().getSeq());
+
+        Assert.assertFalse(machine.rollback(ST_IDLE, "NOT_EXIST"));
+        Assert.assertEquals(ST_PRE_PROCESS, machine.getCurrState().getName());
+        Assert.assertTrue(machine.rollback(ST_IDLE, null));
+        machine.println();
+        Assert.assertEquals(ST_IDLE, machine.getCurrState().getName());
+        Assert.assertEquals(1, machine.getCurrState().getSeq());
     }
 
     private String moveIn(Object controller, Object ctx) {

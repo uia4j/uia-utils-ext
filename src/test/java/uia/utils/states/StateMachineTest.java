@@ -21,8 +21,6 @@ package uia.utils.states;
 import org.junit.Assert;
 import org.junit.Test;
 
-import uia.utils.states.StateMachine.RunResultType;
-
 public class StateMachineTest {
 
     private static String IDLE = "IDLE";
