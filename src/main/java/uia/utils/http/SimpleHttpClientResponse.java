@@ -25,16 +25,16 @@ import java.io.InputStream;
 import org.apache.http.HttpResponse;
 
 /**
- * HTTP client response.
+ * Simple HTTP client response.
  * 
  * @author Kyle K. Lin
  *
  */
-public class HttpClientResponse {
+public class SimpleHttpClientResponse {
 
     private final HttpResponse heepResponse;
 
-    HttpClientResponse(HttpResponse httpResponse) {
+    SimpleHttpClientResponse(HttpResponse httpResponse) {
         this.heepResponse = httpResponse;
     }
 

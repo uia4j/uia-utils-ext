@@ -26,33 +26,30 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
+import org.apache.http.impl.nio.client.HttpAsyncClients;
 
 /**
- * HTTP client.
+ * Simple HTTP client.
  * 
  * @author Kyle K. Lin
  *
  */
-public class HttpClient {
+public class SimpleHttpAsyncClient extends AbstractHttpClient {
 
     private int retryCount;
 
-    private String url;
-
-    private CloseableHttpClient client;
-
-    private Map<String, String> headersDefault;
+    private CloseableHttpAsyncClient client;
 
     /**
      * Constructor.
-     * @param url Root URL.
+     * @param rootURL Root URL.
      */
-    public HttpClient(String url) {
-        this(url, (Map<String, String>) null);
+    public SimpleHttpAsyncClient(String rootURL) {
+        this(rootURL, null);
     }
 
     /**
@@ -60,22 +57,12 @@ public class HttpClient {
      * @param url Root URL.
      * @param headersDefault Header information.
      */
-    public HttpClient(String url, Map<String, String> headersDefault) {
+    public SimpleHttpAsyncClient(String rootURL, Map<String, String> headersDefault) {
+    	super(rootURL, headersDefault);
         this.retryCount = 3;
-        this.url = url;
-        HttpClientBuilder builder = HttpClientBuilder.create();
-        this.client = builder.build();
-        this.headersDefault = headersDefault;
-    }
+        this.client = HttpAsyncClients.createDefault();
 
-    public HttpClient(String url, HttpClientBuilder builder) {
-        this(url, builder, null);
-    }
-
-    public HttpClient(String url, HttpClientBuilder builder, Map<String, String> headersDefault) {
-        this.url = url;
-        this.client = builder.build();
-        this.headersDefault = headersDefault;
+        this.client.start();
     }
 
     /**
@@ -105,34 +92,35 @@ public class HttpClient {
     /**
      * Execute HTTP get.
      * @param action Action.
-     * @return Response.
+     * @param callback Callback.
      * @throws IOException IO failed.
      */
-    public HttpClientResponse get(String action) throws IOException {
-        return get(action, null);
+    public void get(String action, FutureCallback<SimpleHttpClientResponse> callback) throws IOException {
+        get(action, null, callback);
     }
 
     /**
      * Execute HTTP get.
      * @param action Action.
      * @param headersOthers Header information.
-     * @return Response.
+     * @param callback Callback.
      * @throws IOException IO failed.
      */
-    public HttpClientResponse get(String action, Map<String, String> headersOthers) throws IOException {
-        HttpGet getMethod = new HttpGet(this.url + action);
-        return execute(getMethod, headersOthers);
+    public void get(String action, Map<String, String> headersOthers, FutureCallback<SimpleHttpClientResponse> callback) throws IOException {
+        HttpGet getMethod = new HttpGet(this.rootURL + action);
+        getMethod.addHeader("accept", "application/json");
+        execute(getMethod, headersOthers, callback);
     }
 
     /**
      * Execute HTTP post.
      * @param action Action.
      * @param json JSON message.
-     * @return Response.
+     * @param callback Callback.
      * @throws IOException IO failed.
      */
-    public HttpClientResponse postJson(String action, String json) throws IOException {
-        return postJson(action, json, null);
+    public void postJson(String action, String json, FutureCallback<SimpleHttpClientResponse> callback) throws IOException {
+        postJson(action, json, null, callback);
     }
 
     /**
@@ -140,25 +128,25 @@ public class HttpClient {
      * @param action Action.
      * @param json JSON message.
      * @param headersOthers Header information.
-     * @return Response.
+     * @param callback Callback.
      * @throws IOException IO failed.
      */
-    public HttpClientResponse postJson(String action, String json, Map<String, String> headersOthers) throws IOException {
+    public void postJson(String action, String json, Map<String, String> headersOthers, FutureCallback<SimpleHttpClientResponse> callback) throws IOException {
         StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
-        HttpPost postMethod = new HttpPost(this.url + action);
+        HttpPost postMethod = new HttpPost(this.rootURL + action);
         postMethod.setEntity(requestEntity);
-        return execute(postMethod, headersOthers);
+        execute(postMethod, headersOthers, callback);
     }
 
     /**
      * Execute HTTP post.
      * @param action Action.
      * @param xml XML message.
-     * @return Response.
+     * @param callback Callback.
      * @throws IOException IO failed.
      */
-    public HttpClientResponse postXml(String action, String xml) throws IOException {
-        return postXml(action, xml, null);
+    public void postXml(String action, String xml, FutureCallback<SimpleHttpClientResponse> callback) throws IOException {
+        postXml(action, xml, null, callback);
     }
 
     /**
@@ -166,62 +154,77 @@ public class HttpClient {
      * @param action Action.
      * @param xml XML message.
      * @param headersOthers Header information.
-     * @return Response.
+     * @param callback Callback.
      * @throws IOException IO failed.
      */
-    public HttpClientResponse postXml(String action, String xml, Map<String, String> headersOthers) throws IOException {
+    public void postXml(String action, String xml, Map<String, String> headersOthers, FutureCallback<SimpleHttpClientResponse> callback) throws IOException {
         StringEntity requestEntity = new StringEntity(xml, ContentType.APPLICATION_XML);
-        HttpPost postMethod = new HttpPost(this.url + action);
+        HttpPost postMethod = new HttpPost(this.rootURL + action);
         postMethod.setEntity(requestEntity);
-
-        return execute(postMethod, headersOthers);
+        execute(postMethod, headersOthers, callback);
     }
 
     /**
-     * Execute HTTP delete.
+     * Execute HTTP delete
      * @param action Action.
-     * @return Response.
+     * @param callback Callback.
      * @throws IOException IO failed.
      */
-    public HttpClientResponse delete(String action) throws IOException {
-        return delete(action, null);
+    public void delete(String action, FutureCallback<SimpleHttpClientResponse> callback) throws IOException {
+        delete(action, callback);
     }
 
     /**
-     * Execute HTTP delete.
+     * Execute HTTP delete
      * @param action Action.
      * @param headersOthers Header information.
-     * @return Response.
+     * @param callback Callback.
      * @throws IOException IO failed.
      */
-    public HttpClientResponse delete(String action, Map<String, String> headersOthers) throws IOException {
-        HttpDelete deleteMethod = new HttpDelete(this.url + action);
-        return execute(deleteMethod, headersOthers);
+    public void delete(String action, Map<String, String> headersOthers, FutureCallback<SimpleHttpClientResponse> callback) throws IOException {
+        HttpDelete deleteMethod = new HttpDelete(this.rootURL + action);
+        deleteMethod.addHeader("accept", "application/json");
+        execute(deleteMethod, headersOthers, callback);
     }
 
-    private HttpClientResponse execute(HttpUriRequest request, Map<String, String> headersOthers) throws IOException {
+    private void execute(HttpUriRequest request, Map<String, String> headersOthers, final FutureCallback<SimpleHttpClientResponse> callback) throws IOException {
         if (this.headersDefault != null) {
             this.headersDefault.forEach(request::addHeader);
         }
         if (headersOthers != null) {
             headersOthers.forEach(request::addHeader);
         }
+        applyBasicAuth(request);
 
-        HttpResponse response;
         int rc = this.retryCount;
         while (true) {
             rc--;
             try {
-                response = this.client.execute(request);
+                this.client.execute(request, new FutureCallback<HttpResponse>() {
+
+                    @Override
+                    public void cancelled() {
+                        callback.cancelled();
+                    }
+
+                    @Override
+                    public void completed(HttpResponse response) {
+                        callback.completed(new SimpleHttpClientResponse(response));
+                    }
+
+                    @Override
+                    public void failed(Exception ex) {
+                        callback.failed(ex);
+                    }
+
+                });
                 break;
             }
-            catch (IOException ex) {
+            catch (Exception ex) {
                 if (rc < 1) {
                     throw ex;
                 }
             }
         }
-
-        return new HttpClientResponse(response);
     }
 }

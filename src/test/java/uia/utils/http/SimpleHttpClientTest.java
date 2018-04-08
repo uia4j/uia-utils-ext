@@ -20,7 +20,7 @@ package uia.utils.http;
 
 import org.junit.Test;
 
-public class HttpClientTest {
+public class SimpleHttpClientTest {
 
     @Test
     public void test() throws Exception {
