@@ -1,11 +1,11 @@
-package uia.utils.dao.where.rules;
+package uia.utils.dao.where.conditions;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
 
-public class RuleBetweenType implements RuleType {
+public class BetweenType implements ConditionType {
 
     private final String key;
 
@@ -13,7 +13,7 @@ public class RuleBetweenType implements RuleType {
 
     private final Object value2;
 
-    public RuleBetweenType(String key, Object value1, Object value2) {
+    public BetweenType(String key, Object value1, Object value2) {
         this.key = key;
         this.value1 = value1;
         this.value2 = value2;

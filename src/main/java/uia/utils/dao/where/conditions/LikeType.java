@@ -1,15 +1,15 @@
-package uia.utils.dao.where.rules;
+package uia.utils.dao.where.conditions;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class RuleLikeType implements RuleType {
+public class LikeType implements ConditionType {
 
     private final String key;
 
     private final Object value;
 
-    public RuleLikeType(String key, Object value) {
+    public LikeType(String key, Object value) {
         this.key = key;
         this.value = value;
     }

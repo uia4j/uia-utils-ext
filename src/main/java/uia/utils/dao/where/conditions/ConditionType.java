@@ -1,9 +1,9 @@
-package uia.utils.dao.where.rules;
+package uia.utils.dao.where.conditions;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public interface RuleType {
+public interface ConditionType {
 
     public String getStatement();
 

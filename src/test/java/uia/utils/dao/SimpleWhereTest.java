@@ -6,39 +6,69 @@ import java.sql.SQLException;
 import org.junit.Assert;
 import org.junit.Test;
 
-import uia.utils.dao.where.SimpleAnd;
-import uia.utils.dao.where.rules.RuleType;
+import uia.utils.dao.where.SimpleWhere;
+import uia.utils.dao.where.conditions.ConditionType;
 
-public class AndTest implements RuleType {
+public class SimpleWhereTest implements ConditionType {
 
     @Test
-    public void test1() {
-        SimpleAnd and = new SimpleAnd()
+    public void testAnd1() {
+        SimpleWhere and = SimpleWhere.createAnd()
                 .eq("c1", "abc")
                 .eq("c2", null)
                 .between("c3", "123", "456")
                 .likeBegin("c4", "abc")
                 .likeBegin("c5", null)
-                .and(this); 
-        and.addOrder("c1").addOrder("c2");
+                .notEq("c7", "def")
+                .notEq("c8", null)
+                .add(this);
         Assert.assertEquals(
-        		"c1=? AND (c3 between ? and ?) AND c4 like ? AND (c6='A') ORDER BY c1,c2",
-        		and.generate()); 
+                "c1=? and (c3 between ? and ?) and c4 like ? and c7<>? and (c6='A')",
+                and.generate());
     }
 
     @Test
-    public void test2() {
-        SimpleAnd and = new SimpleAnd()
+    public void testAnd2() {
+        SimpleWhere and = SimpleWhere.createAnd()
                 .eqOrNull("c1", "abc")
                 .eqOrNull("c2", null)
                 .between("c3", "123", "456")
                 .likeBeginOrNull("c4", "abc")
                 .likeBeginOrNull("c5", null)
-                .and(() -> "c6 is not null");
-        and.addOrder("c1").addOrder("c2");
+                .notEqOrNull("c7", "def")
+                .notEqOrNull("c8", null)
+                .add(() -> "c6 is not null");
         Assert.assertEquals(
-        		"c1=? AND c2 is null AND (c3 between ? and ?) AND c4 like ? AND c5 is null AND c6 is not null ORDER BY c1,c2",
-        		and.generate());
+                "c1=? and c2 is null and (c3 between ? and ?) and c4 like ? and c5 is null and c7<>? and c8 is not null and c6 is not null",
+                and.generate());
+    }
+
+    @Test
+    public void testOr1() {
+        SimpleWhere or = SimpleWhere.createOr()
+                .eq("c1", "abc")
+                .eq("c2", null)
+                .between("c3", "123", "456")
+                .likeBegin("c4", "abc")
+                .likeBegin("c5", null)
+                .add(this);
+        Assert.assertEquals(
+                "c1=? or (c3 between ? and ?) or c4 like ? or (c6='A')",
+                or.generate());
+    }
+
+    @Test
+    public void testOr2() {
+        SimpleWhere or = SimpleWhere.createOr()
+                .eqOrNull("c1", "abc")
+                .eqOrNull("c2", null)
+                .between("c3", "123", "456")
+                .likeBeginOrNull("c4", "abc")
+                .likeBeginOrNull("c5", null)
+                .add(() -> "c6 is not null");
+        Assert.assertEquals(
+                "c1=? or c2 is null or (c3 between ? and ?) or c4 like ? or c5 is null or c6 is not null",
+                or.generate());
     }
 
     @Override
