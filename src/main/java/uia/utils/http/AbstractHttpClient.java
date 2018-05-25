@@ -20,32 +20,33 @@ package uia.utils.http;
 
 import java.util.Base64;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpUriRequest;
 
 /**
  * Simple HTTP client.
- * 
+ *
  * @author Kyle K. Lin
  *
  */
 public abstract class AbstractHttpClient {
 
-    protected String rootURL;
+    protected final String rootURL;
 
-    protected Map<String, String> headersDefault;
-    
+    protected final Map<String, String> headersDefault;
+
     protected String user;
-    
+
     protected String password;
 
     /**
      * Constructor.
      * @param rootURL Root URL.
      */
-    public AbstractHttpClient(String rootPath) {
-        this(rootPath, (Map<String, String>) null);
+    public AbstractHttpClient(String rootURL) {
+        this(rootURL, new TreeMap<String, String>());
     }
 
     /**
@@ -57,33 +58,37 @@ public abstract class AbstractHttpClient {
         this.rootURL = rootURL;
         this.headersDefault = headersDefault;
     }
-   
+
+    public void addDefaultProperty(String key, String value) {
+        this.headersDefault.put(key, value);
+    }
+
     public String getUser() {
-		return user;
-	}
+        return this.user;
+    }
 
-	public void setUser(String user) {
-		this.user = user;
-	}
+    public void setUser(String user) {
+        this.user = user;
+    }
 
-	public String getPassword() {
-		return password;
-	}
+    public String getPassword() {
+        return this.password;
+    }
 
-	public void setPassword(String password) {
-		this.password = password;
-	}
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
-	protected void applyBasicAuth(HttpUriRequest request) {
-    	if(this.user == null) {
-    		return ;
-    	}
-    	
-    	String auth = this.password == null 
-    			? this.user + ":" 
-    			: this.user + ":" + this.password;
-    	byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes());
-    	String authHeader = "Basic " + new String(encodedAuth);
-    	request.setHeader(HttpHeaders.AUTHORIZATION, authHeader);	
-	}
+    protected void applyBasicAuth(HttpUriRequest request) {
+        if (this.user == null) {
+            return;
+        }
+
+        String auth = this.password == null
+                ? this.user + ":"
+                : this.user + ":" + this.password;
+        byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes());
+        String authHeader = "Basic " + new String(encodedAuth);
+        request.setHeader(HttpHeaders.AUTHORIZATION, authHeader);
+    }
 }

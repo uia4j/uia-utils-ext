@@ -20,6 +20,7 @@ package uia.utils.http;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -33,42 +34,59 @@ import org.apache.http.impl.client.HttpClientBuilder;
 
 /**
  * Simple HTTP client.
- * 
+ *
  * @author Kyle K. Lin
  *
  */
-public class SimpleHttpClient extends AbstractHttpClient {
+public class SimpleHttpClient extends AbstractHttpClient implements AutoCloseable {
 
     private int retryCount;
 
     private CloseableHttpClient client;
 
+    /**
+     * Constructor.
+     * @param rootURL Root URL.
+     */
     public SimpleHttpClient(String rootURL) {
-        this(rootURL, (Map<String, String>) null);
+        this(rootURL, new TreeMap<String, String>());
     }
 
+    /**
+     * Constructor.
+     * @param rootURL Root URL.
+     * @param headersDefault Header information.
+     */
     public SimpleHttpClient(String rootURL, Map<String, String> headersDefault) {
-    	super(rootURL, headersDefault);
+        super(rootURL, headersDefault);
         this.retryCount = 3;
         HttpClientBuilder builder = HttpClientBuilder.create();
         this.client = builder.build();
     }
 
+    /**
+     * Constructor.
+     * @param rootURL Root URL.
+     * @param builder Apache client builder.
+     */
     public SimpleHttpClient(String rootURL, HttpClientBuilder builder) {
-        this(rootURL, builder, null);
+        this(rootURL, builder, new TreeMap<String, String>());
     }
 
+    /**
+     * Constructor.
+     * @param rootURL Root URL.
+     * @param builder Apache client builder.
+     * @param headersDefault Header information.
+     */
     public SimpleHttpClient(String rootURL, HttpClientBuilder builder, Map<String, String> headersDefault) {
-    	super(rootURL, headersDefault);
+        super(rootURL, headersDefault);
         this.retryCount = 3;
         this.client = builder.build();
     }
 
-    /**
-     * Shutdown.
-     * @throws IOException IO failed.
-     */
-    public void shutdown() throws IOException {
+    @Override
+    public void close() throws Exception {
         this.client.close();
     }
 
@@ -193,7 +211,7 @@ public class SimpleHttpClient extends AbstractHttpClient {
             headersOthers.forEach(request::addHeader);
         }
         applyBasicAuth(request);
-        
+
         HttpResponse response;
         int rc = this.retryCount;
         while (true) {

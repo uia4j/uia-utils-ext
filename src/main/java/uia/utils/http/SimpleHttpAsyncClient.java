@@ -20,6 +20,7 @@ package uia.utils.http;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -34,7 +35,7 @@ import org.apache.http.impl.nio.client.HttpAsyncClients;
 
 /**
  * Simple HTTP client.
- * 
+ *
  * @author Kyle K. Lin
  *
  */
@@ -49,16 +50,16 @@ public class SimpleHttpAsyncClient extends AbstractHttpClient {
      * @param rootURL Root URL.
      */
     public SimpleHttpAsyncClient(String rootURL) {
-        this(rootURL, null);
+        this(rootURL, new TreeMap<String, String>());
     }
 
     /**
      * Constructor.
-     * @param url Root URL.
+     * @param rootURL Root URL.
      * @param headersDefault Header information.
      */
     public SimpleHttpAsyncClient(String rootURL, Map<String, String> headersDefault) {
-    	super(rootURL, headersDefault);
+        super(rootURL, headersDefault);
         this.retryCount = 3;
         this.client = HttpAsyncClients.createDefault();
 
@@ -188,6 +189,7 @@ public class SimpleHttpAsyncClient extends AbstractHttpClient {
     }
 
     private void execute(HttpUriRequest request, Map<String, String> headersOthers, final FutureCallback<SimpleHttpClientResponse> callback) throws IOException {
+        System.out.println(request.getURI());
         if (this.headersDefault != null) {
             this.headersDefault.forEach(request::addHeader);
         }
