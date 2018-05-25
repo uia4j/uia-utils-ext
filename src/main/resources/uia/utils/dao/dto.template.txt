@@ -1,0 +1,23 @@
+package {DTO_PACKAGE};
+
+import java.util.Date;
+
+public class {DTO} {
+
+{MEMBER}
+    public {DTO}() {
+    }	
+
+    public {DTO}({DTO} data) {
+{CODE_INITIAL}    }	
+
+    @Override
+    public {DTO} clone() {
+    	return new {DTO}(this);
+    }
+
+    @Override
+    public String toString() {
+        return {TOSTRING};
+    }
+}

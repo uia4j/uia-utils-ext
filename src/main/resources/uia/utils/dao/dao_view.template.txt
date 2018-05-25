@@ -1,0 +1,40 @@
+package {DAO_PACKAGE};
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+
+import {DTO_PACKAGE}.{DTO};
+
+public class {DTO}Dao {
+
+    private static final String SQL_SEL = "{SQL_SEL} ";
+    
+    private final Connection conn;
+
+    public {DTO}Dao(Connection conn) {
+        this.conn = conn;
+    }
+
+    public List<{DTO}> selectAll() throws SQLException {
+        ArrayList<{DTO}> result = new ArrayList<{DTO}>();
+        try (PreparedStatement ps = this.conn.prepareStatement(SQL_SEL)) {
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()) {
+                result.add(convert(rs));
+            }
+            return result;
+        }
+    }    
+    
+    private {DTO} convert(ResultSet rs) throws SQLException {
+        {DTO} data = new {DTO}();
+        
+{CODE_CONVERT}
+        return data;
+    }
+}
