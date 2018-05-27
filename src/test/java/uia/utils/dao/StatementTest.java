@@ -24,7 +24,7 @@ public class StatementTest {
         stat.where(where).orderBy("A");
         stat.where(where).groupBy("A");
 
-        try (Connection conn = DB.create()) {
+        try (Connection conn = createDB()) {
             PreparedStatement ps = stat.prepare(conn, "select * from IVP");
             System.out.println(ps);
         }
@@ -48,12 +48,16 @@ public class StatementTest {
         Statement stat = new Statement();
         stat.where(where).orderBy("A").orderBy("B");
 
-        try (Connection conn = DB.create()) {
+        try (Connection conn = createDB()) {
             PreparedStatement ps = stat.prepare(conn, "select * from ivp");
             System.out.println(ps);
         }
         catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    private Connection createDB() {
+        return null;
     }
 }

@@ -1,80 +1,61 @@
 package uia.utils.dao;
 
-public class ColumnType {
+public abstract class ColumnType {
 
-    private boolean pk;
+    public enum DataType {
 
-    private String columnName;
+        VARCHAR,
 
-    private String propertyName;
+        NVARCHAR,
 
-    private int dataType;
+        VARCHAR2,
 
-    private String dataTypeName;
+        NVARCHAR2,
 
-    private int columnSize;
+        INTEGER,
 
-    private boolean nullable;
+        LONG,
 
-    private int decimalDigits;
+        NUMERIC,
+
+        FLOAT,
+
+        DOUBLE,
+
+        TIMESTAMP,
+
+        DATE,
+
+        TIME,
+
+        BLOB,
+
+        OTHERS;
+
+        DataType() {
+        }
+    }
+
+    protected boolean pk;
+
+    protected String columnName;
+
+    protected String propertyName;
+
+    protected DataType dataType;
+
+    protected int dataTypeCode;
+
+    protected String dataTypeName;
+
+    protected long columnSize;
+
+    protected boolean nullable;
+
+    protected int decimalDigits;
 
     public boolean isPk() {
         return this.pk;
-    }
-
-    public boolean sameAs(ColumnType ct, CompareResult cr) {
-        if (ct == null) {
-            cr.setPassed(false);
-            cr.addMessage(this.columnName + " not found");
-            return false;
-        }
-        if (!this.columnName.equals(ct.columnName)) {
-            cr.setPassed(false);
-            cr.addMessage(this.columnName + " columnName not the same");
-            return false;
-        }
-        if (this.nullable != ct.nullable) {
-            cr.setPassed(false);
-            cr.addMessage(this.columnName + " nullable not the same");
-            return false;
-        }
-        if (this.pk != ct.pk) {
-            cr.setPassed(false);
-            cr.addMessage(this.columnName + " pk not the same");
-            return false;
-        }
-
-        // String
-        if (this.dataTypeName.contains("VARCHAR") && ct.dataTypeName.contains("VARCHAR")) {
-            return true;
-        }
-        // Timestamp
-        if (this.dataTypeName.contains("TIMESTAMP") && ct.dataTypeName.contains("TIMESTAMP")) {
-            return true;
-        }
-
-        if (this.decimalDigits != ct.decimalDigits) {
-            cr.setPassed(false);
-            cr.addMessage(String.format("%s  decimalDigits not the same, %s != %s",
-                    this.columnName,
-                    this.decimalDigits,
-                    ct.decimalDigits));
-            return false;
-        }
-
-        if (this.dataType != ct.dataType) {
-            cr.setPassed(false);
-            cr.addMessage(this.columnName + " dataType not the same");
-            return false;
-        }
-        if (this.columnSize != ct.columnSize) {
-            cr.setPassed(false);
-            cr.addMessage(this.columnName + " columnSize not the same");
-            return false;
-        }
-
-        return true;
-
     }
 
     public void setPk(boolean pk) {
@@ -94,19 +75,20 @@ public class ColumnType {
         return this.propertyName;
     }
 
-    public int getDataType() {
+    public DataType getDataType() {
         return this.dataType;
     }
 
-    /**
-     * 3. NUMBER
-     * 12. VARCHAR
-     * 93. TIMESTAMP
-     * -101. TIMESTAMP WITH TIME ZONE
-     * @param dataType
-     */
-    public void setDataType(int dataType) {
+    public void setDataType(DataType dataType) {
         this.dataType = dataType;
+    }
+
+    public int getDataTypeCode() {
+        return this.dataTypeCode;
+    }
+
+    public void setDataTypeCode(int dataTypeCode) {
+        this.dataTypeCode = dataTypeCode;
     }
 
     public String getDataTypeName() {
@@ -125,11 +107,11 @@ public class ColumnType {
         this.nullable = nullable;
     }
 
-    public int getColumnSize() {
+    public long getColumnSize() {
         return this.columnSize;
     }
 
-    public void setColumnSize(int columnSize) {
+    public void setColumnSize(long columnSize) {
         this.columnSize = columnSize;
     }
 
@@ -141,30 +123,188 @@ public class ColumnType {
         this.decimalDigits = decimalDigits;
     }
 
-    public String getPsSet(int index) {
-        if (this.dataType == 3) {
-            if (this.columnSize >= 18) {
-                this.dataType = 10003;
-            }
-            else if (this.columnSize >= 10) {
-                this.dataType = 1003;
+    /**
+     * Check if this column is string including NVARCHAR, NVARCHAR2, VARCHAR, VARCHAR2.
+     * @return Result.
+     */
+    public boolean isStringType() {
+        // THINK: include BLOB?
+        switch (this.dataType) {
+            case NVARCHAR:
+            case NVARCHAR2:
+            case VARCHAR:
+            case VARCHAR2:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * Check if this column is date-time including Date, TIME, TIMESTAMP.
+     * @return Result.
+     */
+    public boolean isDateTimeType() {
+        switch (this.dataType) {
+            case DATE:
+            case TIME:
+            case TIMESTAMP:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * Check if this column is numeric including INTEGER, LONG, NUMERIC, FLOAT, DOUBLE.
+     * @return Result.
+     */
+    public boolean isNumericType() {
+        switch (this.dataType) {
+            case INTEGER:
+            case LONG:
+            case NUMERIC:
+            case FLOAT:
+            case DOUBLE:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public String getJavaTypeName() {
+        String type = "String";
+        switch (this.dataType) {
+            case INTEGER:
+                type = this.nullable ? "Integer" : "int";
+                break;
+            case LONG:
+                type = this.nullable ? "Long" : "long";
+                break;
+            case NUMERIC:
+            case FLOAT:
+            case DOUBLE:
+                type = "BigDecimal";
+                break;
+            case DATE:
+            case TIME:
+            case TIMESTAMP:
+                type = "Date";
+                break;
+            default:
+                type = "String";
+        }
+
+        return String.format("%s %s", type, this.propertyName);
+    }
+
+    public boolean sameAs(ColumnType targetColumn, ComparePlan plan, CompareResult cr) {
+        if (targetColumn == null) {
+            cr.setPassed(false);
+            cr.addMessage(this.columnName + " not found");
+            return false;
+        }
+
+        // column name
+        if (!this.columnName.equalsIgnoreCase(targetColumn.getColumnName())) {
+            cr.setPassed(false);
+            cr.addMessage(this.columnName + " columnName not the same");
+            return false;
+        }
+
+        // null
+        if (plan.checkNullable) {
+            if (this.nullable != targetColumn.isNullable()) {
+                cr.setPassed(false);
+                cr.addMessage(String.format("%s nullable not the same: (%s,%s)",
+                        this.columnName,
+                        this.nullable,
+                        targetColumn.isNullable()));
+                return false;
             }
         }
+
+        // primary key
+        if (this.pk != targetColumn.isPk()) {
+            cr.setPassed(false);
+            cr.addMessage(String.format("%s pk not the same: (%s,%s)",
+                    this.columnName,
+                    this.pk,
+                    targetColumn.isPk()));
+            return false;
+        }
+
+        // string
+        if (!plan.strictVarchar && isStringType() && targetColumn.isStringType()) {
+            return true;
+        }
+
+        // numeric
+        if (!plan.strictNumeric && isNumericType() && targetColumn.isNumericType()) {
+            return true;
+        }
+
+        // data type
+        if (this.dataType != targetColumn.getDataType()) {
+            cr.setPassed(false);
+            cr.addMessage(String.format("%s dataType not the same: (%s,%s)",
+                    this.columnName,
+                    this.dataType,
+                    targetColumn.getDataType()));
+            return false;
+        }
+
+        // date/time
+        if (isDateTimeType() && targetColumn.isDateTimeType()) {
+            return true;
+        }
+
+        // decimal digit
+        if (this.decimalDigits != targetColumn.getDecimalDigits()) {
+            cr.setPassed(false);
+            cr.addMessage(String.format("%s decimalDigits not the same, (%s:%s,%s:%s)",
+                    this.columnName,
+                    this.dataTypeName,
+                    this.decimalDigits,
+                    targetColumn.getDataTypeName(),
+                    targetColumn.getDecimalDigits()));
+            return false;
+        }
+
+        // column size
+        if (plan.checkDataSize) {
+            if (this.columnSize != targetColumn.getColumnSize()) {
+                cr.setPassed(false);
+                cr.addMessage(String.format("%s columnSize not the same: (%s,%s)",
+                        this.columnName,
+                        this.columnSize,
+                        targetColumn.getColumnSize()));
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    String genPsSet(int index) {
         switch (this.dataType) {
-            case -101:
-            case 93:
+            case DATE:
+            case TIME:
+            case TIMESTAMP:
                 return String.format("ps.setTimestamp(%s, new Timestamp(data.get%s().getTime()));",
                         index,
                         this.propertyName.substring(0, 1).toUpperCase() + this.propertyName.substring(1));
-            case 3:
+            case INTEGER:
                 return String.format("ps.setInt(%s, data.get%s());",
                         index,
                         this.propertyName.substring(0, 1).toUpperCase() + this.propertyName.substring(1));
-            case 1003:
+            case LONG:
                 return String.format("ps.setLong(%s, data.get%s());",
                         index,
                         this.propertyName.substring(0, 1).toUpperCase() + this.propertyName.substring(1));
-            case 10003:
+            case NUMERIC:
+            case FLOAT:
+            case DOUBLE:
                 return String.format("ps.setBigDecimal(%s, data.get%s());",
                         index,
                         this.propertyName.substring(0, 1).toUpperCase() + this.propertyName.substring(1));
@@ -175,30 +315,25 @@ public class ColumnType {
         }
     }
 
-    public String getPsSetEx(int index) {
-        if (this.dataType == 3) {
-            if (this.columnSize >= 18) {
-                this.dataType = 10003;
-            }
-            else if (this.columnSize >= 10) {
-                this.dataType = 1003;
-            }
-        }
+    String genPsSetEx(int index) {
         switch (this.dataType) {
-            case -101:
-            case 93:
-                return String.format("ps.setTimestamp(%s, %s);",
+            case DATE:
+            case TIME:
+            case TIMESTAMP:
+                return String.format("ps.setTimestamp(%s, %s.getTime());",
                         index,
                         this.propertyName);
-            case 3:
+            case INTEGER:
                 return String.format("ps.setInt(%s, %s);",
                         index,
                         this.propertyName);
-            case 1003:
+            case LONG:
                 return String.format("ps.setLong(%s, %s);",
                         index,
                         this.propertyName);
-            case 10003:
+            case NUMERIC:
+            case FLOAT:
+            case DOUBLE:
                 return String.format("ps.setBigDecimal(%s, %s);",
                         index,
                         this.propertyName);
@@ -209,30 +344,27 @@ public class ColumnType {
         }
     }
 
-    public String getRsGet(String index) {
+    String genRsGet(String index) {
         String type = "String";
-        if (this.dataType == 3) {
-            if (this.columnSize >= 18) {
-                this.dataType = 10003;
-            }
-            else if (this.columnSize >= 10) {
-                this.dataType = 1003;
-            }
-        }
         switch (this.dataType) {
-            case 3:
+            case INTEGER:
                 type = "Int";
                 break;
-            case 1003:
+            case LONG:
                 type = "Long";
                 break;
-            case 10003:
+            case NUMERIC:
+            case FLOAT:
+            case DOUBLE:
                 type = "BigDecimal";
                 break;
-            case -101:
-            case 93:
+            case DATE:
+            case TIME:
+            case TIMESTAMP:
                 type = "Timestamp";
                 break;
+            default:
+                type = "String";
         }
 
         String rsGet = String.format("data.set%s(rs.get%s(%s));",
@@ -242,38 +374,15 @@ public class ColumnType {
         return rsGet;
     }
 
-    public String getMemberDef() {
-        String type = "String";
-        if (this.dataType == 3) {
-            if (this.columnSize >= 18) {
-                this.dataType = 10003;
-            }
-            else if (this.columnSize >= 10) {
-                this.dataType = 1003;
-            }
-        }
-        switch (this.dataType) {
-            case 3:
-                type = this.nullable ? "Integer" : "int";
-                break;
-            case 1003:
-                type = this.nullable ? "Long" : "long";
-                break;
-            case 10003:
-                type = "BigDecimal";
-                break;
-            case -101:
-            case 93:
-                type = "Date";
-                break;
-        }
-
-        return String.format("%s %s", type, this.propertyName);
-    }
-
     @Override
     public String toString() {
-        return String.format("%-30s, pk:%-5s, %2s, %-15s [%s]", this.columnName, this.pk, this.dataType, this.dataTypeName, this.columnSize);
+        return String.format("%-30s, pk:%-5s, %-9s, %4s:%-13s [%s]",
+                this.columnName,
+                this.pk,
+                this.dataType,
+                this.dataTypeCode,
+                this.dataTypeName,
+                this.columnSize);
     }
 
     private static String convert(String columnName) {

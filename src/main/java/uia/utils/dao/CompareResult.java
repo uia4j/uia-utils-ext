@@ -33,6 +33,12 @@ public class CompareResult {
         return this.messages;
     }
 
+    public void printFailed() {
+        if (!this.passed) {
+            System.out.println(this);
+        }
+    }
+
     @Override
     public String toString() {
         return this.tableName + " compare passed:" + this.passed + "\n  " + String.join("\n  ", this.messages);

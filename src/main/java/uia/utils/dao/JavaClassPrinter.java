@@ -2,8 +2,6 @@ package uia.utils.dao;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,26 +15,20 @@ public class JavaClassPrinter {
 
     private final String templateDAOTable;
 
-    private final String templateDAOView; 
+    private final String templateDAOView;
 
-    public JavaClassPrinter(Connection conn, String tableName) throws URISyntaxException, IOException, SQLException {
+    public JavaClassPrinter(Database db, String tableName) throws IOException, SQLException {
         this.templateDTO = readContent(JavaClassPrinter.class.getResourceAsStream("dto.template.txt"));
         this.templateDAOTable = readContent(JavaClassPrinter.class.getResourceAsStream("dao_table.template.txt"));
         this.templateDAOView = readContent(JavaClassPrinter.class.getResourceAsStream("dao_view.template.txt"));
-
-        this.table = new Database(conn).selectTable(tableName);
+        this.table = db.selectTable(tableName, true);
     }
 
-    public String getInsertSQL() {
-        return this.table.generateInsertSQL();
-    }
-
-    public String getUpdateSQL() {
-        return this.table.generateUpdateSQL();
-    }
-
-    public String getSelcetSQL() {
-        return this.table.generateSelectSQL();
+    public JavaClassPrinter(TableType table) throws IOException {
+        this.templateDTO = readContent(JavaClassPrinter.class.getResourceAsStream("dto.template.txt"));
+        this.templateDAOTable = readContent(JavaClassPrinter.class.getResourceAsStream("dao_table.template.txt"));
+        this.templateDAOView = readContent(JavaClassPrinter.class.getResourceAsStream("dao_view.template.txt"));
+        this.table = table;
     }
 
     public Result generate(String daoPackageName, String dtoPackageName, String dtoName) {
@@ -60,7 +52,7 @@ public class JavaClassPrinter {
             if (columnTypes.get(i).isPk()) {
                 toString.add("this." + columnTypes.get(i).getPropertyName());
             }
-            member.append("    private ").append(columnTypes.get(i).getMemberDef()).append(";\n\n");
+            member.append("    private ").append(columnTypes.get(i).getJavaTypeName()).append(";\n\n");
             codeInitial.append("        this.").append(columnTypes.get(i).getPropertyName())
                     .append(" = data.").append(columnTypes.get(i).getPropertyName()).append(";\n");
         }
@@ -79,7 +71,7 @@ public class JavaClassPrinter {
         StringBuilder codeConvert = new StringBuilder();
         codeConvert.append("        int index = 1;").append("\n");
         for (int i = 0; i < columnTypes.size(); i++) {
-            codeConvert.append("        ").append(columnTypes.get(i).getRsGet("index++")).append("\n");
+            codeConvert.append("        ").append(columnTypes.get(i).genRsGet("index++")).append("\n");
         }
 
         return this.templateDAOView
@@ -102,20 +94,20 @@ public class JavaClassPrinter {
 
         codeConvert.append("        int index = 1;").append("\n");
         for (int i = 0; i < columnTypes.size(); i++) {
-            codeIns.append("            ").append(columnTypes.get(i).getPsSet(i + 1)).append("\n");
-            codeConvert.append("        ").append(columnTypes.get(i).getRsGet("index++")).append("\n");
+            codeIns.append("            ").append(columnTypes.get(i).genPsSet(i + 1)).append("\n");
+            codeConvert.append("        ").append(columnTypes.get(i).genRsGet("index++")).append("\n");
         }
 
         List<ColumnType> pk = columnTypes.stream().filter(c -> c.isPk()).collect(Collectors.toList());
         List<ColumnType> nonPK = columnTypes.stream().filter(c -> !c.isPk()).collect(Collectors.toList());
         for (int i = 0; i < nonPK.size(); i++) {
-            codeUpd.append("            ").append(nonPK.get(i).getPsSet(i + 1)).append("\n");
+            codeUpd.append("            ").append(nonPK.get(i).genPsSet(i + 1)).append("\n");
         }
         for (int i = 0; i < pk.size(); i++) {
-            codeUpd.append("            ").append(pk.get(i).getPsSet(i + 1 + nonPK.size())).append("\n");
+            codeUpd.append("            ").append(pk.get(i).genPsSet(i + 1 + nonPK.size())).append("\n");
             // TODO: bug
-            codeSelPk.append("            ").append(pk.get(i).getPsSetEx(i + 1)).append("\n");
-            codeSelPkArgs.add(pk.get(i).getMemberDef());
+            codeSelPk.append("            ").append(pk.get(i).genPsSetEx(i + 1)).append("\n");
+            codeSelPkArgs.add(pk.get(i).getJavaTypeName());
             pkWhere.add(pk.get(i).getColumnName().toLowerCase() + "=?");
         }
 
@@ -134,8 +126,7 @@ public class JavaClassPrinter {
                 .replace("{CODE_SEL_PK}", codeSelPk.toString())
                 .replace("{CODE_CONVERT}", codeConvert.toString());
     }
-    
-    
+
     /**
      * Read content from file.
      * @param file File.
@@ -147,9 +138,8 @@ public class JavaClassPrinter {
         byte[] bytesArray = new byte[fis.available()];
         fis.read(bytesArray);
         fis.close();
-        return new String(bytesArray);   
+        return new String(bytesArray);
     }
-
 
     class Result {
 

@@ -5,28 +5,62 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Table structure.
+ *
+ * @author Kyle K. Lin
+ *
+ */
 public class TableType {
 
     private final String tableName;
 
     private final List<ColumnType> columns;
 
-    TableType(String tableName, List<ColumnType> columns) {
+    /**
+     * Constructor.
+     * @param tableName Table name.
+     * @param columns Definition of columns.
+     */
+    public TableType(String tableName, List<ColumnType> columns) {
         this.tableName = tableName;
         this.columns = columns;
     }
 
+    /**
+     * Get table name.
+     * @return Table name.
+     */
     public String getTableName() {
         return this.tableName;
     }
 
+    /**
+     * Get column Definition.
+     * @return
+     */
     public List<ColumnType> getColumns() {
         return this.columns;
     }
 
+    /**
+     * Compare two tables.
+     * @param table Table to be compared.
+     * @return Result.
+     */
     public CompareResult sameAs(TableType table) {
+        return sameAs(table, ComparePlan.table());
+    }
+
+    /**
+     * Compare two tables.
+     * @param table Table to be compared.
+     * @param plan Plan.
+     * @return Result.
+     */
+    public CompareResult sameAs(TableType table, ComparePlan plan) {
         CompareResult cr = new CompareResult(this.tableName);
-        if (table == null || !this.tableName.equals(table.getTableName())) {
+        if (table == null || !this.tableName.equalsIgnoreCase(table.getTableName())) {
             cr.setPassed(false);
             cr.addMessage("tableName mismatch");
             return cr;
@@ -39,12 +73,12 @@ public class TableType {
         }
 
         try {
-            Map<String, ColumnType> source = this.columns.stream().collect(Collectors.toMap(c -> c.getColumnName(), c -> c));
-            Map<String, ColumnType> target = table.columns.stream().collect(Collectors.toMap(c -> c.getColumnName(), c -> c));
+            Map<String, ColumnType> source = this.columns.stream().collect(Collectors.toMap(c -> c.getColumnName().toUpperCase(), c -> c));
+            Map<String, ColumnType> target = table.columns.stream().collect(Collectors.toMap(c -> c.getColumnName().toUpperCase(), c -> c));
             for (String key : source.keySet()) {
                 ColumnType ct1 = source.get(key);
                 ColumnType ct2 = target.containsKey(key) ? target.get(key) : null;
-                ct1.sameAs(ct2, cr);
+                ct1.sameAs(ct2, plan, cr);
             }
         }
         catch (Exception ex) {

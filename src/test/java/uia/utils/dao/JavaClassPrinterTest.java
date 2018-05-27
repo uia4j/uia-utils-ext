@@ -1,14 +1,17 @@
 package uia.utils.dao;
 
+import java.sql.SQLException;
+
 import org.junit.Test;
+
+import uia.utils.dao.pg.PostgreSQL;
 
 public class JavaClassPrinterTest {
 
     @Test
     public void testGenerateTable() throws Exception {
-        JavaClassPrinter.Result result = new JavaClassPrinter(
-        		DB.create(), 
-        		"ivp").generate("huede.mvs.db.dao", "huede.mvs.db", "InventoryEx");
+        JavaClassPrinter.Result result = new JavaClassPrinter(createDB(), "test_only")
+                .generate("huede.mvs.db.dao", "huede.mvs.db", "Ivp");
         System.out.println("=========================");
         System.out.println(result.dto);
         System.out.println("=========================");
@@ -17,9 +20,8 @@ public class JavaClassPrinterTest {
 
     @Test
     public void testGenerateView() throws Exception {
-        JavaClassPrinter.Result result = new JavaClassPrinter(
-        		DB.create(), 
-        		"VIEW_RUN_TG_SFC").generate4View("ame.psb.db.dao", "ame.psb.db", "ViewRunTgRun");
+        JavaClassPrinter.Result result = new JavaClassPrinter(createDB(), "ivp_raw_event_view")
+                .generate4View("huede.mvs.db.dao", "ame.psb.db", "ViewRunTgRun");
         System.out.println("=========================");
         System.out.println(result.dto);
         System.out.println("=========================");
@@ -28,17 +30,24 @@ public class JavaClassPrinterTest {
 
     @Test
     public void testGenerateDTO() throws Exception {
-        System.out.println(new JavaClassPrinter(DB.create(), "ZR_DISPATCH_SFC").generateDTO("ame.psb.db", "DispatchSfc"));
+        System.out.println(new JavaClassPrinter(createDB(), "ivp_raw_event_view")
+                .generateDTO("huede.mvs.db", "DispatchSfc"));
     }
 
     @Test
     public void testGenerateDAO() throws Exception {
-        System.out.println(new JavaClassPrinter(DB.create(), "ZR_DISPATCH_SFC").generateDAO("uia.utils.dao", "uia.utils.dao", "DispatchSfc"));
+        System.out.println(new JavaClassPrinter(createDB(), "ivp_raw_event_view")
+                .generateDAO("huede.mvs.db.dao", "huede.mvs.db", "DispatchSfc"));
     }
 
     @Test
     public void testGenerateDAO4View() throws Exception {
-        System.out.println(new JavaClassPrinter(DB.create(), "ZR_DISPATCH_SFC").generateDAO4View("uia.utils.dao", "uia.utils.dao", "DispatchSfc"));
+        System.out.println(new JavaClassPrinter(createDB(), "ivp_raw_event_view")
+                .generateDAO4View("huede.mvs.db.dao", "huede.mvs.db", "ivp_raw_event_view"));
+    }
+
+    private Database createDB() throws SQLException {
+        return new PostgreSQL("localhost", "5432", "mvsdb", "huede", "huede");
     }
 
 }
