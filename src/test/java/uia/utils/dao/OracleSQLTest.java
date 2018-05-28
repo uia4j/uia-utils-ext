@@ -58,7 +58,7 @@ public class OracleSQLTest {
     @Test
     public void testGenerateCreateTableSQL() throws Exception {
         Database db = new Oracle("10.160.1.48", "1521", "MESDEV", "WIP", "wip");
-        TableType table = db.selectTable("ZR_TEST", true);
+        TableType table = db.selectTable("ZR_CARRIER_CLEAN", true);
 
         System.out.println("=== Oracle ===");
         System.out.println(db.generateCreateTableSQL(table));

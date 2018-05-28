@@ -48,7 +48,7 @@ public abstract class AbstractDatabase implements Database {
 
     @Override
     public int createView(String viewName, String sql) throws SQLException {
-        String script = String.format("CREATE VIEW \"%s\" (%s)", viewName, sql);
+        String script = String.format("CREATE VIEW \"%s\" (\n%s\n)", viewName, sql);
         System.out.println(script);
         return this.conn.prepareStatement(script)
                 .executeUpdate();

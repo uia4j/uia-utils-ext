@@ -259,6 +259,11 @@ public abstract class ColumnType {
             return true;
         }
 
+        // blob
+        if (this.dataType == DataType.BLOB) {
+            return true;
+        }
+
         // decimal digit
         if (this.decimalDigits != targetColumn.getDecimalDigits()) {
             cr.setPassed(false);

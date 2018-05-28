@@ -53,6 +53,39 @@ public class DatabaseTest {
     }
 
     @Test
+    public void testCreateTable_Ora2Hana() throws Exception {
+        try (Database hana = hanaDev()) {
+            try (Database ora = ora()) {
+                for (String tableName : hana.selectTableNames("ZR_CARRIER_CLEAN")) {
+                    TableType table = hana.selectTable(tableName, true);
+                    ora.createTable(table);
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testCreateTable_Pg2Hana() throws Exception {
+        try (Database hana = hanaDev()) {
+            try (Database ora = ora()) {
+                for (String tableName : hana.selectTableNames("ZR_")) {
+                    TableType table = hana.selectTable(tableName, true);
+                    ora.createTable(table);
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testCreateTable_Hana2Hana() throws Exception {
+        try (Database hana1 = hanaDev()) {
+            try (Database hana2 = hanaProd()) {
+                hana2.createTable(hana1.selectTable("Z_PMS_SPAREPARTS_PARAMETER", true));
+            }
+        }
+    }
+
+    @Test
     public void testCreateView_Ora2Pg() throws Exception {
         String script = ora().selectViewScript("VIEW_DISPATCH_SFC");
         pg().createView("VIEW_DISPATCH_SFC", script);
@@ -65,6 +98,25 @@ public class DatabaseTest {
     }
 
     @Test
+    public void testCreateView_Hana2Hana() throws Exception {
+        try (Database hana1 = hanaDev()) {
+            try (Database hana2 = hanaTest()) {
+                String viewName1 = "VIEW_PMS_CHECKLIST_PARAMETER";
+                String script1 = hana1.selectViewScript(viewName1);
+                hana2.createView(viewName1, script1);
+
+                String viewName2 = "VIEW_PMS_PLAN";
+                String script2 = hana1.selectViewScript(viewName2);
+                hana2.createView(viewName2, script2);
+
+                String viewName3 = "VIEW_PMS_PLAN_CHANGE";
+                String script3 = hana1.selectViewScript(viewName3);
+                hana2.createView(viewName3, script3);
+            }
+        }
+    }
+
+    @Test
     public void testSameAsTable_PgOra() throws Exception {
         TableType table1 = pg().selectTable("test_only", true);
         TableType table2 = ora().selectTable("TEST_ONLY", true);
@@ -73,25 +125,27 @@ public class DatabaseTest {
 
     @Test
     public void testSameAsTables_Hana() throws Exception {
-        // Database src = hana();
-        Database src = ora();
-        Database tgt = hanaTest();
-        for (String tableName : src.selectTableNames("ZD_")) {
-            TableType table1 = src.selectTable(tableName, true);
-            TableType table2 = tgt.selectTable(tableName, true);
-            table1.sameAs(table2, new ComparePlan(false, true, true, true)).printFailed();
+        try (Database src = hanaDev()) {
+            try (Database tgt = hanaProd()) {
+                for (String tableName : src.selectTableNames("Z_")) {
+                    TableType table1 = src.selectTable(tableName, true);
+                    TableType table2 = tgt.selectTable(tableName, true);
+                    table1.sameAs(table2, new ComparePlan(false, true, true, true)).printFailed();
+                }
+            }
         }
     }
 
     @Test
     public void testSameAsViews_Hana() throws Exception {
-        Database src = ora();
-        // Database src = hanaDev();
-        Database tgt = hanaTest();
-        for (String viewName : src.selectViewNames("VIEW_")) {
-            TableType table1 = src.selectTable(viewName, false);
-            TableType table2 = tgt.selectTable(viewName, false);
-            table1.sameAs(table2, ComparePlan.view()).printFailed();
+        try (Database src = hanaDev()) {
+            try (Database tgt = hanaProd()) {
+                for (String viewName : src.selectViewNames("VIEW_")) {
+                    TableType table1 = src.selectTable(viewName, false);
+                    TableType table2 = tgt.selectTable(viewName, false);
+                    table1.sameAs(table2, ComparePlan.view()).printFailed();
+                }
+            }
         }
     }
 
@@ -109,5 +163,9 @@ public class DatabaseTest {
 
     private Database hanaTest() throws Exception {
         return new Hana("10.160.2.23", "31015", null, "WIP", "Sap12345");
+    }
+
+    private Database hanaProd() throws Exception {
+        return new Hana("10.160.2.20", "30015", null, "WIP", "Sap12345");
     }
 }

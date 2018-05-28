@@ -11,7 +11,7 @@ public class HanaSQLTest {
     @Test
     public void testSelectTableNames() throws Exception {
         Database db = new Hana("10.160.1.52", "39015", null, "WIP", "Hdb12345");
-        db.selectTableNames().forEach(t -> System.out.println(t));
+        db.selectTableNames("ZR_CARRIER_CLEAN").forEach(t -> System.out.println(t));
         db.close();
     }
 
@@ -25,8 +25,9 @@ public class HanaSQLTest {
     @Test
     public void testSelectTable() throws Exception {
         Database db = new Hana("10.160.1.52", "39015", null, "WIP", "Hdb12345");
+        //Database db = new Hana("10.160.2.23", "31015", null, "WIP", "Sap12345");
 
-        TableType table = db.selectTable("Z_LOGIC", true);
+        TableType table = db.selectTable("ZR_BINMAP_COMBINE", true);
         System.out.println(table.getTableName());
         table.getColumns().forEach(System.out::println);
         System.out.println(table.generateInsertSQL());
@@ -58,7 +59,7 @@ public class HanaSQLTest {
     @Test
     public void testGenerateCreateTableSQL() throws Exception {
         Database db = new Hana("10.160.1.52", "39015", null, "WIP", "Hdb12345");
-        TableType table = db.selectTable("Z_LOGIC", false);
+        TableType table = db.selectTable("ZR_CARRIER_CLEAN", false);
 
         System.out.println("=== Hana ===");
         System.out.println(db.generateCreateTableSQL(table));

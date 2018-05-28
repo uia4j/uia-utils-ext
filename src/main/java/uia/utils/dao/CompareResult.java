@@ -33,6 +33,10 @@ public class CompareResult {
         return this.messages;
     }
 
+    public void print() {
+        System.out.println(this);
+    }
+
     public void printFailed() {
         if (!this.passed) {
             System.out.println(this);

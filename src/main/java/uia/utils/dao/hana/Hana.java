@@ -33,6 +33,14 @@ public class Hana extends AbstractDatabase {
     }
 
     @Override
+    public int createView(String viewName, String sql) throws SQLException {
+        String script = String.format("CREATE VIEW \"%s\" AS \n%s", viewName, sql);
+        System.out.println(script);
+        return this.conn.prepareStatement(script)
+                .executeUpdate();
+    }
+
+    @Override
     public String selectViewScript(String viewName) throws SQLException {
         String script = null;
         PreparedStatement ps = this.conn.prepareStatement("SELECT definition FROM VIEWS WHERE schema_name=? AND view_name=?");
