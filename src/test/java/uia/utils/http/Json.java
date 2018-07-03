@@ -7,6 +7,7 @@ import com.google.gson.GsonBuilder;
 
 public class Json {
 
+    @SuppressWarnings("rawtypes")
     public static Map toMap(String json) {
         Gson gson = new GsonBuilder().create();
         return gson.fromJson(json, Map.class);

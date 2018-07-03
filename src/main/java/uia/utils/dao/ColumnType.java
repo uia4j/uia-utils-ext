@@ -1,5 +1,10 @@
 package uia.utils.dao;
 
+import java.sql.Clob;
+import java.sql.Connection;
+import java.sql.NClob;
+import java.sql.SQLException;
+
 public abstract class ColumnType {
 
     public enum DataType {
@@ -29,6 +34,10 @@ public abstract class ColumnType {
         TIME,
 
         BLOB,
+
+        CLOB,
+
+        NCLOB,
 
         OTHERS;
 
@@ -191,11 +200,35 @@ public abstract class ColumnType {
             case TIMESTAMP:
                 type = "Date";
                 break;
+            case CLOB:
+                type = "Clob";
+                break;
+            case NCLOB:
+                type = "NClob";
+                break;
+            case BLOB:
+                type = "byte[]";
+                break;
             default:
                 type = "String";
         }
 
         return String.format("%s %s", type, this.propertyName);
+    }
+
+    public Object read(Connection conn, Object orig) throws SQLException {
+        switch (this.dataType) {
+            case CLOB:
+                Clob clob = conn.createClob();
+                clob.setString(1, orig.toString());
+                return clob;
+            case NCLOB:
+                NClob nclob = conn.createNClob();
+                nclob.setString(1, orig.toString());
+                return nclob;
+            default:
+                return orig;
+        }
     }
 
     public boolean sameAs(ColumnType targetColumn, ComparePlan plan, CompareResult cr) {
@@ -244,6 +277,11 @@ public abstract class ColumnType {
             return true;
         }
 
+        // data, time, timestamp
+        if (!plan.strictDateTime && isDateTimeType() && targetColumn.isDateTimeType()) {
+            return true;
+        }
+
         // data type
         if (this.dataType != targetColumn.getDataType()) {
             cr.setPassed(false);
@@ -259,8 +297,8 @@ public abstract class ColumnType {
             return true;
         }
 
-        // blob
-        if (this.dataType == DataType.BLOB) {
+        // BLOB, CLOB, NCLOB
+        if (this.dataType == DataType.BLOB || this.dataType == DataType.CLOB || this.dataType == DataType.NCLOB) {
             return true;
         }
 
@@ -313,6 +351,19 @@ public abstract class ColumnType {
                 return String.format("ps.setBigDecimal(%s, data.get%s());",
                         index,
                         this.propertyName.substring(0, 1).toUpperCase() + this.propertyName.substring(1));
+            case CLOB:
+                return String.format("ps.setClob(%s, data.get%s());",
+                        index,
+                        this.propertyName.substring(0, 1).toUpperCase() + this.propertyName.substring(1));
+            case NCLOB:
+                return String.format("ps.setNClob(%s, data.get%s());",
+                        index,
+                        this.propertyName.substring(0, 1).toUpperCase() + this.propertyName.substring(1));
+            case BLOB:
+                return String.format("ps.setBlob(%s, data.get%s());",
+                        index,
+                        this.propertyName.substring(0, 1).toUpperCase() + this.propertyName.substring(1));
+
             default:
                 return String.format("ps.setString(%s, data.get%s());",
                         index,
@@ -325,7 +376,7 @@ public abstract class ColumnType {
             case DATE:
             case TIME:
             case TIMESTAMP:
-                return String.format("ps.setTimestamp(%s, %s.getTime());",
+                return String.format("ps.setTimestamp(%s, new Timestamp(%s.getTime()));",
                         index,
                         this.propertyName);
             case INTEGER:
@@ -340,6 +391,18 @@ public abstract class ColumnType {
             case FLOAT:
             case DOUBLE:
                 return String.format("ps.setBigDecimal(%s, %s);",
+                        index,
+                        this.propertyName);
+            case CLOB:
+                return String.format("ps.setClob(%s, %s);",
+                        index,
+                        this.propertyName);
+            case NCLOB:
+                return String.format("ps.setNClob(%s, %s);",
+                        index,
+                        this.propertyName);
+            case BLOB:
+                return String.format("ps.setBlob(%s, %s);",
                         index,
                         this.propertyName);
             default:
@@ -367,6 +430,15 @@ public abstract class ColumnType {
             case TIME:
             case TIMESTAMP:
                 type = "Timestamp";
+                break;
+            case CLOB:
+                type = "Clob";
+                break;
+            case NCLOB:
+                type = "NClob";
+                break;
+            case BLOB:
+                type = "Blob";
                 break;
             default:
                 type = "String";

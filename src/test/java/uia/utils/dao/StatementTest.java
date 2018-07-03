@@ -8,7 +8,7 @@ import java.util.Date;
 import org.junit.Test;
 
 import uia.utils.dao.where.SimpleWhere;
-import uia.utils.dao.where.Statement;
+import uia.utils.dao.where.SimpleStatement;
 import uia.utils.dao.where.WhereOr;
 
 public class StatementTest {
@@ -20,7 +20,7 @@ public class StatementTest {
                 .eq("B", "B1")
                 .between("TIME", new Date(), new Date());
 
-        Statement stat = new Statement();
+        SimpleStatement stat = new SimpleStatement();
         stat.where(where).orderBy("A");
         stat.where(where).groupBy("A");
 
@@ -45,7 +45,7 @@ public class StatementTest {
 
         WhereOr where = new WhereOr().add(and1).add(and2);
 
-        Statement stat = new Statement();
+        SimpleStatement stat = new SimpleStatement();
         stat.where(where).orderBy("A").orderBy("B");
 
         try (Connection conn = createDB()) {

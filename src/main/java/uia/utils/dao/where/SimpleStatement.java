@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Statement {
+public class SimpleStatement {
 
     private Where where;
 
@@ -14,28 +14,43 @@ public class Statement {
 
     private final List<String> orders;
 
-    public Statement() {
+    public SimpleStatement() {
         this.groups = new ArrayList<String>();
         this.orders = new ArrayList<String>();
     }
 
-    public Statement where(Where where) {
+    public SimpleStatement where(Where where) {
         this.where = where;
         return this;
     }
 
-    public Statement groupBy(String columnName) {
+    public SimpleStatement groupBy(String columnName) {
         this.groups.add(columnName);
         return this;
     }
 
-    public Statement orderBy(String columnName) {
+    public SimpleStatement orderBy(String columnName) {
         this.orders.add(columnName);
         return this;
     }
 
     public PreparedStatement prepare(Connection conn, String selectSql) throws SQLException {
-        String where = this.where.generate();
+        String where = this.where == null ? null : this.where.generate();
+        PreparedStatement ps;
+        if (where == null || where.length() == 0) {
+            ps = conn.prepareStatement(selectSql + groupBy() + orderBy());
+        }
+        else {
+            ps = conn.prepareStatement(selectSql + " where " + where + groupBy() + orderBy());
+            int index = 1;
+            index = this.where.accept(ps, index);
+        }
+
+        return ps;
+    }
+
+    public PreparedStatement prepareNoBinding(Connection conn, String selectSql) throws SQLException {
+        String where = this.where == null ? null : this.where.generate();
         PreparedStatement ps;
         if (where == null || where.length() == 0) {
             ps = conn.prepareStatement(selectSql + groupBy() + orderBy());
@@ -43,10 +58,6 @@ public class Statement {
         else {
             ps = conn.prepareStatement(selectSql + " where " + where + groupBy() + orderBy());
         }
-
-        int index = 1;
-        index = this.where.accept(ps, index);
-
         return ps;
     }
 

@@ -26,19 +26,24 @@ public class BetweenType implements ConditionType {
 
     @Override
     public int accpet(PreparedStatement ps, int index) throws SQLException {
-    	if(this.value1 instanceof Date) {
-            ps.setTimestamp(index++, new Timestamp(((Date)this.value1).getTime()));
-    	}
-    	else {
+        if (this.value1 instanceof Date) {
+            ps.setTimestamp(index++, new Timestamp(((Date) this.value1).getTime()));
+        }
+        else {
             ps.setObject(index++, this.value1);
-    	}
-    	if(this.value2 instanceof Date) {
-            ps.setTimestamp(index++, new Timestamp(((Date)this.value2).getTime()));
-    	}
-    	else {
+        }
+        if (this.value2 instanceof Date) {
+            ps.setTimestamp(index++, new Timestamp(((Date) this.value2).getTime()));
+        }
+        else {
             ps.setObject(index++, this.value2);
-    	}
+        }
         return index;
+    }
+
+    @Override
+    public String toString() {
+        return "(" + this.key + " between '" + this.value1 + "' and '" + this.value2 + "')";
     }
 
 }

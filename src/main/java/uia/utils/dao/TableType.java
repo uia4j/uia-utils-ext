@@ -36,6 +36,16 @@ public class TableType {
     }
 
     /**
+     * select columns of primary key.
+     * @return Columns.
+     */
+    public List<ColumnType> selectPk() {
+        return this.columns.stream()
+                .filter(c -> c.isPk())
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Get column Definition.
      * @return
      */
@@ -61,6 +71,7 @@ public class TableType {
     public CompareResult sameAs(TableType table, ComparePlan plan) {
         CompareResult cr = new CompareResult(this.tableName);
         if (table == null || !this.tableName.equalsIgnoreCase(table.getTableName())) {
+            cr.setMissing(true);
             cr.setPassed(false);
             cr.addMessage("tableName mismatch");
             return cr;
@@ -136,6 +147,32 @@ public class TableType {
         return String.format("UPDATE %s SET %s WHERE %s",
                 this.tableName.toLowerCase(),
                 String.join(",", cs),
+                String.join(" AND ", ws));
+    }
+
+    public String generateDeleteSQL() {
+        ArrayList<String> pks = new ArrayList<String>();
+        for (ColumnType column : this.columns) {
+            if (column.isPk()) {
+                pks.add(column.getColumnName().toLowerCase());
+            }
+        }
+
+        ArrayList<String> cs = new ArrayList<String>();
+        ArrayList<String> ws = new ArrayList<String>();
+        for (ColumnType column : this.columns) {
+            String columnName = column.getColumnName().toLowerCase();
+            if (pks.size() == 0 || pks.contains(columnName)) {
+                pks.add(columnName);
+                ws.add(columnName + "=?");
+            }
+            else {
+                cs.add(columnName + "=?");
+            }
+        }
+
+        return String.format("DELETE FROM %s WHERE %s",
+                this.tableName.toLowerCase(),
                 String.join(" AND ", ws));
     }
 }

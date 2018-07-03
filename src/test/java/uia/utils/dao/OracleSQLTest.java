@@ -9,6 +9,15 @@ import uia.utils.dao.pg.PostgreSQL;
 public class OracleSQLTest {
 
     @Test
+    public void testExists() throws Exception {
+        Database db = new Oracle("10.160.1.48", "1521", "MESDEV", "WIP", "wip");
+        System.out.println(db.exists("VIEW_HOLD_SFC"));
+        System.out.println(db.exists("VIEW_HOLD_SFC_DETAIL"));
+        System.out.println(db.exists("VIEW_HOLD_SF"));
+        db.close();
+    }
+
+    @Test
     public void testSelectTableNames() throws Exception {
         Database db = new Oracle("10.160.1.48", "1521", "MESDEV", "WIP", "wip");
         db.selectTableNames("ZD_").forEach(t -> System.out.println(t));
@@ -26,7 +35,7 @@ public class OracleSQLTest {
     public void testSelectTable() throws Exception {
         Database db = new Oracle("10.160.1.48", "1521", "MESDEV", "WIP", "wip");
 
-        TableType table = db.selectTable("ZR_TEST", true);
+        TableType table = db.selectTable("VIEW_RESOURCE", true);
         System.out.println(table.getTableName());
         table.getColumns().forEach(System.out::println);
         System.out.println(table.generateInsertSQL());
@@ -58,18 +67,18 @@ public class OracleSQLTest {
     @Test
     public void testGenerateCreateTableSQL() throws Exception {
         Database db = new Oracle("10.160.1.48", "1521", "MESDEV", "WIP", "wip");
-        TableType table = db.selectTable("ZR_CARRIER_CLEAN", true);
+        TableType table = db.selectTable("AUTH_GROUP", true);
 
         System.out.println("=== Oracle ===");
         System.out.println(db.generateCreateTableSQL(table));
 
         System.out.println("=== Hana ===");
-        try (Database hana = new Hana("WIP", null)) {
+        try (Database hana = new Hana("WIP", null, null, null, null)) {
             System.out.println(hana.generateCreateTableSQL(table));
         }
 
         System.out.println("=== PogtgreSQL ===");
-        try (Database pg = new PostgreSQL("public", null)) {
+        try (Database pg = new PostgreSQL("public", null, null, null, null)) {
             System.out.println(pg.generateCreateTableSQL(table));
         }
 

@@ -9,12 +9,31 @@ public class CompareResult {
 
     private boolean passed;
 
+    private boolean missing;
+
     private final List<String> messages;
 
     public CompareResult(String tableName) {
         this.tableName = tableName;
+        this.missing = false;
         this.passed = true;
         this.messages = new ArrayList<String>();
+    }
+
+    public CompareResult(String tableName, boolean passed, String message) {
+        this.tableName = tableName;
+        this.missing = false;
+        this.passed = passed;
+        this.messages = new ArrayList<String>();
+        this.messages.add(message);
+    }
+
+    public boolean isMissing() {
+        return this.missing;
+    }
+
+    public void setMissing(boolean missing) {
+        this.missing = missing;
     }
 
     public boolean isPassed() {
@@ -33,18 +52,17 @@ public class CompareResult {
         return this.messages;
     }
 
-    public void print() {
-        System.out.println(this);
-    }
-
-    public void printFailed() {
-        if (!this.passed) {
+    public void print(boolean printAll) {
+        if (printAll || !this.passed) {
             System.out.println(this);
         }
     }
 
     @Override
     public String toString() {
-        return this.tableName + " compare passed:" + this.passed + "\n  " + String.join("\n  ", this.messages);
+        String yn = this.missing ? "(?) " : this.passed ? "(v) " : "(x) ";
+        return this.messages.size() == 0
+                ? yn + this.tableName
+                : yn + this.tableName + "\n    " + String.join("\n    ", this.messages);
     }
 }

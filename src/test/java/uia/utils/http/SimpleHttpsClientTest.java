@@ -33,12 +33,13 @@ import org.junit.Test;
 public class SimpleHttpsClientTest {
 
     @Test
-    public void test() throws Exception {
+    public void testReadAllFiles() throws Exception {
         try (SimpleHttpsClient client = new SimpleHttpsClient("https://172.20.100.245/")) {
             client.addDefaultProperty("Content-Type", "application/json");
-            client.setUser("gazer2kanlin");
-            client.setPassword("5683F5");
-            SimpleHttpClientResponse resp = client.get("mgmt/tm");
+            client.setUser("admin");
+            client.setPassword("1qaz@WSX");
+
+            SimpleHttpClientResponse resp = client.get("mgmt/tm/ltm/rule");
             System.out.println(resp.getStatusCode());
             System.out.println(Json.format(resp.getContent("UTF-8")));
         }
@@ -46,11 +47,11 @@ public class SimpleHttpsClientTest {
 
     @SuppressWarnings("rawtypes")
     @Test
-    public void testGtmRule() throws Exception {
+    public void testReadOneFile() throws Exception {
         try (SimpleHttpsClient client = new SimpleHttpsClient("https://172.20.100.245/")) {
             client.addDefaultProperty("Content-Type", "application/json");
-            client.setUser("gazer2kanlin");
-            client.setPassword("5683F5");
+            client.setUser("admin");
+            client.setPassword("1qaz@WSX");
 
             //SimpleHttpClientResponse resp1 = client.get("mgmt/tm/ltm/rule");
             //System.out.println(resp1.getStatusCode());
@@ -61,13 +62,15 @@ public class SimpleHttpsClientTest {
             Map data = Json.toMap(resp2.getContent("UTF-8"));
             System.out.println(data.get("apiAnonymous"));
 
+            /**
             client.putJson(
                     "mgmt/tm/ltm/rule/TEST",
                     Json.toString(new IRule("TEST", "# COMMENTS\nwhen HTTP_REQUEST {}")));
-
+            
             client.postJson(
                     "mgmt/tm/ltm/rule",
                     Json.toString(new IRule("TEST9", "# COMMENTS\nwhen HTTP_REQUEST {}")));
+            */
         }
     }
 

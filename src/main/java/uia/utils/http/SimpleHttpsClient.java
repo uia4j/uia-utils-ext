@@ -20,17 +20,21 @@ package uia.utils.http;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 
 import javax.net.ssl.SSLContext;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.protocol.RequestAddCookies;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
@@ -43,6 +47,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.message.BasicNameValuePair;
 
 /**
  * Simple HTTP client.
@@ -141,6 +146,16 @@ public class SimpleHttpsClient extends AbstractHttpClient implements AutoCloseab
         StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
         HttpPost postMethod = new HttpPost(this.rootURL + action);
         postMethod.setEntity(requestEntity);
+        return execute(postMethod, headersOthers);
+    }
+
+    public SimpleHttpClientResponse form(String action, Map<String, String> data, Map<String, String> headersOthers) throws IOException {
+        ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
+        data.forEach((k, v) -> params.add(new BasicNameValuePair(k, v)));
+
+        HttpPost postMethod = new HttpPost(this.rootURL + action);
+        postMethod.setEntity(new UrlEncodedFormEntity(params));
+
         return execute(postMethod, headersOthers);
     }
 
@@ -266,6 +281,7 @@ public class SimpleHttpsClient extends AbstractHttpClient implements AutoCloseab
         cm.setMaxTotal(100);
 
         HttpClientBuilder builder = HttpClients.custom()
+                .addInterceptorFirst(new RequestAddCookies())
                 .setSSLSocketFactory(sslsf)
                 .setConnectionManager(cm);
 

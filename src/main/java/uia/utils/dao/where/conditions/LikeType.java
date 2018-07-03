@@ -27,4 +27,8 @@ public class LikeType implements ConditionType {
         return index;
     }
 
+    @Override
+    public String toString() {
+        return this.value == null ? this.key + " is null" : this.key + " like '" + this.value + "'";
+    }
 }

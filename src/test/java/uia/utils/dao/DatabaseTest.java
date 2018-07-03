@@ -22,7 +22,7 @@ public class DatabaseTest {
     public void testCreateTable_Hana2Pg() throws Exception {
         try (Database hana = hanaDev()) {
             try (Database pg = pg()) {
-                for (String tableName : hana.selectTableNames("ZH_")) {
+                for (String tableName : hana.selectTableNames("ACTIVITY")) {
                     TableType table = hana.selectTable(tableName, true);
                     pg.createTable(table);
                 }
@@ -118,19 +118,19 @@ public class DatabaseTest {
 
     @Test
     public void testSameAsTable_PgOra() throws Exception {
-        TableType table1 = pg().selectTable("test_only", true);
-        TableType table2 = ora().selectTable("TEST_ONLY", true);
-        table1.sameAs(table2).printFailed();
+        TableType table1 = pg().selectTable("bom_component", true);
+        TableType table2 = ora().selectTable("BOM_COMPONENT", true);
+        table1.sameAs(table2).print(false);
     }
 
     @Test
     public void testSameAsTables_Hana() throws Exception {
         try (Database src = hanaDev()) {
-            try (Database tgt = hanaProd()) {
-                for (String tableName : src.selectTableNames("Z_")) {
+            try (Database tgt = pg()) {
+                for (String tableName : src.selectTableNames("BOM")) {
                     TableType table1 = src.selectTable(tableName, true);
                     TableType table2 = tgt.selectTable(tableName, true);
-                    table1.sameAs(table2, new ComparePlan(false, true, true, true)).printFailed();
+                    table1.sameAs(table2, new ComparePlan(false, false, false, true, true)).print(true);
                 }
             }
         }
@@ -139,11 +139,11 @@ public class DatabaseTest {
     @Test
     public void testSameAsViews_Hana() throws Exception {
         try (Database src = hanaDev()) {
-            try (Database tgt = hanaProd()) {
+            try (Database tgt = pg()) {
                 for (String viewName : src.selectViewNames("VIEW_")) {
                     TableType table1 = src.selectTable(viewName, false);
                     TableType table2 = tgt.selectTable(viewName, false);
-                    table1.sameAs(table2, ComparePlan.view()).printFailed();
+                    table1.sameAs(table2, ComparePlan.view()).print(false);
                 }
             }
         }
@@ -154,7 +154,7 @@ public class DatabaseTest {
     }
 
     private Database pg() throws Exception {
-        return new PostgreSQL("localhost", "5432", "wip", "wip", "wip");
+        return new PostgreSQL("localhost", "5432", "wip", "postgres", "pgAdmin");
     }
 
     private Database hanaDev() throws Exception {

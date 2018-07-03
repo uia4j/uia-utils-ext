@@ -24,9 +24,9 @@ public class PostgreSQLTest {
 
     @Test
     public void testSelectTable() throws Exception {
-        Database db = new PostgreSQL("localhost", "5432", "mvsdb", "huede", "huede");
+        Database db = new PostgreSQL("localhost", "5432", "tmd", "postgres", "pgAdmin");
 
-        TableType table = db.selectTable("test_only", true);
+        TableType table = db.selectTable("test", true);
         System.out.println(table.getTableName());
         table.getColumns().forEach(System.out::println);
         System.out.println(table.generateInsertSQL());
@@ -66,12 +66,12 @@ public class PostgreSQLTest {
         System.out.println(db.generateCreateTableSQL(table));
 
         System.out.println("=== Oracle ===");
-        try (Database ora = new Oracle("WIP", null)) {
+        try (Database ora = new Oracle("WIP", null, null, null, null)) {
             System.out.println(ora.generateCreateTableSQL(table));
         }
 
         System.out.println("=== Hana ===");
-        try (Database hana = new Hana("WIP", null)) {
+        try (Database hana = new Hana("WIP", null, null, null, null)) {
             System.out.println(hana.generateCreateTableSQL(table));
         }
 

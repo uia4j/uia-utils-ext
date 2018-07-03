@@ -125,4 +125,13 @@ public class SimpleWhere extends Where {
         }
         return i;
     }
+
+    @Override
+    public String toString() {
+        if (this.conds.size() == 0) {
+            return "";
+        }
+        List<String> data = this.conds.stream().map(c -> c.toString()).collect(Collectors.toList());
+        return String.join(this.op, data);
+    }
 }

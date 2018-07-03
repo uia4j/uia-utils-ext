@@ -1,7 +1,5 @@
 package uia.utils.dao.pg;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -15,12 +13,17 @@ import uia.utils.dao.TableType;
 
 public class PostgreSQL extends AbstractDatabase {
 
-    public PostgreSQL(String schema, Connection conn) {
-        super(schema, conn);
+    static {
+        try {
+            Class.forName("org.postgresql.Driver").newInstance();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public PostgreSQL(String host, String port, String service, String user, String pwd) throws SQLException {
-        super("public", DriverManager.getConnection("jdbc:postgresql://" + host + ":" + port + "/" + service, user, pwd));
+        super("org.postgresql.Driver", "jdbc:postgresql://" + host + ":" + port + "/" + service, user, pwd, "public");
     }
 
     @Override
@@ -28,7 +31,7 @@ public class PostgreSQL extends AbstractDatabase {
         String script = null;
 
         Statement stat = this.conn.createStatement();
-        ResultSet rs = stat.executeQuery("select pg_get_viewdef('" + viewName + "', true)");
+        ResultSet rs = stat.executeQuery("select pg_get_viewdef('" + viewName.toLowerCase() + "', true)");
         if (rs.next()) {
             script = rs.getString(1);
             script = script.replace("::text", "").trim();
@@ -38,7 +41,47 @@ public class PostgreSQL extends AbstractDatabase {
     }
 
     @Override
-    protected List<ColumnType> queryColumnDefs(String tableName, boolean firstAsPK) throws SQLException {
+    public String generateCreateTableSQL(TableType table) {
+        if (table == null) {
+            return null;
+        }
+
+        ArrayList<String> pks = new ArrayList<String>();
+        ArrayList<String> cols = new ArrayList<String>();
+        for (ColumnType ct : table.getColumns()) {
+            if (ct.isPk()) {
+                pks.add(ct.getColumnName().toLowerCase());
+            }
+            cols.add(prepareColumnDef(ct));
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("CREATE TABLE \"" + table.getTableName().toLowerCase() + "\"\n(\n");
+        sb.append(String.join(",\n", cols));
+        if (pks.isEmpty()) {
+            sb.append("\n)");
+        }
+        else {
+            String pkSQL = String.format(",\n CONSTRAINT %s_pkey PRIMARY KEY (%s)\n",
+                    table.getTableName().toLowerCase(),
+                    String.join(",", pks));
+            sb.append(pkSQL).append(")");
+        }
+
+        return sb.toString();
+    }
+
+    @Override
+    public String generateAlterTableSQL(String tableName, List<ColumnType> columns) {
+        ArrayList<String> cols = new ArrayList<String>();
+        for (ColumnType column : columns) {
+            cols.add(prepareColumnDef(column));
+        }
+        return "ALTER TABLE " + tableName + " ADD (\n" + String.join(",\n", cols) + "\n)";
+    }
+
+    @Override
+    public List<ColumnType> selectColumns(String tableName, boolean firstAsPK) throws SQLException {
         ArrayList<String> pks = new ArrayList<String>();
         try (ResultSet rs = this.conn.getMetaData().getPrimaryKeys(null, null, tableName)) {
             while (rs.next()) {
@@ -86,9 +129,11 @@ public class PostgreSQL extends AbstractDatabase {
                     ct.setColumnSize(rs.getInt("COLUMN_SIZE"));
 
                     switch (rs.getInt("DATA_TYPE")) {
-                        case -5:    // int8
+                        case -5:    // int8,oid(?)
                             ct.setDataType(DataType.LONG);
                             break;
+                        case -2:    // bytea
+                            ct.setDataType(DataType.BLOB);
                         case 2:     // numeric
                             ct.setDataType(DataType.NUMERIC);
                             break;
@@ -102,18 +147,18 @@ public class PostgreSQL extends AbstractDatabase {
                         case 8:     // float8
                             ct.setDataType(DataType.DOUBLE);
                             break;
-                        case 12:    // varchar,text
+                        case 12:    // character varying,text
                             if (ct.getColumnSize() > Integer.MAX_VALUE / 2) {
-                                ct.setDataType(DataType.BLOB);
+                                ct.setDataType(DataType.CLOB);
                             }
                             else {
-                                ct.setDataType(DataType.VARCHAR);
+                                ct.setDataType(DataType.VARCHAR2);
                             }
                             break;
                         case 91:    // date
                             ct.setDataType(DataType.DATE);
                             break;
-                        case 92:    // time
+                        case 92:    // time, timez
                             ct.setDataType(DataType.TIME);
                             break;
                         case 93:    // timestamp
@@ -136,29 +181,8 @@ public class PostgreSQL extends AbstractDatabase {
     }
 
     @Override
-    public String generateCreateTableSQL(TableType table) {
-        if (table == null) {
-            return null;
-        }
-
-        ArrayList<String> pks = new ArrayList<String>();
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("CREATE TABLE \"" + table.getTableName().toLowerCase() + "\"\n(\n");
-        for (ColumnType ct : table.getColumns()) {
-            if (ct.isPk()) {
-                pks.add(ct.getColumnName().toLowerCase());
-            }
-            sb.append(prepareColumnDef(ct));
-        }
-
-        // TODO: without PK
-        String pkSQL = String.format(" CONSTRAINT %s_pkey PRIMARY KEY (%s)\n",
-                table.getTableName().toLowerCase(),
-                String.join(",", pks));
-        sb.append(pkSQL).append(");");
-
-        return sb.toString();
+    protected String upperOrLower(String value) {
+        return value.toLowerCase();
     }
 
     private String prepareColumnDef(ColumnType ct) {
@@ -190,8 +214,12 @@ public class PostgreSQL extends AbstractDatabase {
             case VARCHAR2:
                 type = "character varying(" + (ct.getColumnSize() == 0 ? 32 : ct.getColumnSize()) + ")";
                 break;
-            case BLOB:
+            case CLOB:
+            case NCLOB:
                 type = "text";
+                break;
+            case BLOB:
+                type = "bytea";
                 break;
             default:
                 throw new NullPointerException(ct.getColumnName() + " type not found");
@@ -203,6 +231,6 @@ public class PostgreSQL extends AbstractDatabase {
             nullable = " NOT NULL";
         }
 
-        return " \"" + ct.getColumnName().toLowerCase() + "\" " + type + nullable + ",\n";
+        return " \"" + ct.getColumnName().toLowerCase() + "\" " + type + nullable;
     }
 }

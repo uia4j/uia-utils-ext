@@ -1,7 +1,5 @@
 package uia.utils.dao.ora;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -24,29 +22,65 @@ public class Oracle extends AbstractDatabase {
         }
     }
 
-    public Oracle(String schema, Connection conn) throws SQLException {
-        super(schema, conn);
-    }
-
     public Oracle(String host, String port, String service, String user, String pwd) throws SQLException {
-        super(user, DriverManager.getConnection("jdbc:oracle:thin:@" + host + ":" + port + ":" + service, user, pwd));
+        super("oracle.jdbc.driver.OracleDriver", "jdbc:oracle:thin:@" + host + ":" + port + ":" + service, user, pwd, user);
     }
 
     @Override
     public String selectViewScript(String viewName) throws SQLException {
         String script = null;
         Statement stat = this.conn.createStatement();
-        ResultSet rs = stat.executeQuery("select DBMS_METADATA.GET_DDL('VIEW','" + viewName + "') from DUAL");
+        ResultSet rs = stat.executeQuery("select DBMS_METADATA.GET_DDL('VIEW','" + viewName.toUpperCase() + "') from DUAL");
         if (rs.next()) {
             script = rs.getString(1);
             int i = script.indexOf(") AS");
-            script = script.substring(i + 5, script.length() - 1).trim();
+            script = script.substring(i + 5, script.length()).trim();
         }
         return script;
     }
 
     @Override
-    protected List<ColumnType> queryColumnDefs(String tableName, boolean firstAsPK) throws SQLException {
+    public String generateCreateTableSQL(TableType table) {
+        if (table == null) {
+            return null;
+        }
+
+        ArrayList<String> pks = new ArrayList<String>();
+        ArrayList<String> cols = new ArrayList<String>();
+        for (ColumnType ct : table.getColumns()) {
+            if (ct.isPk()) {
+                pks.add(ct.getColumnName().toUpperCase());
+            }
+            cols.add(prepareColumnDef(ct));
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("CREATE TABLE " + this.schema + "." + table.getTableName().toUpperCase() + "\n(\n");
+        sb.append(String.join(",\n", cols));
+        if (pks.isEmpty()) {
+            sb.append("\n)");
+        }
+        else {
+            String pkSQL = String.format(",\n CONSTRAINT %s_pkey PRIMARY KEY (\"%s\")\n",
+                    table.getTableName().toUpperCase(),
+                    String.join("\",\"", pks));
+            sb.append(pkSQL).append(")");
+        }
+
+        return sb.toString();
+    }
+
+    @Override
+    public String generateAlterTableSQL(String tableName, List<ColumnType> columns) {
+        ArrayList<String> cols = new ArrayList<String>();
+        for (ColumnType column : columns) {
+            cols.add(prepareColumnDef(column));
+        }
+        return "ALTER TABLE " + tableName + " ADD (\n" + String.join(",\n", cols) + "\n)";
+    }
+
+    @Override
+    public List<ColumnType> selectColumns(String tableName, boolean firstAsPK) throws SQLException {
         ArrayList<String> pks = new ArrayList<String>();
         try (ResultSet rs = this.conn.getMetaData().getPrimaryKeys(null, null, tableName)) {
             while (rs.next()) {
@@ -100,6 +134,9 @@ public class Oracle extends AbstractDatabase {
                         case -1:        // LONG
                             ct.setDataType(DataType.LONG);
                             break;
+                        case 1:        // CHAR
+                            ct.setDataType(DataType.NVARCHAR2);
+                            break;
                         case 3:         // NUMBER
                             ct.setDataType(DataType.NUMERIC);
                             break;
@@ -118,9 +155,13 @@ public class Oracle extends AbstractDatabase {
                             }
                             break;
                         case 2004:      // BLOB
-                        case 2005:      // CLOB
-                        case 2011:      // NCLOB
                             ct.setDataType(DataType.BLOB);
+                            break;
+                        case 2005:      // CLOB
+                            ct.setDataType(DataType.CLOB);
+                            break;
+                        case 2011:      // NCLOB
+                            ct.setDataType(DataType.NCLOB);
                             break;
                         default:
                             ct.setDataType(DataType.OTHERS);
@@ -139,29 +180,8 @@ public class Oracle extends AbstractDatabase {
     }
 
     @Override
-    public String generateCreateTableSQL(TableType table) {
-        if (table == null) {
-            return null;
-        }
-
-        ArrayList<String> pks = new ArrayList<String>();
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("CREATE TABLE " + this.schema + "." + table.getTableName().toUpperCase() + "\n(\n");
-        for (ColumnType ct : table.getColumns()) {
-            if (ct.isPk()) {
-                pks.add(ct.getColumnName().toUpperCase());
-            }
-            sb.append(prepareColumnDef(ct));
-        }
-
-        // TODO: without PK
-        String pkSQL = String.format(" CONSTRAINT %s_pkey PRIMARY KEY (\"%s\")\n",
-                table.getTableName().toUpperCase(),
-                String.join("\",\"", pks));
-        sb.append(pkSQL).append(")");
-
-        return sb.toString();
+    protected String upperOrLower(String value) {
+        return value.toUpperCase();
     }
 
     private String prepareColumnDef(ColumnType ct) {
@@ -201,6 +221,12 @@ public class Oracle extends AbstractDatabase {
                 type = "VARCHAR2(" + (ct.getColumnSize() == 0 ? 32 : ct.getColumnSize()) + " BYTE)";
                 break;
             case BLOB:
+                type = "BLOB";
+                break;
+            case CLOB:
+                type = "CLOB";
+                break;
+            case NCLOB:
                 type = "NCLOB";
                 break;
             default:
@@ -213,6 +239,6 @@ public class Oracle extends AbstractDatabase {
             nullable = " NOT NULL";
         }
 
-        return " \"" + ct.getColumnName().toUpperCase() + "\" " + type + nullable + ",\n";
+        return " \"" + ct.getColumnName().toUpperCase() + "\" " + type + nullable;
     }
 }
