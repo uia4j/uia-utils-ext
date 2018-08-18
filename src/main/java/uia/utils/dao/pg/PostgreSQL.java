@@ -23,6 +23,7 @@ public class PostgreSQL extends AbstractDatabase {
     }
 
     public PostgreSQL(String host, String port, String service, String user, String pwd) throws SQLException {
+        // jdbc:postgresql://host:port/database
         super("org.postgresql.Driver", "jdbc:postgresql://" + host + ":" + port + "/" + service, user, pwd, "public");
     }
 
@@ -134,6 +135,15 @@ public class PostgreSQL extends AbstractDatabase {
                             break;
                         case -2:    // bytea
                             ct.setDataType(DataType.BLOB);
+                            break;
+                        case 1:     // bpchar
+                            if (ct.getColumnSize() > Integer.MAX_VALUE / 2) {
+                                ct.setDataType(DataType.CLOB);
+                            }
+                            else {
+                                ct.setDataType(DataType.VARCHAR2);
+                            }
+                            break;
                         case 2:     // numeric
                             ct.setDataType(DataType.NUMERIC);
                             break;

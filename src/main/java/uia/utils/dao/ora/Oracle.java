@@ -23,6 +23,7 @@ public class Oracle extends AbstractDatabase {
     }
 
     public Oracle(String host, String port, String service, String user, String pwd) throws SQLException {
+        // jdbc:oracle:thin:@host:port:SID
         super("oracle.jdbc.driver.OracleDriver", "jdbc:oracle:thin:@" + host + ":" + port + ":" + service, user, pwd, user);
     }
 

@@ -1,5 +1,7 @@
 package uia.utils.dao;
 
+import java.util.List;
+
 import org.junit.Test;
 
 import uia.utils.dao.hana.Hana;
@@ -71,6 +73,18 @@ public class HanaSQLTest {
         System.out.println("=== PogtgreSQL ===");
         try (PostgreSQL pg = new PostgreSQL("public", null, null, null, null)) {
             System.out.println(pg.generateCreateTableSQL(table));
+        }
+
+        db.close();
+    }
+
+    @Test
+    public void testCase1() throws Exception {
+        Database db = new Hana("10.160.2.23", "31015", null, "WIP", "Sap12345");
+        List<String> tns = db.selectTableNames("Z_");
+        for (String tn : tns) {
+            TableType table = db.selectTable(tn, false);
+            System.out.println(db.generateCreateTableSQL(table));
         }
 
         db.close();

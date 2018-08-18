@@ -221,11 +221,11 @@ public abstract class ColumnType {
             case CLOB:
                 Clob clob = conn.createClob();
                 clob.setString(1, orig.toString());
-                return clob;
+                return orig;
             case NCLOB:
                 NClob nclob = conn.createNClob();
                 nclob.setString(1, orig.toString());
-                return nclob;
+                return orig;
             default:
                 return orig;
         }

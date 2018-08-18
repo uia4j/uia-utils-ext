@@ -23,13 +23,13 @@ public class Hana extends AbstractDatabase {
     }
 
     public Hana(String host, String port, String service, String user, String pwd) throws SQLException {
+        // jdbc:sap://host:port?reconnect=true
         super("com.sap.db.jdbc.Driver", "jdbc:sap://" + host + ":" + port, user, pwd, user);
     }
 
     @Override
     public int createView(String viewName, String sql) throws SQLException {
         String script = String.format("CREATE VIEW \"%s\" AS \n%s", viewName.toUpperCase(), sql);
-        System.out.println(script);
         return this.conn.prepareStatement(script)
                 .executeUpdate();
     }
@@ -57,7 +57,7 @@ public class Hana extends AbstractDatabase {
         ArrayList<String> cols = new ArrayList<String>();
         for (ColumnType ct : table.getColumns()) {
             if (ct.isPk()) {
-                pks.add(ct.getColumnName());
+                pks.add(ct.getColumnName().toUpperCase());
             }
             cols.add(prepareColumnDef(ct));
         }

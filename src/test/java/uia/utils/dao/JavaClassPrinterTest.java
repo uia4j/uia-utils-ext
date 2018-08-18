@@ -10,8 +10,8 @@ public class JavaClassPrinterTest {
 
     @Test
     public void testGenerateTable() throws Exception {
-        JavaClassPrinter.Result result = new JavaClassPrinter(createDB(), "tmd_tx_keys")
-                .generate("uia.tmd.zztop.db.dao", "uia.tmd.zztop.db", "TmdTxKeys");
+        JavaClassPrinter.Result result = new JavaClassPrinter(createDB(), "chamber_param")
+                .generate("uia.pie.db.dao", "uia.pie.db", "ChamberParam");
         System.out.println("=========================");
         System.out.println(result.dto);
         System.out.println("=========================");
@@ -20,8 +20,8 @@ public class JavaClassPrinterTest {
 
     @Test
     public void testGenerateView() throws Exception {
-        JavaClassPrinter.Result result = new JavaClassPrinter(createDB(), "ivp_raw_event_view")
-                .generate4View("uia.utils.dao", "ame.psb.db", "ViewRunTgRun");
+        JavaClassPrinter.Result result = new JavaClassPrinter(createDB(), "view_app_node_equip")
+                .generate4View("uia.fdc.db.dao", "uia.fdc.db", "ViewAppNodeEquip");
         System.out.println("=========================");
         System.out.println(result.dto);
         System.out.println("=========================");
@@ -47,7 +47,8 @@ public class JavaClassPrinterTest {
     }
 
     private Database createDB() throws SQLException {
-        return new PostgreSQL("localhost", "5432", "tmd", "postgres", "pgAdmin");
+        //return new PostgreSQL("localhost", "5432", "tmd", "postgres", "pgAdmin");
+        return new PostgreSQL("localhost", "5432", "pie", "pie", "pie");
     }
 
 }

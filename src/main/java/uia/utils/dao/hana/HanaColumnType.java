@@ -1,5 +1,8 @@
 package uia.utils.dao.hana;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
 import uia.utils.dao.ColumnType;
 import uia.utils.dao.ComparePlan;
 import uia.utils.dao.CompareResult;
@@ -9,5 +12,10 @@ public class HanaColumnType extends ColumnType {
     @Override
     public boolean sameAs(ColumnType targetColumn, ComparePlan plan, CompareResult cr) {
         return super.sameAs(targetColumn, plan, cr);
+    }
+
+    @Override
+    public Object read(Connection conn, Object orig) throws SQLException {
+        return orig;
     }
 }

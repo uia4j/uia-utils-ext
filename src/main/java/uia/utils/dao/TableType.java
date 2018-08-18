@@ -46,6 +46,17 @@ public class TableType {
     }
 
     /**
+     * select columns of primary key.
+     * @return Names of columns.
+     */
+    public List<String> selectPkNames() {
+        return this.columns.stream()
+                .filter(c -> c.isPk())
+                .map(c -> c.columnName)
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Get column Definition.
      * @return
      */

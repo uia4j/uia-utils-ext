@@ -189,7 +189,6 @@ public abstract class AbstractDatabase implements Database {
     protected abstract String upperOrLower(String value);
 
     private DataSource createDataSource(String driverName, String connectURI, String user, String pwd) {
-        System.out.println("initial");
         BasicDataSource dataSource = new BasicDataSource();
         dataSource.setUrl(connectURI);
         dataSource.setUsername(user);
