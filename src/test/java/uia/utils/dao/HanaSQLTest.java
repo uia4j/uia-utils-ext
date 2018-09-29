@@ -29,8 +29,14 @@ import uia.utils.dao.pg.PostgreSQL;
 public class HanaSQLTest {
 
     @Test
+    public void testConn() throws Exception {
+        Database db = new Hana("10.160.2.23", "31015", null, "WIP_ARCHIVE", "Sap54321");
+        db.close();
+    }
+
+    @Test
     public void testSelectTableNames() throws Exception {
-        Database db = new Hana("10.160.1.52", "39015", null, "WIP", "Hdb12345");
+        Database db = new Hana("10.160.2.23", "31015", "WIP_ARCHIVE", "WIP_ARCHIVE", "Sap54321");
         db.selectTableNames().forEach(t -> System.out.println(t));
         db.close();
     }

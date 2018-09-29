@@ -173,6 +173,10 @@ public class TableType {
             }
         }
 
+        if (cs.isEmpty()) {
+            return null;
+        }
+
         return String.format("UPDATE %s SET %s WHERE %s",
                 this.tableName.toLowerCase(),
                 String.join(",", cs),

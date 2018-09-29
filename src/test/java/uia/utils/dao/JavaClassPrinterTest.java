@@ -28,8 +28,8 @@ public class JavaClassPrinterTest {
 
     @Test
     public void testGenerateTable() throws Exception {
-        JavaClassPrinter.Result result = new JavaClassPrinter(createDB(), "chamber_param")
-                .generate("uia.pie.db.dao", "uia.pie.db", "ChamberParam");
+        JavaClassPrinter.Result result = new JavaClassPrinter(createDB(), "dcp_tile_prop")
+                .generate("uia.pie.db.dao", "uia.pie.db", "DcpTileProp");
         System.out.println("=========================");
         System.out.println(result.dto);
         System.out.println("=========================");

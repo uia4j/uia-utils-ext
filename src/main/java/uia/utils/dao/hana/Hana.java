@@ -39,10 +39,14 @@ public class Hana extends AbstractDatabase {
             e.printStackTrace();
         }
     }
+    
+    public Hana() throws SQLException {
+		super(null, null, null, null, null);
+    }
 
-    public Hana(String host, String port, String service, String user, String pwd) throws SQLException {
+    public Hana(String host, String port, String schema, String user, String pwd) throws SQLException {
         // jdbc:sap://host:port?reconnect=true
-        super("com.sap.db.jdbc.Driver", "jdbc:sap://" + host + ":" + port, user, pwd, user);
+        super("com.sap.db.jdbc.Driver", "jdbc:sap://" + host + ":" + port, user, pwd, schema == null ? user : schema);
     }
 
     @Override

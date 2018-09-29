@@ -33,11 +33,14 @@ public class JavaClassPrinter {
 
     private final String templateDAOTable;
 
+    private final String templateDAOTable2;
+
     private final String templateDAOView;
 
     public JavaClassPrinter(Database db, String tableName) throws IOException, SQLException {
         this.templateDTO = readContent(JavaClassPrinter.class.getResourceAsStream("dto.template.txt"));
         this.templateDAOTable = readContent(JavaClassPrinter.class.getResourceAsStream("dao_table.template.txt"));
+        this.templateDAOTable2 = readContent(JavaClassPrinter.class.getResourceAsStream("dao_table.template2.txt"));
         this.templateDAOView = readContent(JavaClassPrinter.class.getResourceAsStream("dao_view.template.txt"));
         this.table = db.selectTable(tableName, true);
     }
@@ -45,6 +48,7 @@ public class JavaClassPrinter {
     public JavaClassPrinter(TableType table) throws IOException {
         this.templateDTO = readContent(JavaClassPrinter.class.getResourceAsStream("dto.template.txt"));
         this.templateDAOTable = readContent(JavaClassPrinter.class.getResourceAsStream("dao_table.template.txt"));
+        this.templateDAOTable2 = readContent(JavaClassPrinter.class.getResourceAsStream("dao_table.template2.txt"));
         this.templateDAOView = readContent(JavaClassPrinter.class.getResourceAsStream("dao_view.template.txt"));
         this.table = table;
     }
@@ -129,20 +133,39 @@ public class JavaClassPrinter {
             pkWhere.add(pk.get(i).getColumnName().toLowerCase() + "=?");
         }
 
-        return this.templateDAOTable
-                .replace("{TABLE_NAME}", this.table.getTableName().toLowerCase())
-                .replace("{DAO_PACKAGE}", daoPackageName)
-                .replace("{DTO_PACKAGE}", dtoPackageName)
-                .replace("{DTO}", dtoName)
-                .replace("{SQL_INS}", this.table.generateInsertSQL())
-                .replace("{SQL_UPD}", this.table.generateUpdateSQL())
-                .replace("{SQL_SEL}", this.table.generateSelectSQL())
-                .replace("{CODE_INS}", codeIns.toString())
-                .replace("{CODE_UPD}", codeUpd.toString())
-                .replace("{CODE_SEL_PK_ARGS}", String.join(", ", codeSelPkArgs))
-                .replace("{WHERE_PK}", String.join(" AND ", pkWhere))
-                .replace("{CODE_SEL_PK}", codeSelPk.toString())
-                .replace("{CODE_CONVERT}", codeConvert.toString());
+        String updateSQL = this.table.generateUpdateSQL();
+
+        if (updateSQL != null) {
+            return this.templateDAOTable
+                    .replace("{TABLE_NAME}", this.table.getTableName().toLowerCase())
+                    .replace("{DAO_PACKAGE}", daoPackageName)
+                    .replace("{DTO_PACKAGE}", dtoPackageName)
+                    .replace("{DTO}", dtoName)
+                    .replace("{SQL_INS}", this.table.generateInsertSQL())
+                    .replace("{SQL_UPD}", updateSQL)
+                    .replace("{SQL_SEL}", this.table.generateSelectSQL())
+                    .replace("{CODE_INS}", codeIns.toString())
+                    .replace("{CODE_UPD}", codeUpd.toString())
+                    .replace("{CODE_SEL_PK_ARGS}", String.join(", ", codeSelPkArgs))
+                    .replace("{WHERE_PK}", String.join(" AND ", pkWhere))
+                    .replace("{CODE_SEL_PK}", codeSelPk.toString())
+                    .replace("{CODE_CONVERT}", codeConvert.toString());
+        }
+        else {
+            return this.templateDAOTable2
+                    .replace("{TABLE_NAME}", this.table.getTableName().toLowerCase())
+                    .replace("{DAO_PACKAGE}", daoPackageName)
+                    .replace("{DTO_PACKAGE}", dtoPackageName)
+                    .replace("{DTO}", dtoName)
+                    .replace("{SQL_INS}", this.table.generateInsertSQL())
+                    .replace("{SQL_SEL}", this.table.generateSelectSQL())
+                    .replace("{CODE_INS}", codeIns.toString())
+                    .replace("{CODE_UPD}", codeUpd.toString())
+                    .replace("{CODE_SEL_PK_ARGS}", String.join(", ", codeSelPkArgs))
+                    .replace("{WHERE_PK}", String.join(" AND ", pkWhere))
+                    .replace("{CODE_SEL_PK}", codeSelPk.toString())
+                    .replace("{CODE_CONVERT}", codeConvert.toString());
+        }
     }
 
     /**
