@@ -40,6 +40,10 @@ public class PostgreSQL extends AbstractDatabase {
         }
     }
 
+    public PostgreSQL() throws SQLException {
+		super(null, null, null, null, null);
+    }
+
     public PostgreSQL(String host, String port, String service, String user, String pwd) throws SQLException {
         // jdbc:postgresql://host:port/database
         super("org.postgresql.Driver", "jdbc:postgresql://" + host + ":" + port + "/" + service, user, pwd, "public");

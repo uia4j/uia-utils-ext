@@ -38,6 +38,10 @@ public class Oracle extends AbstractDatabase {
         catch (Exception e) {
             e.printStackTrace();
         }
+    }    
+
+    public Oracle() throws SQLException {
+		super(null, null, null, null, null);
     }
 
     public Oracle(String host, String port, String service, String user, String pwd) throws SQLException {
