@@ -57,4 +57,59 @@ public class WhereTest {
         System.out.println("(...) or (and):" + where2.generate());
         Assert.assertEquals("((A=? or B=?) and (C=? or D=?)) or (E=? and F=?)", where2.generate());
     }
+
+    @Test
+    public void testOrEmpty() {
+        WhereOr where = new WhereOr();
+        SimpleWhere and1 = SimpleWhere.createAnd();
+        SimpleWhere or2 = SimpleWhere.createOr();
+
+        Assert.assertFalse(where.hasConditions());
+        Assert.assertFalse(and1.hasConditions());
+        Assert.assertFalse(or2.hasConditions());
+        Assert.assertEquals("", where.generate());
+        Assert.assertEquals("", and1.generate());
+        Assert.assertEquals("", or2.generate());
+        
+        where.add(and1);
+        Assert.assertFalse(where.hasConditions());
+        
+        and1.eq("a", "10");
+        Assert.assertTrue(and1.hasConditions());
+        Assert.assertTrue(where.hasConditions());
+        Assert.assertEquals("(a=?)", where.generate());
+
+        where.add(or2);
+        Assert.assertEquals("(a=?)", where.generate());
+        or2.eq("b", "20");
+        Assert.assertEquals("(a=?) or (b=?)", where.generate());
+    }
+
+
+    @Test
+    public void testAndEmpty() {
+        WhereAnd where = new WhereAnd();
+        SimpleWhere and1 = SimpleWhere.createAnd();
+        SimpleWhere or2 = SimpleWhere.createOr();
+
+        Assert.assertFalse(where.hasConditions());
+        Assert.assertFalse(and1.hasConditions());
+        Assert.assertFalse(or2.hasConditions());
+        Assert.assertEquals("", where.generate());
+        Assert.assertEquals("", and1.generate());
+        Assert.assertEquals("", or2.generate());
+        
+        where.add(and1);
+        Assert.assertFalse(where.hasConditions());
+        
+        and1.eq("a", "10");
+        Assert.assertTrue(and1.hasConditions());
+        Assert.assertTrue(where.hasConditions());
+        Assert.assertEquals("(a=?)", where.generate());
+
+        where.add(or2);
+        Assert.assertEquals("(a=?)", where.generate());
+        or2.eq("b", "20");
+        Assert.assertEquals("(a=?) and (b=?)", where.generate());
+    }
 }

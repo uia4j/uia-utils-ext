@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.uia.solution</groupId>
 	<artifactId>uia-utils-ext</artifactId>
-	<version>0.2.2</version>
+	<version>0.2.3</version>
 	<packaging>jar</packaging>
 	<name>uia-utils-ext</name>
 	<url>https://github.com/uia4j/uia-utils-ext</url>
@@ -31,32 +31,22 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>4.5.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpasyncclient</artifactId>
-			<version>4.1.1</version>
-		</dependency>
-		<dependency>
 		    <groupId>org.postgresql</groupId>
 		    <artifactId>postgresql</artifactId>
 		    <version>9.3-1101-jdbc41</version>
-			<scope>test</scope>
+			<scope>provided</scope>
 		</dependency>
         <dependency>
             <groupId>ngdbc</groupId>
             <artifactId>ngdbc</artifactId>
             <version>2.1.2</version>
-			<scope>test</scope>
+			<scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>ojdbc6</groupId>
             <artifactId>ojdbc6</artifactId>
             <version>11.2.0.4</version>
-			<scope>test</scope>
+			<scope>provided</scope>
         </dependency>
 	</dependencies>
 	<build>
@@ -73,7 +63,6 @@
 				<version>2.12.4</version>
 				<configuration>
 					<excludes>
-						<exclude>uia/utils/http/*.java</exclude>
 						<exclude>uia/utils/dao/*.java</exclude>
 					</excludes>
 				</configuration>

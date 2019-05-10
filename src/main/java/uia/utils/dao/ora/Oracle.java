@@ -63,6 +63,12 @@ public class Oracle extends AbstractDatabase {
     }
 
     @Override
+    public String generateCreateViewSQL(String viewName, String sql) {
+        return String.format("CREATE VIEW \"%s\" (\n%s\n)", upperOrLower(viewName), sql);
+    }
+
+
+    @Override
     public String generateCreateTableSQL(TableType table) {
         if (table == null) {
             return null;

@@ -27,7 +27,9 @@ import java.util.stream.Collectors;
 import uia.utils.dao.where.conditions.BetweenType;
 import uia.utils.dao.where.conditions.ConditionType;
 import uia.utils.dao.where.conditions.EqType;
+import uia.utils.dao.where.conditions.LessThanType;
 import uia.utils.dao.where.conditions.LikeType;
+import uia.utils.dao.where.conditions.MoreThanType;
 import uia.utils.dao.where.conditions.NotEqType;
 
 public class SimpleWhere extends Where {
@@ -35,6 +37,10 @@ public class SimpleWhere extends Where {
     private final ArrayList<ConditionType> conds;
 
     private final String op;
+    
+    public boolean hasConditions() {
+    	return this.conds.size() > 0;
+    }
 
     public static SimpleWhere createAnd() {
         return new SimpleWhere(" and ");
@@ -123,6 +129,23 @@ public class SimpleWhere extends Where {
 
     public SimpleWhere add(ConditionType cond) {
         this.conds.add(cond);
+        return this;
+    }
+    
+    public SimpleWhere moreThan(String key, Object value, boolean eq) {
+        if (isEmpty(key)) {
+            return this;
+        }
+    	this.conds.add(new MoreThanType(key, value, eq));
+        return this;
+    }
+
+    
+    public SimpleWhere lessThan(String key, Object value, boolean eq) {
+        if (isEmpty(key)) {
+            return this;
+        }
+    	this.conds.add(new LessThanType(key, value, eq));
         return this;
     }
 

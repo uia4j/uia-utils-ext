@@ -31,6 +31,13 @@ public class WhereOr extends Where {
     public WhereOr() {
         this.wheres = new ArrayList<Where>();
     }
+    
+    public boolean hasConditions() {
+    	return this.wheres.stream()
+    			.filter(w -> w.hasConditions())
+    			.findAny()
+    			.isPresent();
+    }
 
     public WhereOr add(Where where) {
         this.wheres.add(where);
@@ -39,7 +46,10 @@ public class WhereOr extends Where {
 
     @Override
     public String generate() {
-        List<String> ws = this.wheres.stream().map(w -> "(" + w.generate() + ")").collect(Collectors.toList());
+        List<String> ws = this.wheres.stream()
+        		.filter(w -> w.hasConditions())
+        		.map(w -> "(" + w.generate() + ")")
+        		.collect(Collectors.toList());
         return String.join(" or ", ws);
     }
 

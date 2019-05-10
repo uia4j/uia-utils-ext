@@ -8,11 +8,12 @@ UIA Utils extension
 [![License](https://img.shields.io/github/license/uia4j/uia-utils-ext.svg)](LICENSE)
 
 
-Common utilities extension. Need JDK 1.8 or above. extension includes 3 sub projects:
+Common utilities extension. Need JDK 1.8 or above. extension includes 4 sub projects:
 
 * Cube - Multi dimension to query and view data.
 * Http - Simplified HttpClient of Apache HttpComponents.
 * States - Implementation of state machine pattern.
+* DAO - DAO pattern implementation and some helpers.
 
 ## Cube
 ### key classes
@@ -116,6 +117,13 @@ worker.run("E3", value);  // STATE3
 worker.run("E2", value);  // STATE3
 ```
 
+## DAO
+###
+### Query
+C1='A' and C2 between 'A' and 'Z'
+```java
+SimpleWhere.and
+```
 ## Copyright and License
 
 Licensed under the Apache License, Version 2.0 (the "License");

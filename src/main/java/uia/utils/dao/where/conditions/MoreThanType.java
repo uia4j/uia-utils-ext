@@ -16,50 +16,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package uia.utils.dao.where;
+package uia.utils.dao.where.conditions;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.sql.Timestamp;
+import java.util.Date;
 
-public class WhereAnd extends Where {
+public class MoreThanType implements ConditionType {
 
-    private ArrayList<Where> wheres;
+    private final String key;
 
-    public WhereAnd() {
-        this.wheres = new ArrayList<Where>();
-    }
+    private final Object value;
     
-    public boolean hasConditions() {
-    	return this.wheres.stream()
-    			.filter(w -> w.hasConditions())
-    			.findAny()
-    			.isPresent();
-    }
+    private final boolean eq;
 
-    public WhereAnd add(Where where) {
-        this.wheres.add(where);
-        return this;
+    public MoreThanType(String key, Object value, boolean eq) {
+        this.key = key;
+        this.value = value;
+        this.eq = eq;
     }
 
     @Override
-    public String generate() {
-        List<String> ws = this.wheres.stream()
-        		.filter(w -> w.hasConditions())
-        		.map(w -> "(" + w.generate() + ")")
-        		.collect(Collectors.toList());
-        return String.join(" and ", ws);
+    public String getStatement() {
+        return this.eq ? this.key + ">=?" : this.key + ">?";
     }
 
     @Override
-    public int accept(PreparedStatement ps, int index) throws SQLException {
-        int i = index;
-        for (Where w : this.wheres) {
-            i = w.accept(ps, i);
+    public int accpet(PreparedStatement ps, int index) throws SQLException {
+        if (this.value instanceof Date) {
+            ps.setTimestamp(index++, new Timestamp(((Date) this.value).getTime()));
         }
-        return i;
+        else {
+            ps.setObject(index++, this.value);
+        }
+        return index;
     }
 
+    @Override
+    public String toString() {
+        return this.value == null ? this.key + " is null" : this.key + "='" + this.value + "'";
+    }
 }

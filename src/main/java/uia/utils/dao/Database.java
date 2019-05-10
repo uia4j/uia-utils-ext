@@ -48,6 +48,8 @@ public interface Database extends AutoCloseable {
 
     public String selectViewScript(String viewName) throws SQLException;
 
+    public String generateCreateViewSQL(String viewName, String sql);
+
     public String generateCreateTableSQL(TableType table);
 
     public String generateAlterTableSQL(String tableName, List<ColumnType> cols);
