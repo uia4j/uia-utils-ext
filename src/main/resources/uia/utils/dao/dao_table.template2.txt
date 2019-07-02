@@ -1,0 +1,78 @@
+package {DAO_PACKAGE};
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+
+import {DTO_PACKAGE}.{DTO};
+
+public class {DTO}Dao {
+
+    private static final String SQL_INS = "{SQL_INS}";
+
+    private static final String SQL_SEL = "{SQL_SEL} ";
+    
+    private final Connection conn;
+
+    public {DTO}Dao(Connection conn) {
+        this.conn = conn;
+    }
+    
+    public int insert({DTO} data) throws SQLException {
+        try (PreparedStatement ps = this.conn.prepareStatement(SQL_INS)) {
+{CODE_INS}
+            return ps.executeUpdate();
+        }
+    }    
+    
+    public int insert(List<{DTO}> dataList) throws SQLException {
+        try (PreparedStatement ps = this.conn.prepareStatement(SQL_INS)) {
+            for({DTO} data : dataList) {
+{CODE_INS}
+                ps.addBatch();
+            }
+            return ps.executeBatch().length;
+        }
+    }    
+
+    public int delete({CODE_SEL_PK_ARGS}) throws SQLException {
+        try (PreparedStatement ps = this.conn.prepareStatement("DELETE FROM {TABLE_NAME} WHERE {WHERE_PK}")) {
+{CODE_SEL_PK}
+            return ps.executeUpdate();
+        }
+    }    
+
+    public {DTO} selectByPK({CODE_SEL_PK_ARGS}) throws SQLException {
+        {DTO} result = null;
+        try (PreparedStatement ps = this.conn.prepareStatement(SQL_SEL  + "WHERE {WHERE_PK}")) {
+{CODE_SEL_PK}
+            ResultSet rs = ps.executeQuery();
+            if(rs.next()) {
+                result = convert(rs);
+            }
+            return result;
+        }
+    }    
+
+    public List<{DTO}> selectAll() throws SQLException {
+        ArrayList<{DTO}> result = new ArrayList<{DTO}>();
+        try (PreparedStatement ps = this.conn.prepareStatement(SQL_SEL)) {
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()) {
+                result.add(convert(rs));
+            }
+            return result;
+        }
+    }    
+    
+    private {DTO} convert(ResultSet rs) throws SQLException {
+        {DTO} data = new {DTO}();
+        
+{CODE_CONVERT}
+        return data;
+    }
+}

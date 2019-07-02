@@ -1,18 +1,19 @@
 UIA Utils extension
 ================
 
-[![Download](https://api.bintray.com/packages/gazer2kanlin/maven/uia.utils4j.ext/images/download.svg) ](https://bintray.com/gazer2kanlin/maven/uia.utils4j.ext/_latestVersion)
-[![Build Status](https://travis-ci.org/gazer2kanlin/uia.utils4j.ext.svg?branch=master)](https://travis-ci.org/gazer2kanlin/uia.utils4j.ext)
-[![Codecov](https://img.shields.io/codecov/c/github/gazer2kanlin/uia.utils4j.ext.svg)](https://codecov.io/gh/gazer2kanlin/uia.utils4j.ext)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/4466fb1ecba5481691e8befeacb27d32)](https://www.codacy.com/app/gazer2kanlin/uia.utils4j.ext?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=gazer2kanlin/uia.utils4j.ext&amp;utm_campaign=Badge_Grade)
-[![License](https://img.shields.io/github/license/gazer2kanlin/uia.utils4j.ext.svg)](LICENSE)
+[![Download](https://api.bintray.com/packages/uia4j/maven/uia-utils-ext/images/download.svg)](https://bintray.com/uia4j/maven/uia-utils-ext/_latestVersion)
+[![Build Status](https://travis-ci.org/uiaj4/uia-utils-ext.svg?branch=master)](https://travis-ci.org/uia4j/uia-utils-ext)
+[![codecov](https://codecov.io/gh/uia4j/uia-utils-ext/branch/master/graph/badge.svg)](https://codecov.io/gh/uia4j/uia-utils-ext)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/4466fb1ecba5481691e8befeacb27d32)](https://www.codacy.com/app/gazer2kanlin/uia-utils-ext?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=uia4j/uia-utils-ext&amp;utm_campaign=Badge_Grade)
+[![License](https://img.shields.io/github/license/uia4j/uia-utils-ext.svg)](LICENSE)
 
 
-Common utilities extension. Need JDK 1.8 or above. extension includes 3 sub projects:
+Common utilities extension. Need JDK 1.8 or above. extension includes 4 sub projects:
 
 * Cube - Multi dimension to query and view data.
 * Http - Simplified HttpClient of Apache HttpComponents.
 * States - Implementation of state machine pattern.
+* DAO - DAO pattern implementation and some helpers.
 
 ## Cube
 ### key classes
@@ -116,6 +117,13 @@ worker.run("E3", value);  // STATE3
 worker.run("E2", value);  // STATE3
 ```
 
+## DAO
+###
+### Query
+C1='A' and C2 between 'A' and 'Z'
+```java
+SimpleWhere.and
+```
 ## Copyright and License
 
 Licensed under the Apache License, Version 2.0 (the "License");

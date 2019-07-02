@@ -50,6 +50,13 @@ public class PostgreSQL extends AbstractDatabase {
     }
 
     @Override
+    public int createView(String viewName, String sql) throws SQLException {
+        String script = String.format("CREATE VIEW \"%s\" AS \n%s", viewName.toLowerCase(), sql);
+        return this.conn.prepareStatement(script)
+                .executeUpdate();
+    }
+
+    @Override
     public String selectViewScript(String viewName) throws SQLException {
         String script = null;
 
@@ -61,6 +68,11 @@ public class PostgreSQL extends AbstractDatabase {
             script = script.substring(0, script.length() - 1);
         }
         return script;
+    }
+
+    @Override
+    public String generateCreateViewSQL(String viewName, String sql) {
+        return String.format("CREATE VIEW \"%s\" AS \n%s", viewName.toLowerCase(), sql);
     }
 
     @Override

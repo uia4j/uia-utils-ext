@@ -69,6 +69,12 @@ public class Hana extends AbstractDatabase {
         return script;
     }
 
+
+    @Override
+    public String generateCreateViewSQL(String viewName, String sql) {
+        return String.format("CREATE VIEW \"%s\" AS \n%s", viewName.toUpperCase(), sql);
+    }
+
     @Override
     public String generateCreateTableSQL(TableType table) {
         if (table == null) {

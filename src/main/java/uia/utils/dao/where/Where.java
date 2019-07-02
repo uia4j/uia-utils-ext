@@ -23,6 +23,8 @@ import java.sql.SQLException;
 import java.util.List;
 
 public abstract class Where {
+	
+	public abstract boolean hasConditions();
 
     public abstract String generate();
 
