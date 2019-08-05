@@ -307,19 +307,19 @@ public abstract class ColumnType {
         }
 
         // null
-        if (plan.checkNullable) {
-            if (this.nullable != targetColumn.isNullable()) {
-                cr.setPassed(false);
-                cr.addMessage(String.format("%s nullable not the same: (%s,%s)",
-                        this.columnName,
-                        this.nullable,
-                        targetColumn.isNullable()));
-                return false;
-            }
+        if (plan.checkNullable && this.nullable != targetColumn.isNullable()) {
+            cr.setPassed(false);
+            cr.addMessage(String.format("%s nullable not the same: (%s,%s)",
+                    this.columnName,
+                    this.nullable,
+                    targetColumn.isNullable()));
+            return false;
         }
 
         // primary key
-        if (this.pk != targetColumn.isPk()) {
+        if (this.pk != targetColumn.isPk())
+
+        {
             cr.setPassed(false);
             cr.addMessage(String.format("%s pk not the same: (%s,%s)",
                     this.columnName,
@@ -329,7 +329,9 @@ public abstract class ColumnType {
         }
 
         // string
-        if (!plan.strictVarchar && isStringType() && targetColumn.isStringType()) {
+        if (!plan.strictVarchar &&
+
+                isStringType() && targetColumn.isStringType()) {
             return true;
         }
 
@@ -376,15 +378,13 @@ public abstract class ColumnType {
         }
 
         // column size
-        if (plan.checkDataSize) {
-            if (this.columnSize != targetColumn.getColumnSize()) {
-                cr.setPassed(false);
-                cr.addMessage(String.format("%s columnSize not the same: (%s,%s)",
-                        this.columnName,
-                        this.columnSize,
-                        targetColumn.getColumnSize()));
-                return false;
-            }
+        if (plan.checkDataSize && this.columnSize != targetColumn.getColumnSize()) {
+            cr.setPassed(false);
+            cr.addMessage(String.format("%s columnSize not the same: (%s,%s)",
+                    this.columnName,
+                    this.columnSize,
+                    targetColumn.getColumnSize()));
+            return false;
         }
 
         return true;

@@ -219,7 +219,7 @@ public class Oracle extends AbstractDatabase {
                             break;
                         default:
                             ct.setDataType(DataType.OTHERS);
-
+                            break;
                     }
                     cts.add(ct);
                 }

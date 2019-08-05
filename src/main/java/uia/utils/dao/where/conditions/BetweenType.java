@@ -48,20 +48,20 @@ public class BetweenType implements ConditionType {
     }
 
     @Override
-    public int accpet(PreparedStatement ps, int index) throws SQLException {
+    public int accpet(final PreparedStatement ps, final int index) throws SQLException {
         if (this.value1 instanceof Date) {
-            ps.setTimestamp(index++, new Timestamp(((Date) this.value1).getTime()));
+            ps.setTimestamp(index, new Timestamp(((Date) this.value1).getTime()));
         }
         else {
-            ps.setObject(index++, this.value1);
+            ps.setObject(index, this.value1);
         }
         if (this.value2 instanceof Date) {
-            ps.setTimestamp(index++, new Timestamp(((Date) this.value2).getTime()));
+            ps.setTimestamp(index + 1, new Timestamp(((Date) this.value2).getTime()));
         }
         else {
-            ps.setObject(index++, this.value2);
+            ps.setObject(index + 1, this.value2);
         }
-        return index;
+        return index + 2;
     }
 
     @Override
