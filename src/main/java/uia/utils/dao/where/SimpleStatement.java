@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SimpleStatement {
+	
+	private final String selectSql;
 
     private Where where;
 
@@ -32,9 +34,15 @@ public class SimpleStatement {
 
     private final List<String> orders;
 
-    public SimpleStatement() {
+    public SimpleStatement(String selectSql) {
+    	this.selectSql = selectSql;
         this.groups = new ArrayList<String>();
         this.orders = new ArrayList<String>();
+    }
+    
+    public void reset() {
+    	this.groups.clear();
+    	this.orders.clear();
     }
 
     public SimpleStatement where(Where where) {
@@ -52,16 +60,22 @@ public class SimpleStatement {
         return this;
     }
 
-    public PreparedStatement prepare(Connection conn, String selectSql) throws SQLException {
+    public PreparedStatement prepare(Connection conn) throws SQLException {
         String where = this.where == null ? null : this.where.generate();
         PreparedStatement ps;
         if (where == null || where.length() == 0) {
-            ps = conn.prepareStatement(selectSql + groupBy() + orderBy());
+            ps = conn.prepareStatement(String.format("%s%s%s",
+            		this.selectSql,
+            		groupBy(),
+            		orderBy()));
         }
         else {
-            ps = conn.prepareStatement(selectSql + " where " + where + groupBy() + orderBy());
-            int index = 1;
-            index = this.where.accept(ps, index);
+            ps = conn.prepareStatement(String.format("%s where %s%s%s",
+            		this.selectSql,
+            		where,
+            		groupBy(),
+            		orderBy()));
+            this.where.accept(ps, 1);
         }
 
         return ps;
@@ -71,11 +85,19 @@ public class SimpleStatement {
         String where = this.where == null ? null : this.where.generate();
         PreparedStatement ps;
         if (where == null || where.length() == 0) {
-            ps = conn.prepareStatement(selectSql + groupBy() + orderBy());
+            ps = conn.prepareStatement(String.format("%s%s%s",
+            		this.selectSql,
+            		groupBy(),
+            		orderBy()));
         }
         else {
-            ps = conn.prepareStatement(selectSql + " where " + where + groupBy() + orderBy());
+            ps = conn.prepareStatement(String.format("%s where %s%s%s",
+            		this.selectSql,
+            		where,
+            		groupBy(),
+            		orderBy()));
         }
+
         return ps;
     }
 

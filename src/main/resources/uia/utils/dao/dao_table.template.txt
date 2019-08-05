@@ -25,14 +25,14 @@ public class {DTO}Dao {
     }
     
     public int insert({DTO} data) throws SQLException {
-        try (PreparedStatement ps = this.conn.prepareStatement(SQL_INS)) {
+        try(PreparedStatement ps = this.conn.prepareStatement(SQL_INS)) {
 {CODE_INS}
             return ps.executeUpdate();
         }
     }    
     
     public int insert(List<{DTO}> dataList) throws SQLException {
-        try (PreparedStatement ps = this.conn.prepareStatement(SQL_INS)) {
+        try(PreparedStatement ps = this.conn.prepareStatement(SQL_INS)) {
             for({DTO} data : dataList) {
 {CODE_INS}
                 ps.addBatch();
@@ -42,14 +42,14 @@ public class {DTO}Dao {
     }    
 
     public int update({DTO} data) throws SQLException {
-        try (PreparedStatement ps = this.conn.prepareStatement(SQL_UPD)) {
+        try(PreparedStatement ps = this.conn.prepareStatement(SQL_UPD)) {
 {CODE_UPD}
             return ps.executeUpdate();
         }
     }    
 
     public int update(List<{DTO}> dataList) throws SQLException {
-        try (PreparedStatement ps = this.conn.prepareStatement(SQL_UPD)) {
+        try(PreparedStatement ps = this.conn.prepareStatement(SQL_UPD)) {
             for({DTO} data : dataList) {
 {CODE_UPD}
                 ps.addBatch();
@@ -59,7 +59,7 @@ public class {DTO}Dao {
     }    
 
     public int delete({CODE_SEL_PK_ARGS}) throws SQLException {
-        try (PreparedStatement ps = this.conn.prepareStatement("DELETE FROM {TABLE_NAME} WHERE {WHERE_PK}")) {
+        try(PreparedStatement ps = this.conn.prepareStatement("DELETE FROM {TABLE_NAME} WHERE {WHERE_PK}")) {
 {CODE_SEL_PK}
             return ps.executeUpdate();
         }
@@ -67,24 +67,26 @@ public class {DTO}Dao {
 
     public {DTO} selectByPK({CODE_SEL_PK_ARGS}) throws SQLException {
         {DTO} result = null;
-        try (PreparedStatement ps = this.conn.prepareStatement(SQL_SEL  + "WHERE {WHERE_PK}")) {
+        try(PreparedStatement ps = this.conn.prepareStatement(SQL_SEL  + "WHERE {WHERE_PK}")) {
 {CODE_SEL_PK}
-            ResultSet rs = ps.executeQuery();
-            if(rs.next()) {
-                result = convert(rs);
+            try(ResultSet rs = ps.executeQuery()) {
+                if(rs.next()) {
+                    result = convert(rs);
+                }
+                return result;
             }
-            return result;
         }
     }    
 
     public List<{DTO}> selectAll() throws SQLException {
         ArrayList<{DTO}> result = new ArrayList<{DTO}>();
-        try (PreparedStatement ps = this.conn.prepareStatement(SQL_SEL)) {
-            ResultSet rs = ps.executeQuery();
-            while(rs.next()) {
-                result.add(convert(rs));
+        try(PreparedStatement ps = this.conn.prepareStatement(SQL_SEL)) {
+            try(ResultSet rs = ps.executeQuery()) {
+                while(rs.next()) {
+                    result.add(convert(rs));
+                }
+                return result;
             }
-            return result;
         }
     }    
     

@@ -115,8 +115,6 @@ public class AbstractStateWorkerTest extends AbstractStateWorker<AbstractStateWo
 
     @Override
     protected void initial() {
-        AbstractStateWorker.PRINTABLE = true;
-
         // IDLE
         this.stateMachine.registerState(IDLE)
                 .addEvent("validateLot", AbstractStateWorkerTest.this::validateLot)

@@ -67,8 +67,6 @@ public abstract class ColumnType {
 
     protected String columnName;
 
-    protected String propertyName;
-
     protected DataType dataType;
 
     protected int dataTypeCode;
@@ -80,6 +78,8 @@ public abstract class ColumnType {
     protected boolean nullable;
 
     protected int decimalDigits;
+
+    protected String remark;
 
     public boolean isPk() {
         return this.pk;
@@ -95,11 +95,6 @@ public abstract class ColumnType {
 
     public void setColumnName(String columnName) {
         this.columnName = columnName;
-        this.propertyName = convert(this.columnName);
-    }
-
-    public String getPropertyName() {
-        return this.propertyName;
     }
 
     public DataType getDataType() {
@@ -150,7 +145,15 @@ public abstract class ColumnType {
         this.decimalDigits = decimalDigits;
     }
 
-    /**
+    public String getRemark() {
+		return remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+
+	/**
      * Check if this column is string including NVARCHAR, NVARCHAR2, VARCHAR, VARCHAR2.
      * @return Result.
      */
@@ -200,38 +203,28 @@ public abstract class ColumnType {
     }
 
     public String getJavaTypeName() {
-        String type = "String";
         switch (this.dataType) {
             case INTEGER:
-                type = this.nullable ? "Integer" : "int";
-                break;
+            	return this.nullable ? "Integer" : "int";
             case LONG:
-                type = this.nullable ? "Long" : "long";
-                break;
+            	return this.nullable ? "Long" : "long";
             case NUMERIC:
             case FLOAT:
             case DOUBLE:
-                type = "BigDecimal";
-                break;
+            	return "BigDecimal";
             case DATE:
             case TIME:
             case TIMESTAMP:
-                type = "Date";
-                break;
+            	return "Date";
             case CLOB:
-                type = "Clob";
-                break;
+            	return "Clob";
             case NCLOB:
-                type = "NClob";
-                break;
+            	return "NClob";
             case BLOB:
-                type = "byte[]";
-                break;
+            	return "byte[]";
             default:
-                type = "String";
+                return "String";
         }
-
-        return String.format("%s %s", type, this.propertyName);
     }
 
     public Object read(Connection conn, Object orig) throws SQLException {
@@ -348,85 +341,87 @@ public abstract class ColumnType {
     }
 
     String genPsSet(int index) {
+    	String propertyName = CamelNaming.upper(this.columnName);
         switch (this.dataType) {
             case DATE:
             case TIME:
             case TIMESTAMP:
                 return String.format("ps.setTimestamp(%s, new Timestamp(data.get%s().getTime()));",
                         index,
-                        this.propertyName.substring(0, 1).toUpperCase() + this.propertyName.substring(1));
+                        propertyName);
             case INTEGER:
                 return String.format("ps.setInt(%s, data.get%s());",
                         index,
-                        this.propertyName.substring(0, 1).toUpperCase() + this.propertyName.substring(1));
+                        propertyName);
             case LONG:
                 return String.format("ps.setLong(%s, data.get%s());",
                         index,
-                        this.propertyName.substring(0, 1).toUpperCase() + this.propertyName.substring(1));
+                        propertyName);
             case NUMERIC:
             case FLOAT:
             case DOUBLE:
                 return String.format("ps.setBigDecimal(%s, data.get%s());",
                         index,
-                        this.propertyName.substring(0, 1).toUpperCase() + this.propertyName.substring(1));
+                        propertyName);
             case CLOB:
                 return String.format("ps.setClob(%s, data.get%s());",
                         index,
-                        this.propertyName.substring(0, 1).toUpperCase() + this.propertyName.substring(1));
+                        propertyName);
             case NCLOB:
                 return String.format("ps.setNClob(%s, data.get%s());",
                         index,
-                        this.propertyName.substring(0, 1).toUpperCase() + this.propertyName.substring(1));
+                        propertyName);
             case BLOB:
                 return String.format("ps.setBlob(%s, data.get%s());",
                         index,
-                        this.propertyName.substring(0, 1).toUpperCase() + this.propertyName.substring(1));
+                        propertyName);
 
             default:
                 return String.format("ps.setString(%s, data.get%s());",
                         index,
-                        this.propertyName.substring(0, 1).toUpperCase() + this.propertyName.substring(1));
+                        propertyName);
         }
     }
 
     String genPsSetEx(int index) {
+    	String propertyName = CamelNaming.lower(this.columnName);
         switch (this.dataType) {
             case DATE:
             case TIME:
             case TIMESTAMP:
                 return String.format("ps.setTimestamp(%s, new Timestamp(%s.getTime()));",
                         index,
-                        this.propertyName);
+                        propertyName);
             case INTEGER:
                 return String.format("ps.setInt(%s, %s);",
                         index,
-                        this.propertyName);
+                        propertyName);
             case LONG:
                 return String.format("ps.setLong(%s, %s);",
                         index,
-                        this.propertyName);
+                        propertyName);
             case NUMERIC:
             case FLOAT:
             case DOUBLE:
                 return String.format("ps.setBigDecimal(%s, %s);",
                         index,
-                        this.propertyName);
+                        propertyName);
             case CLOB:
                 return String.format("ps.setClob(%s, %s);",
                         index,
-                        this.propertyName);
+                        propertyName);
             case NCLOB:
                 return String.format("ps.setNClob(%s, %s);",
                         index,
-                        this.propertyName);
+                        propertyName);
             case BLOB:
                 return String.format("ps.setBlob(%s, %s);",
                         index,
-                        this.propertyName);
+                        propertyName);
             default:
                 return String.format("ps.setString(%s, %s);",
                         index,
-                        this.propertyName);
+                        propertyName);
         }
     }
 
@@ -463,7 +458,7 @@ public abstract class ColumnType {
         }
 
         String rsGet = String.format("data.set%s(rs.get%s(%s));",
-                this.propertyName.substring(0, 1).toUpperCase() + this.propertyName.substring(1),
+        		CamelNaming.upper(this.columnName),
                 type,
                 index);
         return rsGet;
@@ -471,33 +466,13 @@ public abstract class ColumnType {
 
     @Override
     public String toString() {
-        return String.format("%-30s, pk:%-5s, %-9s, %4s:%-13s [%s]",
+        return String.format("%-30s, pk:%-5s, %-9s, %4s:%-13s [%s], %s",
                 this.columnName,
                 this.pk,
                 this.dataType,
                 this.dataTypeCode,
                 this.dataTypeName,
-                this.columnSize);
-    }
-
-    private static String convert(String columnName) {
-        String result = "";
-        int x = columnName.indexOf("_");
-        if (x < 0) {
-            return columnName.toLowerCase();
-        }
-        else {
-            result = columnName.substring(0, x).toLowerCase();
-            columnName = columnName.substring(x + 1);
-        }
-
-        x = columnName.indexOf("_");
-        while (x > 0) {
-            result += columnName.substring(0, 1).toUpperCase() + columnName.substring(1, x).toLowerCase();
-            columnName = columnName.substring(x + 1);
-            x = columnName.indexOf("_");
-        }
-        result += columnName.substring(0, 1).toUpperCase() + columnName.substring(1).toLowerCase();
-        return result;
+                this.columnSize,
+                this.remark);
     }
 }

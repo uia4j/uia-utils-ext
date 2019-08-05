@@ -32,16 +32,20 @@ import java.util.stream.Collectors;
 public class TableType {
 
     private final String tableName;
+    
+    private final String remark;
 
     private final List<ColumnType> columns;
 
     /**
      * Constructor.
      * @param tableName Table name.
+     * @param remark Table comment.
      * @param columns Definition of columns.
      */
-    public TableType(String tableName, List<ColumnType> columns) {
+    public TableType(String tableName, String remark, List<ColumnType> columns) {
         this.tableName = tableName;
+        this.remark = remark;
         this.columns = columns;
     }
 
@@ -54,6 +58,14 @@ public class TableType {
     }
 
     /**
+     * Get table comment.
+     * @return Table comment.
+     */
+    public String getRemark() {
+		return this.remark;
+	}
+
+	/**
      * select columns of primary key.
      * @return Columns.
      */
@@ -76,7 +88,7 @@ public class TableType {
 
     /**
      * Get column Definition.
-     * @return
+     * @return Columns.
      */
     public List<ColumnType> getColumns() {
         return this.columns;
@@ -115,9 +127,9 @@ public class TableType {
         try {
             Map<String, ColumnType> source = this.columns.stream().collect(Collectors.toMap(c -> c.getColumnName().toUpperCase(), c -> c));
             Map<String, ColumnType> target = table.columns.stream().collect(Collectors.toMap(c -> c.getColumnName().toUpperCase(), c -> c));
-            for (String key : source.keySet()) {
-                ColumnType ct1 = source.get(key);
-                ColumnType ct2 = target.containsKey(key) ? target.get(key) : null;
+            for (Map.Entry<String, ColumnType> kv : source.entrySet()) {
+                ColumnType ct1 = kv.getValue();
+                ColumnType ct2 = target.get(kv.getKey());
                 ct1.sameAs(ct2, plan, cr);
             }
         }
@@ -191,16 +203,11 @@ public class TableType {
             }
         }
 
-        ArrayList<String> cs = new ArrayList<String>();
         ArrayList<String> ws = new ArrayList<String>();
         for (ColumnType column : this.columns) {
             String columnName = column.getColumnName().toLowerCase();
             if (pks.size() == 0 || pks.contains(columnName)) {
-                pks.add(columnName);
                 ws.add(columnName + "=?");
-            }
-            else {
-                cs.add(columnName + "=?");
             }
         }
 

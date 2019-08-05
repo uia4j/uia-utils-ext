@@ -37,22 +37,14 @@ public class SimpleWhere extends Where {
     private final ArrayList<ConditionType> conds;
 
     private final String op;
+
+    SimpleWhere(String op) {
+        this.conds = new ArrayList<ConditionType>();
+        this.op = op;
+    }
     
     public boolean hasConditions() {
     	return this.conds.size() > 0;
-    }
-
-    public static SimpleWhere createAnd() {
-        return new SimpleWhere(" and ");
-    }
-
-    public static SimpleWhere createOr() {
-        return new SimpleWhere(" or ");
-    }
-
-    private SimpleWhere(String op) {
-        this.conds = new ArrayList<ConditionType>();
-        this.op = op;
     }
 
     public SimpleWhere eq(String key, Object value) {
@@ -154,7 +146,9 @@ public class SimpleWhere extends Where {
         if (this.conds.size() == 0) {
             return "";
         }
-        List<String> data = this.conds.stream().map(c -> c.getStatement()).collect(Collectors.toList());
+        List<String> data = this.conds.stream()
+        		.map(c -> c.getStatement())
+        		.collect(Collectors.toList());
         return String.join(this.op, data);
     }
 

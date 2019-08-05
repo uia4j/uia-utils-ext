@@ -46,27 +46,31 @@ public class Hana extends AbstractDatabase {
 
     public Hana(String host, String port, String schema, String user, String pwd) throws SQLException {
         // jdbc:sap://host:port?reconnect=true
-        super("com.sap.db.jdbc.Driver", "jdbc:sap://" + host + ":" + port, user, pwd, schema == null ? user : schema);
+        super("com.sap.db.jdbc.Driver", String.format("jdbc:sap://%s:%s", host, port), user, pwd, schema == null ? user : schema);
     }
 
     @Override
     public int createView(String viewName, String sql) throws SQLException {
         String script = String.format("CREATE VIEW \"%s\" AS \n%s", viewName.toUpperCase(), sql);
-        return this.conn.prepareStatement(script)
-                .executeUpdate();
+        try(PreparedStatement ps = this.conn.prepareStatement(script)) {
+        	return ps.executeUpdate();
+        }
     }
 
     @Override
     public String selectViewScript(String viewName) throws SQLException {
         String script = null;
-        PreparedStatement ps = this.conn.prepareStatement("SELECT definition FROM VIEWS WHERE schema_name=? AND view_name=?");
-        ps.setString(1, this.schema);
-        ps.setString(2, viewName.toUpperCase());
-        ResultSet rs = ps.executeQuery();
-        if (rs.next()) {
-            script = rs.getString(1);
+        try(PreparedStatement ps = this.conn.prepareStatement("SELECT definition FROM VIEWS WHERE schema_name=? AND view_name=?")) {
+	        ps.setString(1, this.schema);
+	        ps.setString(2, viewName.toUpperCase());
+
+	        try(ResultSet rs = ps.executeQuery()) {
+		        if (rs.next()) {
+		            script = rs.getString(1);
+		        }
+		        return script;
+	        }
         }
-        return script;
     }
 
 
@@ -83,21 +87,39 @@ public class Hana extends AbstractDatabase {
 
         ArrayList<String> pks = new ArrayList<String>();
         ArrayList<String> cols = new ArrayList<String>();
+        ArrayList<String> comments = new ArrayList<String>();
+        if(table.getRemark() != null) {
+        	comments.add(String.format("COMMENT ON TABLE %s is '%s';\n", 
+        			table.getTableName().toLowerCase(), 
+        			table.getRemark()));
+        }
+
         for (ColumnType ct : table.getColumns()) {
             if (ct.isPk()) {
                 pks.add(ct.getColumnName().toUpperCase());
             }
             cols.add(prepareColumnDef(ct));
+            if (ct.getRemark() != null && 
+            	ct.getRemark().trim().length() > 0) {
+            	comments.add(String.format("COMMENT ON COLUMN %s.%s is '%s';\n", 
+            			table.getTableName().toUpperCase(), 
+            			ct.getColumnName().toUpperCase(),
+            			ct.getRemark()));
+            }
         }
 
         StringBuilder sb = new StringBuilder();
         sb.append("CREATE COLUMN TABLE \"" + table.getTableName().toUpperCase() + "\"\n(\n");
         sb.append(String.join(",\n", cols));
         if (pks.isEmpty()) {
-            sb.append("\n);");
+            sb.append("\n);\n");
         }
         else {
-            sb.append(",\n PRIMARY KEY (\"" + String.join("\",\"", pks) + "\")\n);");
+            sb.append(",\n PRIMARY KEY (\"" + String.join("\",\"", pks) + "\")\n);\n");
+        }
+
+        for(String comment : comments) {
+        	sb.append(comment);
         }
 
         return sb.toString();
@@ -159,6 +181,7 @@ public class Hana extends AbstractDatabase {
                     ct.setDataTypeName(rs.getString("TYPE_NAME"));
                     ct.setNullable("1".equals(rs.getString("NULLABLE")));
                     ct.setColumnSize(rs.getInt("COLUMN_SIZE"));
+                    ct.setRemark(rs.getString("REMARKS"));
 
                     switch (rs.getInt("DATA_TYPE")) {
                         case -9:    // NVARCHAR

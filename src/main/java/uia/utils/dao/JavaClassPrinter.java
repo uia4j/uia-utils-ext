@@ -38,18 +38,18 @@ public class JavaClassPrinter {
     private final String templateDAOView;
 
     public JavaClassPrinter(Database db, String tableName) throws IOException, SQLException {
-        this.templateDTO = readContent(JavaClassPrinter.class.getResourceAsStream("dto.template.txt"));
-        this.templateDAOTable = readContent(JavaClassPrinter.class.getResourceAsStream("dao_table.template.txt"));
-        this.templateDAOTable2 = readContent(JavaClassPrinter.class.getResourceAsStream("dao_table.template2.txt"));
-        this.templateDAOView = readContent(JavaClassPrinter.class.getResourceAsStream("dao_view.template.txt"));
+        this.templateDTO = readContent("dto.template.txt");
+        this.templateDAOTable = readContent("dao_table.template.txt");
+        this.templateDAOTable2 = readContent("dao_table.template2.txt");
+        this.templateDAOView = readContent("dao_view.template.txt");
         this.table = db.selectTable(tableName, true);
     }
 
     public JavaClassPrinter(TableType table) throws IOException {
-        this.templateDTO = readContent(JavaClassPrinter.class.getResourceAsStream("dto.template.txt"));
-        this.templateDAOTable = readContent(JavaClassPrinter.class.getResourceAsStream("dao_table.template.txt"));
-        this.templateDAOTable2 = readContent(JavaClassPrinter.class.getResourceAsStream("dao_table.template2.txt"));
-        this.templateDAOView = readContent(JavaClassPrinter.class.getResourceAsStream("dao_view.template.txt"));
+        this.templateDTO = readContent("dto.template.txt");
+        this.templateDAOTable = readContent("dao_table.template.txt");
+        this.templateDAOTable2 = readContent("dao_table.template2.txt");
+        this.templateDAOView = readContent("dao_view.template.txt");
         this.table = table;
     }
 
@@ -67,23 +67,42 @@ public class JavaClassPrinter {
 
     public String generateDTO(String dtoPackageName, String dtoName) {
         ArrayList<String> toString = new ArrayList<String>();
-        StringBuilder member = new StringBuilder();
-        StringBuilder codeInitial = new StringBuilder();
+        StringBuilder codeMember = new StringBuilder();
+        StringBuilder codeConstr = new StringBuilder();
+        StringBuilder codeGetSet = new StringBuilder();
         List<ColumnType> columnTypes = this.table.getColumns();
         for (int i = 0; i < columnTypes.size(); i++) {
+        	String propNameL = CamelNaming.lower(columnTypes.get(i).columnName);
+        	String propNameU = CamelNaming.upper(columnTypes.get(i).columnName);
+        	String javaType = columnTypes.get(i).getJavaTypeName();
             if (columnTypes.get(i).isPk()) {
-                toString.add("this." + columnTypes.get(i).getPropertyName());
+                toString.add("this." + propNameL);
             }
-            member.append("    private ").append(columnTypes.get(i).getJavaTypeName()).append(";\n\n");
-            codeInitial.append("        this.").append(columnTypes.get(i).getPropertyName())
-                    .append(" = data.").append(columnTypes.get(i).getPropertyName()).append(";\n");
+            codeMember.append(String.format("\n    private %s %s", javaType, propNameL)).append(";\n");
+            codeConstr.append("        this.").append(propNameL).append(" = data.").append(propNameL).append(";\n");
+
+            codeGetSet.append("\n");
+            if("Date".equals(javaType)) {
+                codeGetSet.append(String.format("    public %s get%s()", javaType, propNameU)).append(" {\n");
+                codeGetSet.append(String.format("        return this.%s == null ? null : new Date(this.%s.getTime());", propNameL, propNameL)).append("\n    }\n\n");
+                codeGetSet.append(String.format("    public void set%s(%s %s)", propNameU, javaType, propNameL)).append(" {\n");
+                codeGetSet.append(String.format("        this.%s = %s == null ? null : new Date(%s.getTime());", propNameL, propNameL, propNameL)).append("\n    }\n");
+            }
+            else {
+                codeGetSet.append(String.format("    public %s get%s()", javaType, propNameU)).append(" {\n");
+                codeGetSet.append(String.format("        return this.%s;", propNameL)).append("\n    }\n\n");
+                codeGetSet.append(String.format("    public void set%s(%s %s)", propNameU, javaType, propNameL)).append(" {\n");
+                codeGetSet.append(String.format("        this.%s = %s;", propNameL, propNameL)).append("\n    }\n");
+            }
+           
         }
 
         return this.templateDTO
                 .replace("{DTO_PACKAGE}", dtoPackageName)
                 .replace("{DTO}", dtoName)
-                .replace("{CODE_INITIAL}", codeInitial.toString())
-                .replace("{MEMBER}", member.toString())
+                .replace("{CODE_INITIAL}", codeConstr.toString())
+                .replace("{CODE_GETSET}", codeGetSet.toString())
+                           .replace("{MEMBER}", codeMember.toString())
                 .replace("{TOSTRING}", String.join(" + \", \" + ", toString));
     }
 
@@ -129,7 +148,7 @@ public class JavaClassPrinter {
             codeUpd.append("            ").append(pk.get(i).genPsSet(i + 1 + nonPK.size())).append("\n");
             // TODO: bug
             codeSelPk.append("            ").append(pk.get(i).genPsSetEx(i + 1)).append("\n");
-            codeSelPkArgs.add(pk.get(i).getJavaTypeName());
+            codeSelPkArgs.add(pk.get(i).getJavaTypeName() + " " + CamelNaming.lower(pk.get(i).columnName));
             pkWhere.add(pk.get(i).getColumnName().toLowerCase() + "=?");
         }
 
@@ -168,21 +187,15 @@ public class JavaClassPrinter {
         }
     }
 
-    /**
-     * Read content from file.
-     * @param file File.
-     * @param charsetName Charset name.
-     * @return Content.
-     * @throws IOException IO exception.
-     */
-    private String readContent(InputStream fis) throws IOException {
-        byte[] bytesArray = new byte[fis.available()];
-        fis.read(bytesArray);
-        fis.close();
-        return new String(bytesArray);
+    private String readContent(String name) throws IOException {
+    	try(InputStream is = JavaClassPrinter.class.getResourceAsStream(name)) {
+	        byte[] bytesArray = new byte[is.available()];
+	        is.read(bytesArray);
+	        return new String(bytesArray, "utf-8");
+    	}
     }
 
-    class Result {
+    static class Result {
 
         public final String dto;
 

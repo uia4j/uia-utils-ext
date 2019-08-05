@@ -22,12 +22,13 @@ public class {DTO}Dao {
 
     public List<{DTO}> selectAll() throws SQLException {
         ArrayList<{DTO}> result = new ArrayList<{DTO}>();
-        try (PreparedStatement ps = this.conn.prepareStatement(SQL_SEL)) {
-            ResultSet rs = ps.executeQuery();
-            while(rs.next()) {
-                result.add(convert(rs));
+        try(PreparedStatement ps = this.conn.prepareStatement(SQL_SEL)) {
+            try(ResultSet rs = ps.executeQuery()) {
+                while(rs.next()) {
+                    result.add(convert(rs));
+                }
+                return result;
             }
-            return result;
         }
     }    
     

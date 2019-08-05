@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.uia.solution</groupId>
 	<artifactId>uia-utils-ext</artifactId>
-	<version>0.2.4</version>
+	<version>0.2.5-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>uia-utils-ext</name>
 	<url>https://github.com/uia4j/uia-utils-ext</url>
@@ -40,20 +40,21 @@
             <groupId>ojdbc6</groupId>
             <artifactId>ojdbc6</artifactId>
             <version>11.2.0.4</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/libs/ojdbc/ojdbc6.jar</systemPath>            
         </dependency>
 		<dependency>
 			<groupId>ngdbc</groupId>
 			<artifactId>ngdbc</artifactId>
 			<version>2.1.2</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/libs/ngdbc/ngdbc.jar</systemPath>            
 		</dependency>
 	</dependencies>
 	<build>
 		<finalName>${project.artifactId}-${project.version}</finalName>
 		<plugins>
+			<plugin>
+				<groupId>com.github.spotbugs</groupId>
+				<artifactId>spotbugs-maven-plugin</artifactId>
+				<version>3.1.12</version>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>

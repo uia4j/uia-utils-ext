@@ -145,63 +145,80 @@ public abstract class AbstractDatabase implements Database {
 
     @Override
     public TableType selectTable(String tableOrView, boolean firstAsPK) throws SQLException {
+    	String comment = null;
+        try (ResultSet rs = this.conn.getMetaData().getTables(null, this.schema, upperOrLower(tableOrView), new String[] { "TABLE", "VIEW" })) {
+        	if(!rs.next()) {
+        		return null;
+        	}
+            comment = rs.getString("REMARKS");
+        }
+    	
         List<ColumnType> columns = selectColumns(upperOrLower(tableOrView), firstAsPK);
-        return columns.size() == 0 ? null : new TableType(upperOrLower(tableOrView), columns);
+        return columns.size() == 0 ? null : new TableType(upperOrLower(tableOrView), comment, columns);
     }
 
     @Override
     public int createTable(TableType table) throws SQLException {
         String script = generateCreateTableSQL(table);
-        return this.conn.prepareStatement(script)
-                .executeUpdate();
+        try(PreparedStatement ps = this.conn.prepareStatement(script)) {
+            return ps.executeUpdate();
+        }
     }
 
     @Override
     public int alterTableColumns(String tableName, List<ColumnType> columns) throws SQLException {
         String script = generateAlterTableSQL(tableName, columns);
-        return this.conn.prepareStatement(script)
-                .executeUpdate();
+        try(PreparedStatement ps = this.conn.prepareStatement(script)) {
+        	return ps.executeUpdate();
+        }
     }
 
     @Override
     public int dropTable(String tableName) throws SQLException {
-        return this.conn.prepareStatement("DROP TABLE " + upperOrLower(tableName))
-                .executeUpdate();
+    	try(PreparedStatement ps = this.conn.prepareStatement("DROP TABLE " + upperOrLower(tableName))) {
+    		return ps.executeUpdate();
+    	}
     }
 
     @Override
     public int createView(String viewName, String sql) throws SQLException {
-        String script = String.format("CREATE VIEW \"%s\" (\n%s\n)", upperOrLower(viewName), sql);
-        return this.conn.prepareStatement(script)
-                .executeUpdate();
+        String script = String.format("CREATE VIEW \"%s\" (\n%s\n)", 
+        		upperOrLower(viewName), 
+        		sql);
+        try(PreparedStatement ps = this.conn.prepareStatement(script)) {
+        	return ps.executeUpdate();
+        }
     }
 
     @Override
     public int dropView(String viewName) throws SQLException {
-        return this.conn.prepareStatement("DROP VIEW " + upperOrLower(viewName))
-                .executeUpdate();
+    	try(PreparedStatement ps = this.conn.prepareStatement("DROP VIEW " + upperOrLower(viewName))) {
+    		return ps.executeUpdate();
+    	}
     }
 
     @Override
     public int[] executeBatch(List<String> sqls) throws SQLException {
-        java.sql.Statement state = this.conn.createStatement();
-        for (String sql : sqls) {
-            state.addBatch(sql);
+        try(java.sql.Statement state = this.conn.createStatement()) {
+	        for (String sql : sqls) {
+	            state.addBatch(sql);
+	        }
+	        return state.executeBatch();
         }
-        return state.executeBatch();
     }
 
     @Override
     public int[] executeBatch(String sql, List<List<Object>> rows) throws SQLException {
-        PreparedStatement ps = this.conn.prepareStatement(sql);
-        for (List<Object> row : rows) {
-            int i = 1;
-            for (Object col : row) {
-                ps.setObject(i++, col);
-            }
-            ps.addBatch();
+        try(PreparedStatement ps = this.conn.prepareStatement(sql)) {
+	        for (List<Object> row : rows) {
+	            int i = 1;
+	            for (Object col : row) {
+	                ps.setObject(i++, col);
+	            }
+	            ps.addBatch();
+	        }
+	        return ps.executeBatch();
         }
-        return ps.executeBatch();
     }
 
     protected abstract String upperOrLower(String value);

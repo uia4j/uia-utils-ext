@@ -28,11 +28,6 @@ package uia.utils.states;
  */
 public abstract class AbstractStateWorker<C, X> {
 
-    /**
-     * Allow to print debug information or not.
-     */
-    public static boolean PRINTABLE = false;
-
     protected StateMachine<C, X> stateMachine;
 
     /**
@@ -121,7 +116,6 @@ public abstract class AbstractStateWorker<C, X> {
      * Print internal information. Debug only.
      */
     public static void printlnHeader() {
-        PRINTABLE = true;
         System.out.println(String.format("%-25s, %-15s, %-20s, %-20s, %s",
                 "Class",
                 "Name",
@@ -137,14 +131,12 @@ public abstract class AbstractStateWorker<C, X> {
      * @param extra Extra information.
      */
     public void println(String eventName, String extra) {
-        if (PRINTABLE) {
-            System.out.println(String.format("%-25s, %-15s, %-20s, %-20s, %s",
-                    getClass().getSimpleName(),
-                    getName(),
-                    eventName,
-                    this.stateMachine.getCurrState(),
-                    extra));
-        }
+        System.out.println(String.format("%-25s, %-15s, %-20s, %-20s, %s",
+                getClass().getSimpleName(),
+                getName(),
+                eventName,
+                this.stateMachine.getCurrState(),
+                extra));
     }
 
     /**

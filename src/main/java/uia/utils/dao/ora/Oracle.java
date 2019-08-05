@@ -18,9 +18,9 @@
  *******************************************************************************/
 package uia.utils.dao.ora;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,14 +52,17 @@ public class Oracle extends AbstractDatabase {
     @Override
     public String selectViewScript(String viewName) throws SQLException {
         String script = null;
-        Statement stat = this.conn.createStatement();
-        ResultSet rs = stat.executeQuery("select DBMS_METADATA.GET_DDL('VIEW','" + viewName.toUpperCase() + "') from DUAL");
-        if (rs.next()) {
-            script = rs.getString(1);
-            int i = script.indexOf(") AS");
-            script = script.substring(i + 5, script.length()).trim();
+        try(PreparedStatement ps = this.conn.prepareStatement("select DBMS_METADATA.GET_DDL('VIEW',?) from DUAL")) {
+        	ps.setString(1,  viewName);
+	        try(ResultSet rs = ps.executeQuery()) {
+		        if (rs.next()) {
+		            script = rs.getString(1);
+		            int i = script.indexOf(") AS");
+		            script = script.substring(i + 5, script.length()).trim();
+		        }
+		        return script;
+		    }
         }
-        return script;
     }
 
     @Override
@@ -76,24 +79,41 @@ public class Oracle extends AbstractDatabase {
 
         ArrayList<String> pks = new ArrayList<String>();
         ArrayList<String> cols = new ArrayList<String>();
+        ArrayList<String> comments = new ArrayList<String>();
+        if(table.getRemark() != null) {
+        	comments.add(String.format("COMMENT ON TABLE %s is '%s';\n", 
+        			table.getTableName().toLowerCase(), 
+        			table.getRemark()));
+        }
+
         for (ColumnType ct : table.getColumns()) {
             if (ct.isPk()) {
                 pks.add(ct.getColumnName().toUpperCase());
             }
             cols.add(prepareColumnDef(ct));
+            if(ct.getRemark() != null && ct.getRemark().trim().length() > 0) {
+            	comments.add(String.format("COMMENT ON COLUMN %s.%s is '%s';\n", 
+            			table.getTableName().toUpperCase(), 
+            			ct.getColumnName().toUpperCase(),
+            			ct.getRemark()));
+            }
         }
 
         StringBuilder sb = new StringBuilder();
         sb.append("CREATE TABLE " + this.schema + "." + table.getTableName().toUpperCase() + "\n(\n");
         sb.append(String.join(",\n", cols));
         if (pks.isEmpty()) {
-            sb.append("\n)");
+            sb.append("\n);\n");
         }
         else {
             String pkSQL = String.format(",\n CONSTRAINT %s_pkey PRIMARY KEY (\"%s\")\n",
                     table.getTableName().toUpperCase(),
                     String.join("\",\"", pks));
-            sb.append(pkSQL).append(")");
+            sb.append(pkSQL).append(");\n");
+        }
+        
+        for(String comment : comments) {
+        	sb.append(comment);
         }
 
         return sb.toString();
@@ -155,6 +175,7 @@ public class Oracle extends AbstractDatabase {
                     ct.setDataTypeName(rs.getString("TYPE_NAME"));
                     ct.setNullable("1".equals(rs.getString("NULLABLE")));
                     ct.setColumnSize(rs.getInt("COLUMN_SIZE"));
+                    ct.setRemark(rs.getString("REMARKS"));
 
                     switch (rs.getInt("DATA_TYPE")) {
                         case -9:        // NVARCHAR2

@@ -42,14 +42,36 @@ public class PostgreSQLTest {
 
     @Test
     public void testSelectTable() throws Exception {
-        Database db = new PostgreSQL("localhost", "5432", "tmd", "postgres", "pgAdmin");
+        Database db = new PostgreSQL("localhost", "5432", "mvsdb", "huede", "huede");
 
-        TableType table = db.selectTable("test", true);
-        System.out.println(table.getTableName());
-        table.getColumns().forEach(System.out::println);
-        System.out.println(table.generateInsertSQL());
-        System.out.println(table.generateUpdateSQL());
-        System.out.println(table.generateSelectSQL());
+        print(db.selectTable("hspt", true));
+        print(db.selectTable("hspt_area", true));
+        print(db.selectTable("ivp_dtu", true));
+        print(db.selectTable("ivp_event_def", true));
+        print(db.selectTable("ivp", true));
+        print(db.selectTable("ivp_agent", true));
+        print(db.selectTable("ivp_run", true));
+        print(db.selectTable("ivp_raw", true));
+        print(db.selectTable("ivp_raw_event", true));
+        print(db.selectTable("login_log", true));
+
+        db.close();
+    }
+
+    @Test
+    public void testPMS() throws Exception {
+        final Database db = new PostgreSQL("localhost", "5432", "pmsdb", "pms", "pms");
+
+        db.selectTableNames().forEach(tn -> {
+            try {
+            	TableType t = db.selectTable(tn, true);
+            	System.out.println(db.generateCreateTableSQL(t));
+				print(t);
+			} catch (Exception e) {
+
+			}
+        });
+        
 
         db.close();
     }
@@ -94,5 +116,17 @@ public class PostgreSQLTest {
         }
 
         db.close();
+    }
+    
+    private void print(TableType table) {
+    	System.out.println(table.getTableName() + " " + table.getRemark());
+    	for(ColumnType ct : table.getColumns()) {
+    		System.out.println(String.format("  %s(%s): %s%s", 
+    				ct.getColumnName(), 
+    				ct.getDataTypeName(), 
+    				ct.getRemark(),
+    				ct.isPk() ? ", PK" : ""));
+    	}
+    	System.out.println();
     }
 }

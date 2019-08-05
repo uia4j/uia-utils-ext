@@ -28,8 +28,17 @@ public class JavaClassPrinterTest {
 
     @Test
     public void testGenerateTable() throws Exception {
-        JavaClassPrinter.Result result = new JavaClassPrinter(createDB(), "dcp_tile_prop")
-                .generate("uia.pie.db.dao", "uia.pie.db", "DcpTileProp");
+    	Database db = createDB();
+    	String daoPackage = "project.db.dao";
+    	String dtoPackage = "project.db";
+    	String tableName = "user_profile";
+
+    	JavaClassPrinter printer = new JavaClassPrinter(db, tableName);
+    	JavaClassPrinter.Result result = printer.generate(
+    	    daoPackage,
+    	    dtoPackage,
+    	    CamelNaming.upper(tableName));
+
         System.out.println("=========================");
         System.out.println(result.dto);
         System.out.println("=========================");
@@ -38,8 +47,17 @@ public class JavaClassPrinterTest {
 
     @Test
     public void testGenerateView() throws Exception {
-        JavaClassPrinter.Result result = new JavaClassPrinter(createDB(), "view_app_node_equip")
-                .generate4View("uia.fdc.db.dao", "uia.fdc.db", "ViewAppNodeEquip");
+    	Database db = createDB();
+    	String daoPackage = "project.db.dao";
+    	String dtoPackage = "project.db";
+    	String viewName = "user_profile";
+
+    	JavaClassPrinter printer = new JavaClassPrinter(db, viewName);
+    	JavaClassPrinter.Result result = printer.generate4View(
+    	    daoPackage,
+    	    dtoPackage,
+    	    CamelNaming.upper(viewName));
+
         System.out.println("=========================");
         System.out.println(result.dto);
         System.out.println("=========================");
@@ -66,7 +84,7 @@ public class JavaClassPrinterTest {
 
     private Database createDB() throws SQLException {
         //return new PostgreSQL("localhost", "5432", "tmd", "postgres", "pgAdmin");
-        return new PostgreSQL("localhost", "5432", "pie", "pie", "pie");
+        return new PostgreSQL("localhost", "5432", "scmdb", "scm", "scmAdmin");
     }
 
 }

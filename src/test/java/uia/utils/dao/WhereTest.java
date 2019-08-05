@@ -30,39 +30,39 @@ public class WhereTest {
 
     @Test
     public void testOr() {
-        Where and1 = SimpleWhere.createAnd().eq("A", "A").eq("B", "B");
+        Where and1 = Where.simpleAnd().eq("A", "A").eq("B", "B");
         System.out.println("and1: " + and1.generate());
-        Where and2 = SimpleWhere.createAnd().eq("C", "C").eq("D", "D");
+        Where and2 = Where.simpleAnd().eq("C", "C").eq("D", "D");
         System.out.println("and2: " + and2.generate());
 
-        Where where = new WhereOr().add(and1).add(and2);
+        Where where = Where.or(and1, and2);
         System.out.println("(and) or (and): " + where.generate());
         Assert.assertEquals("(A=? and B=?) or (C=? and D=?)", where.generate());
     }
 
     @Test
     public void testAnd() {
-        Where or1 = SimpleWhere.createOr().eq("A", "A").eq("B", "B");
+        Where or1 = Where.simpleOr().eq("A", "A").eq("B", "B");
         System.out.println("or1: " + or1.generate());
-        Where or2 = SimpleWhere.createOr().eq("C", "C").eq("D", "D");
+        Where or2 = Where.simpleOr().eq("C", "C").eq("D", "D");
         System.out.println("or2: " + or2.generate());
-        Where and3 = SimpleWhere.createAnd().eq("E", "E").eq("F", "F");
+        Where and3 = Where.simpleAnd().eq("E", "E").eq("F", "F");
         System.out.println("and3: " + and3.generate());
 
-        Where where1 = new WhereAnd().add(or1).add(or2);
+        Where where1 = Where.and(or1, or2);
         System.out.println("(or) and (or):" + where1.generate());
         Assert.assertEquals("(A=? or B=?) and (C=? or D=?)", where1.generate());
 
-        Where where2 = new WhereOr().add(where1).add(and3);
+        Where where2 = Where.or(where1, and3);
         System.out.println("(...) or (and):" + where2.generate());
         Assert.assertEquals("((A=? or B=?) and (C=? or D=?)) or (E=? and F=?)", where2.generate());
     }
 
     @Test
     public void testOrEmpty() {
-        WhereOr where = new WhereOr();
-        SimpleWhere and1 = SimpleWhere.createAnd();
-        SimpleWhere or2 = SimpleWhere.createOr();
+        WhereOr where = Where.or();
+        SimpleWhere and1 = Where.simpleAnd();
+        SimpleWhere or2 = Where.simpleOr();
 
         Assert.assertFalse(where.hasConditions());
         Assert.assertFalse(and1.hasConditions());
@@ -88,9 +88,9 @@ public class WhereTest {
 
     @Test
     public void testAndEmpty() {
-        WhereAnd where = new WhereAnd();
-        SimpleWhere and1 = SimpleWhere.createAnd();
-        SimpleWhere or2 = SimpleWhere.createOr();
+        WhereAnd where = Where.and();
+        SimpleWhere and1 = Where.simpleAnd();
+        SimpleWhere or2 = Where.simpleOr();
 
         Assert.assertFalse(where.hasConditions());
         Assert.assertFalse(and1.hasConditions());

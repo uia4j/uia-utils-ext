@@ -18,9 +18,9 @@
  *******************************************************************************/
 package uia.utils.dao.pg;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,28 +46,32 @@ public class PostgreSQL extends AbstractDatabase {
 
     public PostgreSQL(String host, String port, String service, String user, String pwd) throws SQLException {
         // jdbc:postgresql://host:port/database
-        super("org.postgresql.Driver", "jdbc:postgresql://" + host + ":" + port + "/" + service, user, pwd, "public");
+        super("org.postgresql.Driver", String.format("jdbc:postgresql://%s:%s/%s", host, port, service), user, pwd, "public");
     }
 
     @Override
     public int createView(String viewName, String sql) throws SQLException {
         String script = String.format("CREATE VIEW \"%s\" AS \n%s", viewName.toLowerCase(), sql);
-        return this.conn.prepareStatement(script)
-                .executeUpdate();
+        try(PreparedStatement ps = this.conn.prepareStatement(script)) {
+        	return ps.executeUpdate();
+        }
     }
 
     @Override
     public String selectViewScript(String viewName) throws SQLException {
         String script = null;
 
-        Statement stat = this.conn.createStatement();
-        ResultSet rs = stat.executeQuery("select pg_get_viewdef('" + viewName.toLowerCase() + "', true)");
-        if (rs.next()) {
-            script = rs.getString(1);
-            script = script.replace("::text", "").trim();
-            script = script.substring(0, script.length() - 1);
+        try(PreparedStatement ps = this.conn.prepareStatement("select pg_get_viewdef(?, true)")) {
+        	ps.setString(1, viewName);
+	        try(ResultSet rs = ps.executeQuery()) {
+		        if (rs.next()) {
+		            script = rs.getString(1);
+		            script = script.replace("::text", "").trim();
+		            script = script.substring(0, script.length() - 1);
+		        }
+		        return script;
+	        }
         }
-        return script;
     }
 
     @Override
@@ -83,24 +87,42 @@ public class PostgreSQL extends AbstractDatabase {
 
         ArrayList<String> pks = new ArrayList<String>();
         ArrayList<String> cols = new ArrayList<String>();
+        ArrayList<String> comments = new ArrayList<String>();
+        if(table.getRemark() != null) {
+        	comments.add(String.format("COMMENT ON TABLE %s is '%s';\n", 
+        			table.getTableName().toLowerCase(), 
+        			table.getRemark()));
+        }
+        
         for (ColumnType ct : table.getColumns()) {
             if (ct.isPk()) {
                 pks.add(ct.getColumnName().toLowerCase());
             }
             cols.add(prepareColumnDef(ct));
+            if (ct.getRemark() != null && 
+                ct.getRemark().trim().length() > 0) {
+            	comments.add(String.format("COMMENT ON COLUMN %s.%s is '%s';\n", 
+            			table.getTableName().toLowerCase(), 
+            			ct.getColumnName().toLowerCase(),
+            			ct.getRemark()));
+            }
         }
 
         StringBuilder sb = new StringBuilder();
         sb.append("CREATE TABLE \"" + table.getTableName().toLowerCase() + "\"\n(\n");
         sb.append(String.join(",\n", cols));
         if (pks.isEmpty()) {
-            sb.append("\n)");
+            sb.append("\n);\n");
         }
         else {
             String pkSQL = String.format(",\n CONSTRAINT %s_pkey PRIMARY KEY (%s)\n",
                     table.getTableName().toLowerCase(),
                     String.join(",", pks));
-            sb.append(pkSQL).append(")");
+            sb.append(pkSQL).append(");\n");
+        }
+        
+        for(String comment : comments) {
+        	sb.append(comment);
         }
 
         return sb.toString();
@@ -162,6 +184,7 @@ public class PostgreSQL extends AbstractDatabase {
                     ct.setDataTypeName(rs.getString("TYPE_NAME"));
                     ct.setNullable("1".equals(rs.getString("NULLABLE")));
                     ct.setColumnSize(rs.getInt("COLUMN_SIZE"));
+                    ct.setRemark(rs.getString("REMARKS"));
 
                     switch (rs.getInt("DATA_TYPE")) {
                         case -5:    // int8,oid(?)
@@ -234,10 +257,13 @@ public class PostgreSQL extends AbstractDatabase {
         switch (ct.getDataType()) {
             case LONG:
                 type = "bigint";
+                break;
             case NUMERIC:
                 type = "numeric";
+                break;
             case FLOAT:
                 type = "real";
+                break;
             case DOUBLE:
                 type = "double precision";
                 break;
@@ -249,6 +275,7 @@ public class PostgreSQL extends AbstractDatabase {
                 break;
             case TIME:
                 type = "time without time zone";
+                break;
             case TIMESTAMP:
                 type = "timestamp without time zone";
                 break;

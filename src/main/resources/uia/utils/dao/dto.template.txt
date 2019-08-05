@@ -3,16 +3,15 @@ package {DTO_PACKAGE};
 import java.util.Date;
 
 public class {DTO} {
-
 {MEMBER}
     public {DTO}() {
     }	
 
     public {DTO}({DTO} data) {
-{CODE_INITIAL}    }	
-
-    @Override
-    public {DTO} clone() {
+{CODE_INITIAL}
+    }	
+{CODE_GETSET}
+    public {DTO} copy() {
     	return new {DTO}(this);
     }
 

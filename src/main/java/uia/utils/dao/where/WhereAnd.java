@@ -28,7 +28,7 @@ public class WhereAnd extends Where {
 
     private ArrayList<Where> wheres;
 
-    public WhereAnd() {
+    WhereAnd() {
         this.wheres = new ArrayList<Where>();
     }
     

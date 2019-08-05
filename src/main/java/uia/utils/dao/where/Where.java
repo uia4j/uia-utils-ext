@@ -30,6 +30,30 @@ public abstract class Where {
 
     public abstract int accept(PreparedStatement ps, int index) throws SQLException;
 
+    public static SimpleWhere simpleAnd() {
+        return new SimpleWhere(" and ");
+    }
+
+    public static SimpleWhere simpleOr() {
+        return new SimpleWhere(" or ");
+    }
+    
+    public static WhereAnd and(Where... ws){
+    	WhereAnd where = new WhereAnd();
+    	for(Where w : ws) {
+    		where.add(w);
+    	}
+    	return where;
+    }
+    
+    public static WhereOr or(Where... ws){
+    	WhereOr where = new WhereOr();
+    	for(Where w : ws) {
+    		where.add(w);
+    	}
+    	return where;
+    }
+
     protected boolean isEmpty(Object value) {
         return value == null || value.toString().trim().length() == 0;
     }
