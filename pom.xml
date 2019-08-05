@@ -36,6 +36,13 @@
 		    <version>9.3-1101-jdbc41</version>
 			<scope>provided</scope>
 		</dependency> 
+		<dependency>
+		    <groupId>org.xerial</groupId>
+		    <artifactId>sqlite-jdbc</artifactId>
+		    <version>3.28.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<!-- 
         <dependency> 
             <groupId>ojdbc6</groupId>
             <artifactId>ojdbc6</artifactId>
@@ -48,12 +55,7 @@
 			<version>2.1.2</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-		    <groupId>org.xerial</groupId>
-		    <artifactId>sqlite-jdbc</artifactId>
-		    <version>3.28.0</version>
-			<scope>provided</scope>
-		</dependency>
+		 -->
 	</dependencies>
 	<build>
 		<finalName>${project.artifactId}-${project.version}</finalName>
