@@ -84,6 +84,11 @@ worker.run("E2", value);  // STATE3
 ```
 
 ## DAO
+Datebases the API supports are:
+* PostgreSQL
+* Oracle
+* HANA
+
 ### PreparedStatement Builder
 #### AND statement
 Example: *c1=? __and__ (c2 between ? and ?) __and__ c3 like ? __and__ c4<>?*
@@ -93,7 +98,6 @@ SimpleWhere and = Where.simpleAnd()
     .between("c2", "123", "456")
     .likeBegin("c3", "abc")
     .notEq("c4", "def");
-String statement = and.generate();
 ```
 
 #### OR statement
@@ -104,7 +108,6 @@ SimpleWhere or = Where.simpleOr()
     .between("c2", "123", "456")
     .likeBeginOrNull("c3", "abc")
     .notEq("c4", "def");
-String statement = or.generate();
 ```
 
 #### AND + OR statement
@@ -148,7 +151,8 @@ SimpleWhere where = Where.simpleAnd()
 PreparedStatement ps = SimpleStatement("select F1,F2,F3,F4 from TABLE_NAME")
     .where(where)
     .orderBy("F3")
-    .orderBy("F4");
+    .orderBy("F4")
+    .prepare(conn);
 ```
 
 ### DAO and DTO generator
