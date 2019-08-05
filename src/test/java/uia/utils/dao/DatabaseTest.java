@@ -33,7 +33,8 @@ public class DatabaseTest {
     @Test
     public void test1() throws Exception {
         try (Database db = sqlit1()) {
-            Assert.assertEquals(3, db.selectTableNames().size());
+            Assert.assertEquals(4, db.selectTableNames().size());
+            Assert.assertEquals(4, db.selectTableNames(null).size());
             Assert.assertEquals(2, db.selectTableNames("equip").size());
             Assert.assertEquals(12, db.selectColumns("equip", false).size());
             Assert.assertNotNull(db.selectTable("equip", false));
@@ -41,7 +42,10 @@ public class DatabaseTest {
             Assert.assertNull(db.selectTable("pms", false));
 
             Assert.assertEquals(1, db.selectViewNames().size());
+            Assert.assertEquals(1, db.selectViewNames(null).size());
             Assert.assertEquals(1, db.selectViewNames("view_").size());
+
+            System.out.println(db.selectViewScript("view_equip"));
         }
     }
 
@@ -49,10 +53,23 @@ public class DatabaseTest {
     public void test2() throws Exception {
         try (Database db1 = sqlit1()) {
             try (Database db2 = sqlit2()) {
+                if (db2.exists("equip")) {
+                    db2.dropTable("equip");
+                }
+                if (db2.exists("view_equip")) {
+                    db2.dropView("view_equip");
+                }
+
                 db2.createTable(db1.selectTable("equip", false));
                 Assert.assertEquals(1, db2.selectTableNames().size());
                 db2.dropTable("equip");
                 Assert.assertEquals(0, db2.selectTableNames().size());
+
+                db2.createView("view_equip", db1.selectViewScript("view_equip"));
+                Assert.assertEquals(1, db2.selectViewNames().size());
+                db2.dropView("view_equip");
+                Assert.assertEquals(0, db2.selectViewNames().size());
+
             }
         }
     }
@@ -62,6 +79,10 @@ public class DatabaseTest {
         try (Database db1 = sqlit1()) {
             TableType t1 = db1.selectTable("equip", false);
             try (Database db2 = sqlit2()) {
+                if (db2.exists("equip")) {
+                    db2.dropTable("equip");
+                }
+
                 db2.createTable(t1);
                 TableType t2 = db2.selectTable("equip", false);
                 db2.dropTable("equip");

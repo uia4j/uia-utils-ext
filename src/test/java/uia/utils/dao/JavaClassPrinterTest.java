@@ -32,22 +32,29 @@ import uia.utils.dao.sqlite.SQLite;
 public class JavaClassPrinterTest {
 
     @Test
-    public void testGenerateTable() throws Exception {
+    public void testGenerateTable1() throws Exception {
         Database db = createDB();
         String tableName = "equip";
         String dtoPackage = "uia.utils";
         String daoPackage = "uia.utils.dao";
 
-        JavaClassPrinter printer = new JavaClassPrinter(db, tableName);
-        JavaClassPrinter.Result result = printer.generate(
+        new JavaClassPrinter(db, tableName).generate(
                 daoPackage,
                 dtoPackage,
                 CamelNaming.upper(tableName));
+    }
 
-        System.out.println("=========================");
-        System.out.println(result.dto);
-        System.out.println("=========================");
-        System.out.println(result.dao);
+    @Test
+    public void testGenerateTable2() throws Exception {
+        Database db = createDB();
+        String tableName = "part_group_part";
+        String dtoPackage = "uia.utils";
+        String daoPackage = "uia.utils.dao";
+
+        new JavaClassPrinter(db, tableName).generate(
+                daoPackage,
+                dtoPackage,
+                CamelNaming.upper(tableName));
     }
 
     @Test
@@ -57,16 +64,10 @@ public class JavaClassPrinterTest {
         String dtoPackage = "uia.utils";
         String daoPackage = "uia.utils.dao";
 
-        JavaClassPrinter printer = new JavaClassPrinter(db, viewName);
-        JavaClassPrinter.Result result = printer.generate4View(
+        new JavaClassPrinter(db, viewName).generate4View(
                 daoPackage,
                 dtoPackage,
                 CamelNaming.upper(viewName));
-
-        System.out.println("=========================");
-        System.out.println(result.dto);
-        System.out.println("=========================");
-        System.out.println(result.dao);
     }
 
     private Database createDB() throws SQLException {

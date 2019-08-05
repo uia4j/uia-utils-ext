@@ -35,6 +35,7 @@ public class SQLiteTest {
         Database pg = new PostgreSQL("localhost", "5432", "pmsdb", "pms", "pms");
 
         Database sqlite = new SQLite("test/sqlite1");
+        sqlite.createTable(pg.selectTable("part_group_part", false));
         sqlite.createTable(pg.selectTable("lookup", false));
         sqlite.createTable(pg.selectTable("equip", false));
         sqlite.createTable(pg.selectTable("equip_group", false));

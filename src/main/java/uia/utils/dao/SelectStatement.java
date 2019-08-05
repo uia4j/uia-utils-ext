@@ -80,7 +80,7 @@ public class SelectStatement {
         String where = this.where == null ? null : this.where.generate();
         PreparedStatement ps;
         if (where == null || where.length() == 0) {
-            String sql = String.format("%s where %s%s%s",
+            String sql = String.format("%s%s%s",
                     this.selectSql,
                     groupBy(),
                     orderBy());
