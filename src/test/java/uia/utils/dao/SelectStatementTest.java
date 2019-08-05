@@ -108,6 +108,44 @@ public class SelectStatementTest {
         }
     }
 
+    @Test
+    public void test5() throws Exception {
+        SimpleWhere w1 = Where.simpleAnd().eq("state_name", "on").lessThan("ma_count", 10, false);
+        SimpleWhere w2 = Where.simpleAnd().eq("state_name", "edit");
+        Where where = Where.or(w1, w2);
+        Assert.assertEquals("(state_name=? and ma_count<?) or (state_name=?)", where.generate());
+
+        try (Database db = createDB()) {
+            SelectStatement select = new SelectStatement("SELECT id,equip_group_id,state_name,sub_state_name FROM equip")
+                    .where(where)
+                    .orderBy("id");
+            try (PreparedStatement ps = select.prepare(db.getConnection())) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    Assert.assertFalse(rs.next());
+                }
+            }
+        }
+    }
+
+    @Test
+    public void test6() throws Exception {
+        SimpleWhere w1 = Where.simpleOr().eq("state_name", "on").eq("state_name", "edit");
+        SimpleWhere w2 = Where.simpleOr().moreThan("ma_count", 10, true);
+        Where where = Where.and(w1, w2);
+        Assert.assertEquals("(state_name=? or state_name=?) and (ma_count>=?)", where.generate());
+
+        try (Database db = createDB()) {
+            SelectStatement select = new SelectStatement("SELECT id,equip_group_id,state_name,sub_state_name FROM equip")
+                    .where(where)
+                    .orderBy("id");
+            try (PreparedStatement ps = select.prepare(db.getConnection())) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    Assert.assertFalse(rs.next());
+                }
+            }
+        }
+    }
+
     private Database createDB() throws SQLException {
         return new SQLite("test/sqlite1");
     }

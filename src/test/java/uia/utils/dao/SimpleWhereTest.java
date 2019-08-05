@@ -49,6 +49,9 @@ public class SimpleWhereTest implements ConditionType {
         Assert.assertEquals(
                 "c1=? and (c3 between ? and ?) and c4 like ? and c7<>? and (cx='A')",
                 and.generate());
+        Assert.assertEquals(
+                "c1='abc' and (c3 between '123' and '456') and c4 like 'abc%' and c7<>'def' and (cx='A')",
+                and.toString());
     }
 
     @Test
@@ -65,6 +68,26 @@ public class SimpleWhereTest implements ConditionType {
         Assert.assertEquals(
                 "c1=? and c2 is null and (c3 between ? and ?) and c4 like ? and c5 is null and c7<>? and c8 is not null and cx is not null",
                 and.generate());
+    }
+
+    @Test
+    public void testAnd3() {
+        SimpleWhere and = Where.simpleAnd()
+                .eq("c1", "C1")
+                .eq("c2", null)
+                .eqOrNull("c3", "C3")
+                .eqOrNull("c4", null)
+                .notEq("c5", "C5")
+                .notEq("c6", null)
+                .notEqOrNull("c7", "C7")
+                .notEqOrNull("c8", null);
+        Assert.assertEquals(
+                "c1=? and c3=? and c4 is null and c5<>? and c7<>? and c8 is not null",
+                and.generate());
+
+        Assert.assertEquals(
+                "c1='C1' and c3='C3' and c4 is null and c5<>'C5' and c7<>'C7' and c8 is not null",
+                and.toString());
     }
 
     @Test
@@ -95,6 +118,22 @@ public class SimpleWhereTest implements ConditionType {
                 or.generate());
     }
 
+    @Test
+    public void testOr3() {
+        SimpleWhere or = Where.simpleOr()
+                .eq("c1", "abc")
+                .eq("c2", null)
+                .eqOrNull("c3", "abc")
+                .eqOrNull("c4", null)
+                .notEq("c5", "abc")
+                .notEq("c6", null)
+                .notEqOrNull("c7", "abc")
+                .notEqOrNull("c8", null);
+        Assert.assertEquals(
+                "c1=? or c3=? or c4 is null or c5<>? or c7<>? or c8 is not null",
+                or.generate());
+    }
+
     @Override
     public String getStatement() {
         return "(cx='A')";
@@ -103,6 +142,11 @@ public class SimpleWhereTest implements ConditionType {
     @Override
     public int accpet(PreparedStatement ps, int index) throws SQLException {
         return index;
+    }
+
+    @Override
+    public String toString() {
+        return "(cx='A')";
     }
 
 }

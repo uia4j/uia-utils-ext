@@ -43,11 +43,7 @@ public class JavaClassPrinter {
     private final String templateDAOView;
 
     public JavaClassPrinter(Database db, String tableName) throws IOException, SQLException {
-        this.templateDTO = readContent("dto.template.txt");
-        this.templateDAOTable = readContent("dao_table.template.txt");
-        this.templateDAOTable2 = readContent("dao_table.template2.txt");
-        this.templateDAOView = readContent("dao_view.template.txt");
-        this.table = db.selectTable(tableName, true);
+        this(db.selectTable(tableName, true));
     }
 
     public JavaClassPrinter(TableType table) throws IOException {
