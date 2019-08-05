@@ -1,2 +1,5 @@
 ignore:
-  - "src/main/java/uia/utils/http/*.java"
+  - "src/main/java/uia/utils/dao/hana/*.java"
+  - "src/main/java/uia/utils/dao/pg/*.java"
+  - "src/main/java/uia/utils/dao/ora/*.java"
+  - "src/main/java/uia/utils/dao/sqlite/*.java"
