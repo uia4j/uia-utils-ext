@@ -78,6 +78,8 @@ public class DatabaseTest {
     public void test3() throws Exception {
         try (Database db1 = sqlit1()) {
             TableType t1 = db1.selectTable("equip", false);
+            Assert.assertEquals("DELETE FROM equip WHERE id=?", t1.generateDeleteSQL());
+
             try (Database db2 = sqlit2()) {
                 if (db2.exists("equip")) {
                     db2.dropTable("equip");
@@ -87,8 +89,13 @@ public class DatabaseTest {
                 TableType t2 = db2.selectTable("equip", false);
                 db2.dropTable("equip");
 
-                CompareResult cr = t1.sameAs(t2);
-                Assert.assertTrue(cr.isPassed());
+                CompareResult cr1 = t1.sameAs(t2);
+                Assert.assertTrue(cr1.isPassed());
+
+                t2.getColumns().remove(1);
+                CompareResult cr2 = t1.sameAs(t2);
+                Assert.assertFalse(cr2.isPassed());
+                cr2.print(true);
             }
         }
     }

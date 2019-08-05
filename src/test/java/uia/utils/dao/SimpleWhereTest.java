@@ -98,9 +98,11 @@ public class SimpleWhereTest implements ConditionType {
                 .between("c3", "123", "456")
                 .likeBegin("c4", "abc")
                 .likeBegin("c5", null)
+                .likeOrNull("c6", "abc")
+                .likeOrNull("c7", null)
                 .add(this);
         Assert.assertEquals(
-                "c1=? or (c3 between ? and ?) or c4 like ? or (cx='A')",
+                "c1=? or (c3 between ? and ?) or c4 like ? or c6 like ? or c7 is null or (cx='A')",
                 or.generate());
     }
 
