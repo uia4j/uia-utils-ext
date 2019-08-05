@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2018 UIA
+ * Copyright 2019 UIA
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -21,6 +21,11 @@ package uia.utils.dao;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ *
+ * @author Kyle K. Lin
+ *
+ */
 public class CompareResult {
 
     public final String tableName;

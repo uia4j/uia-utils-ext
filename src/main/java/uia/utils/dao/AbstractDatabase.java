@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2018 UIA
+ * Copyright 2019 UIA
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -30,6 +30,11 @@ import javax.sql.DataSource;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 
+/**
+ *
+ * @author Kyle K. Lin
+ *
+ */
 public abstract class AbstractDatabase implements Database {
 
     protected final Connection conn;
@@ -39,7 +44,7 @@ public abstract class AbstractDatabase implements Database {
     private DataSource dataSource;
 
     protected AbstractDatabase(String driverName, String url, String user, String pwd, String schema) throws SQLException {
-        if (user != null) {
+        if (url != null) {
             this.conn = DriverManager.getConnection(url, user, pwd);
             this.dataSource = createDataSource(driverName, url, user, pwd);
             this.schema = schema;
@@ -144,23 +149,23 @@ public abstract class AbstractDatabase implements Database {
     }
 
     @Override
-    public TableType selectTable(String tableOrView, boolean firstAsPK) throws SQLException {
-    	String comment = null;
+    public TableType selectTable(String tableOrView, boolean firstAsPk) throws SQLException {
+        String comment = null;
         try (ResultSet rs = this.conn.getMetaData().getTables(null, this.schema, upperOrLower(tableOrView), new String[] { "TABLE", "VIEW" })) {
-        	if(!rs.next()) {
-        		return null;
-        	}
+            if (!rs.next()) {
+                return null;
+            }
             comment = rs.getString("REMARKS");
         }
-    	
-        List<ColumnType> columns = selectColumns(upperOrLower(tableOrView), firstAsPK);
+
+        List<ColumnType> columns = selectColumns(upperOrLower(tableOrView), firstAsPk);
         return columns.size() == 0 ? null : new TableType(upperOrLower(tableOrView), comment, columns);
     }
 
     @Override
     public int createTable(TableType table) throws SQLException {
         String script = generateCreateTableSQL(table);
-        try(PreparedStatement ps = this.conn.prepareStatement(script)) {
+        try (PreparedStatement ps = this.conn.prepareStatement(script)) {
             return ps.executeUpdate();
         }
     }
@@ -168,64 +173,70 @@ public abstract class AbstractDatabase implements Database {
     @Override
     public int alterTableColumns(String tableName, List<ColumnType> columns) throws SQLException {
         String script = generateAlterTableSQL(tableName, columns);
-        try(PreparedStatement ps = this.conn.prepareStatement(script)) {
-        	return ps.executeUpdate();
+        try (PreparedStatement ps = this.conn.prepareStatement(script)) {
+            return ps.executeUpdate();
         }
     }
 
     @Override
     public int dropTable(String tableName) throws SQLException {
-    	try(PreparedStatement ps = this.conn.prepareStatement("DROP TABLE " + upperOrLower(tableName))) {
-    		return ps.executeUpdate();
-    	}
+        try (PreparedStatement ps = this.conn.prepareStatement("DROP TABLE " + upperOrLower(tableName))) {
+            return ps.executeUpdate();
+        }
     }
 
     @Override
     public int createView(String viewName, String sql) throws SQLException {
-        String script = String.format("CREATE VIEW \"%s\" (\n%s\n)", 
-        		upperOrLower(viewName), 
-        		sql);
-        try(PreparedStatement ps = this.conn.prepareStatement(script)) {
-        	return ps.executeUpdate();
+        String script = String.format("CREATE VIEW \"%s\" (%n%s%n)",
+                upperOrLower(viewName),
+                sql);
+        try (PreparedStatement ps = this.conn.prepareStatement(script)) {
+            return ps.executeUpdate();
         }
     }
 
     @Override
     public int dropView(String viewName) throws SQLException {
-    	try(PreparedStatement ps = this.conn.prepareStatement("DROP VIEW " + upperOrLower(viewName))) {
-    		return ps.executeUpdate();
-    	}
+        try (PreparedStatement ps = this.conn.prepareStatement("DROP VIEW " + upperOrLower(viewName))) {
+            return ps.executeUpdate();
+        }
     }
 
     @Override
     public int[] executeBatch(List<String> sqls) throws SQLException {
-        try(java.sql.Statement state = this.conn.createStatement()) {
-	        for (String sql : sqls) {
-	            state.addBatch(sql);
-	        }
-	        return state.executeBatch();
+        try (java.sql.Statement state = this.conn.createStatement()) {
+            for (String sql : sqls) {
+                state.addBatch(sql);
+            }
+            return state.executeBatch();
         }
     }
 
     @Override
     public int[] executeBatch(String sql, List<List<Object>> rows) throws SQLException {
-        try(PreparedStatement ps = this.conn.prepareStatement(sql)) {
-	        for (List<Object> row : rows) {
-	            int i = 1;
-	            for (Object col : row) {
-	                ps.setObject(i++, col);
-	            }
-	            ps.addBatch();
-	        }
-	        return ps.executeBatch();
+        try (PreparedStatement ps = this.conn.prepareStatement(sql)) {
+            for (List<Object> row : rows) {
+                int i = 1;
+                for (Object col : row) {
+                    ps.setObject(i++, col);
+                }
+                ps.addBatch();
+            }
+            return ps.executeBatch();
         }
     }
 
+    /**
+     * Change value to upper case or lower case.
+     *
+     * @param value Value.
+     * @return Result.
+     */
     protected abstract String upperOrLower(String value);
 
-    private DataSource createDataSource(String driverName, String connectURI, String user, String pwd) {
+    private DataSource createDataSource(String driverName, String connectUrl, String user, String pwd) {
         BasicDataSource dataSource = new BasicDataSource();
-        dataSource.setUrl(connectURI);
+        dataSource.setUrl(connectUrl);
         dataSource.setUsername(user);
         dataSource.setPassword(pwd);
         dataSource.setInitialSize(10);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2018 UIA
+ * Copyright 2019 UIA
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -25,6 +25,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ *
+ * @author Kyle K. Lin
+ *
+ */
 public class JavaClassPrinter {
 
     private final TableType table;
@@ -72,29 +77,29 @@ public class JavaClassPrinter {
         StringBuilder codeGetSet = new StringBuilder();
         List<ColumnType> columnTypes = this.table.getColumns();
         for (int i = 0; i < columnTypes.size(); i++) {
-        	String propNameL = CamelNaming.lower(columnTypes.get(i).columnName);
-        	String propNameU = CamelNaming.upper(columnTypes.get(i).columnName);
-        	String javaType = columnTypes.get(i).getJavaTypeName();
+            String propNameLower = CamelNaming.lower(columnTypes.get(i).columnName);
+            String propNameUpper = CamelNaming.upper(columnTypes.get(i).columnName);
+            String javaType = columnTypes.get(i).getJavaTypeName();
             if (columnTypes.get(i).isPk()) {
-                toString.add("this." + propNameL);
+                toString.add("this." + propNameLower);
             }
-            codeMember.append(String.format("\n    private %s %s", javaType, propNameL)).append(";\n");
-            codeConstr.append("        this.").append(propNameL).append(" = data.").append(propNameL).append(";\n");
+            codeMember.append(String.format("%n    private %s %s", javaType, propNameLower)).append(";\n");
+            codeConstr.append("        this.").append(propNameLower).append(" = data.").append(propNameLower).append(";\n");
 
             codeGetSet.append("\n");
-            if("Date".equals(javaType)) {
-                codeGetSet.append(String.format("    public %s get%s()", javaType, propNameU)).append(" {\n");
-                codeGetSet.append(String.format("        return this.%s == null ? null : new Date(this.%s.getTime());", propNameL, propNameL)).append("\n    }\n\n");
-                codeGetSet.append(String.format("    public void set%s(%s %s)", propNameU, javaType, propNameL)).append(" {\n");
-                codeGetSet.append(String.format("        this.%s = %s == null ? null : new Date(%s.getTime());", propNameL, propNameL, propNameL)).append("\n    }\n");
+            if ("Date".equals(javaType)) {
+                codeGetSet.append(String.format("    public %s get%s()", javaType, propNameUpper)).append(" {\n");
+                codeGetSet.append(String.format("        return this.%s == null ? null : new Date(this.%s.getTime());", propNameLower, propNameLower)).append("\n    }\n\n");
+                codeGetSet.append(String.format("    public void set%s(%s %s)", propNameUpper, javaType, propNameLower)).append(" {\n");
+                codeGetSet.append(String.format("        this.%s = %s == null ? null : new Date(%s.getTime());", propNameLower, propNameLower, propNameLower)).append("\n    }\n");
             }
             else {
-                codeGetSet.append(String.format("    public %s get%s()", javaType, propNameU)).append(" {\n");
-                codeGetSet.append(String.format("        return this.%s;", propNameL)).append("\n    }\n\n");
-                codeGetSet.append(String.format("    public void set%s(%s %s)", propNameU, javaType, propNameL)).append(" {\n");
-                codeGetSet.append(String.format("        this.%s = %s;", propNameL, propNameL)).append("\n    }\n");
+                codeGetSet.append(String.format("    public %s get%s()", javaType, propNameUpper)).append(" {\n");
+                codeGetSet.append(String.format("        return this.%s;", propNameLower)).append("\n    }\n\n");
+                codeGetSet.append(String.format("    public void set%s(%s %s)", propNameUpper, javaType, propNameLower)).append(" {\n");
+                codeGetSet.append(String.format("        this.%s = %s;", propNameLower, propNameLower)).append("\n    }\n");
             }
-           
+
         }
 
         return this.templateDTO
@@ -102,7 +107,7 @@ public class JavaClassPrinter {
                 .replace("{DTO}", dtoName)
                 .replace("{CODE_INITIAL}", codeConstr.toString())
                 .replace("{CODE_GETSET}", codeGetSet.toString())
-                           .replace("{MEMBER}", codeMember.toString())
+                .replace("{MEMBER}", codeMember.toString())
                 .replace("{TOSTRING}", String.join(" + \", \" + ", toString));
     }
 
@@ -188,11 +193,11 @@ public class JavaClassPrinter {
     }
 
     private String readContent(String name) throws IOException {
-    	try(InputStream is = JavaClassPrinter.class.getResourceAsStream(name)) {
-	        byte[] bytesArray = new byte[is.available()];
-	        is.read(bytesArray);
-	        return new String(bytesArray, "utf-8");
-    	}
+        try (InputStream is = JavaClassPrinter.class.getResourceAsStream(name)) {
+            byte[] bytesArray = new byte[is.available()];
+            is.read(bytesArray);
+            return new String(bytesArray, "utf-8");
+        }
     }
 
     static class Result {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2018 UIA
+ * Copyright 2019 UIA
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -35,7 +35,7 @@ public abstract class AbstractStateWorker<C, X> {
      * @param workerName Worker name.
      */
     protected AbstractStateWorker(String workerName) {
-    	this(workerName, null);
+        this(workerName, null);
     }
 
     /**
@@ -76,7 +76,7 @@ public abstract class AbstractStateWorker<C, X> {
     }
 
     /**
-     * Add state-in listener. 
+     * Add state-in listener.
      * @param stateName State name.
      * @param listener The listener.
      */
@@ -85,7 +85,7 @@ public abstract class AbstractStateWorker<C, X> {
     }
 
     /**
-     * Add state-out listener. 
+     * Add state-out listener.
      * @param stateName State name.
      * @param listener The listener.
      */
@@ -94,7 +94,7 @@ public abstract class AbstractStateWorker<C, X> {
     }
 
     /**
-     * Add event listener. 
+     * Add event listener.
      * @param eventName Event name.
      * @param listener The listener.
      */

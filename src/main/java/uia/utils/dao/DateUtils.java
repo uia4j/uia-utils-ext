@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2018 UIA
+ * Copyright 2019 UIA
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -24,6 +24,11 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.TimeZone;
 
+/**
+ *
+ * @author Kyle K. Lin
+ *
+ */
 public class DateUtils {
 
     public static void setDate(PreparedStatement ps, int index, Date value) throws SQLException {

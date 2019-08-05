@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2018 UIA
+ * Copyright 2019 UIA
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -32,6 +32,11 @@ import uia.utils.dao.where.conditions.LikeType;
 import uia.utils.dao.where.conditions.MoreThanType;
 import uia.utils.dao.where.conditions.NotEqType;
 
+/**
+ *
+ * @author Kyle K. Lin
+ *
+ */
 public class SimpleWhere extends Where {
 
     private final ArrayList<ConditionType> conds;
@@ -42,9 +47,10 @@ public class SimpleWhere extends Where {
         this.conds = new ArrayList<ConditionType>();
         this.op = op;
     }
-    
+
+    @Override
     public boolean hasConditions() {
-    	return this.conds.size() > 0;
+        return this.conds.size() > 0;
     }
 
     public SimpleWhere eq(String key, Object value) {
@@ -123,21 +129,20 @@ public class SimpleWhere extends Where {
         this.conds.add(cond);
         return this;
     }
-    
+
     public SimpleWhere moreThan(String key, Object value, boolean eq) {
         if (isEmpty(key)) {
             return this;
         }
-    	this.conds.add(new MoreThanType(key, value, eq));
+        this.conds.add(new MoreThanType(key, value, eq));
         return this;
     }
 
-    
     public SimpleWhere lessThan(String key, Object value, boolean eq) {
         if (isEmpty(key)) {
             return this;
         }
-    	this.conds.add(new LessThanType(key, value, eq));
+        this.conds.add(new LessThanType(key, value, eq));
         return this;
     }
 
@@ -147,8 +152,8 @@ public class SimpleWhere extends Where {
             return "";
         }
         List<String> data = this.conds.stream()
-        		.map(c -> c.getStatement())
-        		.collect(Collectors.toList());
+                .map(c -> c.getStatement())
+                .collect(Collectors.toList());
         return String.join(this.op, data);
     }
 

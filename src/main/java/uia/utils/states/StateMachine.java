@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2018 UIA
+ * Copyright 2019 UIA
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -34,10 +34,19 @@ public class StateMachine<C, X> {
 
     public enum RunResultType {
 
+        /**
+         * Not Support current event.
+         */
         EVENT_NOT_SUPPORT,
 
+        /**
+         * Kepp current state.
+         */
         STATE_KEEP,
 
+        /**
+         * State changed.
+         */
         STATE_CHANGED
     }
 
@@ -89,9 +98,8 @@ public class StateMachine<C, X> {
      * @return Registered state.
      */
     public State<C, X> registerState(String stateName) {
-    	return registerState(stateName, 0);
+        return registerState(stateName, 0);
     }
-
 
     /**
      * Register a new state.
@@ -153,7 +161,7 @@ public class StateMachine<C, X> {
         }
         listeners.add(listener);
     }
-    
+
     /**
      * Rollback to specific state.
      * @param stateName State name rollback to.
@@ -161,24 +169,24 @@ public class StateMachine<C, X> {
      * @return Rollback or not.
      */
     public boolean rollback(String stateName, String prevStateName) {
-    	State<C, X> state2 = this.states.get(stateName);
-    	if(state2 == null) {
-    		return false;
-    	}
+        State<C, X> state2 = this.states.get(stateName);
+        if (state2 == null) {
+            return false;
+        }
 
-    	if(prevStateName != null) {
-        	State<C, X> state1 = this.states.get(prevStateName);
-        	if(state1 == null) {
-        		return false;
-        	}
-        	this.prevState = state1;
-    	}
-    	else {
-    		this.prevState = null;
-    	}
+        if (prevStateName != null) {
+            State<C, X> state1 = this.states.get(prevStateName);
+            if (state1 == null) {
+                return false;
+            }
+            this.prevState = state1;
+        }
+        else {
+            this.prevState = null;
+        }
 
-    	this.currState = state2;
-    	return true;
+        this.currState = state2;
+        return true;
     }
 
     /**
@@ -251,8 +259,8 @@ public class StateMachine<C, X> {
             return;
         }
         for (StateListener<X> listener : listeners) {
-            listener.run(new StateEventContext<X>(eventName, ctx)); 
-        } 
+            listener.run(new StateEventContext<X>(eventName, ctx));
+        }
     }
 
     private void raiseEvent(String eventName, X ctx) {

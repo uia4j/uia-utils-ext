@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2018 UIA
+ * Copyright 2019 UIA
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -23,40 +23,90 @@ import java.sql.Connection;
 import java.sql.NClob;
 import java.sql.SQLException;
 
+/**
+ *
+ * @author Kyle K. Lin
+ *
+ */
 public abstract class ColumnType {
 
     public enum DataType {
 
+        /**
+         * varchar
+         */
         VARCHAR,
 
+        /**
+         * nvarchar
+         */
         NVARCHAR,
 
+        /**
+         * varchar2
+         */
         VARCHAR2,
 
+        /**
+         * nvarchar2
+         */
         NVARCHAR2,
 
+        /**
+         * integer
+         */
         INTEGER,
 
+        /**
+         * long
+         */
         LONG,
 
+        /**
+         * numeroc
+         */
         NUMERIC,
 
+        /**
+         * float
+         */
         FLOAT,
 
         DOUBLE,
 
+        /**
+         * timestamp
+         */
         TIMESTAMP,
 
+        /**
+         * date
+         */
         DATE,
 
+        /**
+         * time
+         */
         TIME,
 
+        /**
+         * blob
+         */
         BLOB,
 
+        /**
+         * clob
+         */
         CLOB,
 
+        /**
+         * nclob
+         */
         NCLOB,
 
+        /**
+         * others
+         */
         OTHERS;
 
         DataType() {
@@ -146,14 +196,14 @@ public abstract class ColumnType {
     }
 
     public String getRemark() {
-		return remark;
-	}
+        return this.remark;
+    }
 
-	public void setRemark(String remark) {
-		this.remark = remark;
-	}
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
 
-	/**
+    /**
      * Check if this column is string including NVARCHAR, NVARCHAR2, VARCHAR, VARCHAR2.
      * @return Result.
      */
@@ -205,23 +255,23 @@ public abstract class ColumnType {
     public String getJavaTypeName() {
         switch (this.dataType) {
             case INTEGER:
-            	return this.nullable ? "Integer" : "int";
+                return this.nullable ? "Integer" : "int";
             case LONG:
-            	return this.nullable ? "Long" : "long";
+                return this.nullable ? "Long" : "long";
             case NUMERIC:
             case FLOAT:
             case DOUBLE:
-            	return "BigDecimal";
+                return "BigDecimal";
             case DATE:
             case TIME:
             case TIMESTAMP:
-            	return "Date";
+                return "Date";
             case CLOB:
-            	return "Clob";
+                return "Clob";
             case NCLOB:
-            	return "NClob";
+                return "NClob";
             case BLOB:
-            	return "byte[]";
+                return "byte[]";
             default:
                 return "String";
         }
@@ -341,7 +391,7 @@ public abstract class ColumnType {
     }
 
     String genPsSet(int index) {
-    	String propertyName = CamelNaming.upper(this.columnName);
+        String propertyName = CamelNaming.upper(this.columnName);
         switch (this.dataType) {
             case DATE:
             case TIME:
@@ -384,7 +434,7 @@ public abstract class ColumnType {
     }
 
     String genPsSetEx(int index) {
-    	String propertyName = CamelNaming.lower(this.columnName);
+        String propertyName = CamelNaming.lower(this.columnName);
         switch (this.dataType) {
             case DATE:
             case TIME:
@@ -458,7 +508,7 @@ public abstract class ColumnType {
         }
 
         String rsGet = String.format("data.set%s(rs.get%s(%s));",
-        		CamelNaming.upper(this.columnName),
+                CamelNaming.upper(this.columnName),
                 type,
                 index);
         return rsGet;

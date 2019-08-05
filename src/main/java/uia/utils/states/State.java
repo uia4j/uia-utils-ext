@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2018 UIA
+ * Copyright 2019 UIA
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -30,8 +30,8 @@ import java.util.TreeMap;
  * @param <X> Event context.
  */
 public class State<C, X> {
-	
-	private final int seq;
+
+    private final int seq;
 
     private final String name;
 
@@ -47,7 +47,7 @@ public class State<C, X> {
      * @param name State name.
      */
     public State(String name) {
-    	this(name, 0);
+        this(name, 0);
     }
 
     /**
@@ -96,13 +96,13 @@ public class State<C, X> {
     public String getName() {
         return this.name;
     }
-    
+
     /**
      * Get sequence No.
      * @return Sequence No,
      */
     public int getSeq() {
-    	return this.seq;
+        return this.seq;
     }
 
     /**

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2018 UIA
+ * Copyright 2019 UIA
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -16,39 +16,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package uia.utils.dao;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+package uia.utils.dao.sqlite;
 
 import org.junit.Test;
 
-import uia.utils.dao.where.SimpleWhere;
-import uia.utils.dao.where.Where;
-import uia.utils.dao.where.SimpleStatement;
+import uia.utils.dao.Database;
+import uia.utils.dao.pg.PostgreSQL;
 
-public class StatementTest {
+/**
+ *
+ * @author Kyle K. Lin
+ *
+ */
+public class SQLiteTest {
 
     @Test
-    public void test1() throws SQLException {
-        SimpleWhere where = Where.simpleAnd()
-                .eq("f1", "value1")
-                .eq("f2", "value2");
+    public void testCreate() throws Exception {
+        Database pg = new PostgreSQL("localhost", "5432", "pmsdb", "pms", "pms");
 
-        try (Connection conn = createDB()) {
-            PreparedStatement ps = new SimpleStatement("SELECT f1,f2,f3,f4 FROM table_name")
-            	.where(where)
-            	.groupBy("A")
-            	.prepare(conn);
-            System.out.println(ps);
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
+        Database sqlite = new SQLite("test/sqlite1");
+        sqlite.createTable(pg.selectTable("lookup", false));
+        sqlite.createTable(pg.selectTable("equip", false));
+        sqlite.createTable(pg.selectTable("equip_group", false));
+        sqlite.createView("view_equip", pg.selectViewScript("view_equip"));
+        sqlite.close();
 
-    private Connection createDB() {
-        return null;
+        pg.close();
     }
 }

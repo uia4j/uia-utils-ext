@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2018 UIA
+ * Copyright 2019 UIA
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -21,6 +21,11 @@ package uia.utils.states;
 import org.junit.Assert;
 import org.junit.Test;
 
+/**
+ *
+ * @author Kyle K. Lin
+ *
+ */
 public class RollbackTest {
 
     private static String ST_IDLE = "IDLE";
@@ -65,7 +70,7 @@ public class RollbackTest {
         Assert.assertNotNull(machine.getState(ST_NEXT));
 
         Assert.assertFalse(machine.rollback("NOT_EXIST", ST_IDLE));
-        
+
         machine.changeState(ST_IDLE);
         machine.println();
         Assert.assertEquals("NULL", machine.getPrevState().getName());
@@ -81,7 +86,7 @@ public class RollbackTest {
         Assert.assertEquals(ST_PRE_PROCESS, machine.getPrevState().getName());
         Assert.assertEquals(ST_PROCESSING, machine.getCurrState().getName());
         Assert.assertEquals(3, machine.getCurrState().getSeq());
-        
+
         machine.rollback(ST_PRE_PROCESS, ST_IDLE);
         machine.println();
         Assert.assertEquals(ST_IDLE, machine.getPrevState().getName());

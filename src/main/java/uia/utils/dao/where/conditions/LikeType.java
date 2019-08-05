@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2018 UIA
+ * Copyright 2019 UIA
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -21,6 +21,11 @@ package uia.utils.dao.where.conditions;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+/**
+ *
+ * @author Kyle K. Lin
+ *
+ */
 public class LikeType implements ConditionType {
 
     private final String key;

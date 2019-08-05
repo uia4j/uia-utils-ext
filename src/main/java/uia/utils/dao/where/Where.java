@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2018 UIA
+ * Copyright 2019 UIA
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -22,42 +22,98 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
+/**
+ *
+ * @author Kyle K. Lin
+ *
+ */
 public abstract class Where {
-	
-	public abstract boolean hasConditions();
 
+    /**
+     * Test conditions exist or not.
+     *
+     * @return Result.
+     */
+    public abstract boolean hasConditions();
+
+    /**
+     * Generate the statement.
+     *
+     * @return The statement.
+     */
     public abstract String generate();
 
+    /**
+     * Accept where statement.
+     *
+     * @param ps Statement instance.
+     * @param index Index to set.
+     * @return Next index.
+     * @throws SQLException Failed to execute.
+     */
     public abstract int accept(PreparedStatement ps, int index) throws SQLException;
 
+    /**
+     * Create a simple AND statement.
+     *
+     * @return AND statement.
+     */
     public static SimpleWhere simpleAnd() {
         return new SimpleWhere(" and ");
     }
 
+    /**
+     * Create a simple OR statement.
+     *
+     * @return OR statement.
+     */
     public static SimpleWhere simpleOr() {
         return new SimpleWhere(" or ");
     }
-    
-    public static WhereAnd and(Where... ws){
-    	WhereAnd where = new WhereAnd();
-    	for(Where w : ws) {
-    		where.add(w);
-    	}
-    	return where;
-    }
-    
-    public static WhereOr or(Where... ws){
-    	WhereOr where = new WhereOr();
-    	for(Where w : ws) {
-    		where.add(w);
-    	}
-    	return where;
+
+    /**
+     * Create a AND statement.
+     *
+     * @return AND statement.
+     */
+    public static WhereAnd and(Where... ws) {
+        WhereAnd where = new WhereAnd();
+        for (Where w : ws) {
+            where.add(w);
+        }
+        return where;
     }
 
+    /**
+     * Create a OR statement.
+     *
+     * @return OR statement.
+     */
+    public static WhereOr or(Where... ws) {
+        WhereOr where = new WhereOr();
+        for (Where w : ws) {
+            where.add(w);
+        }
+        return where;
+    }
+
+    /**
+     * Test if value is empty.
+     *
+     * @param value Value.
+     * @return Result.
+     */
     protected boolean isEmpty(Object value) {
         return value == null || value.toString().trim().length() == 0;
     }
 
+    /**
+     * Returns WHERE statement.
+     *
+     * @param where Where statement.
+     * @param paramValues parameters and values.
+     * @return Result.
+     */
     public static String toString(String where, List<Object> paramValues) {
         if (where == null) {
             return "";

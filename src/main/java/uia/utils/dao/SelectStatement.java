@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2018 UIA
+ * Copyright 2019 UIA
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package uia.utils.dao.where;
+package uia.utils.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -24,9 +24,16 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SimpleStatement {
-	
-	private final String selectSql;
+import uia.utils.dao.where.Where;
+
+/**
+ *
+ * @author Kyle K. Lin
+ *
+ */
+public class SelectStatement {
+
+    private final String selectSql;
 
     private Where where;
 
@@ -34,29 +41,38 @@ public class SimpleStatement {
 
     private final List<String> orders;
 
-    public SimpleStatement(String selectSql) {
-    	this.selectSql = selectSql;
+    public SelectStatement(String selectSql) {
+        this.selectSql = selectSql;
         this.groups = new ArrayList<String>();
         this.orders = new ArrayList<String>();
     }
-    
+
     public void reset() {
-    	this.groups.clear();
-    	this.orders.clear();
+        this.groups.clear();
+        this.orders.clear();
     }
 
-    public SimpleStatement where(Where where) {
+    public SelectStatement where(Where where) {
         this.where = where;
         return this;
     }
 
-    public SimpleStatement groupBy(String columnName) {
+    public SelectStatement groupBy(String columnName) {
         this.groups.add(columnName);
         return this;
     }
 
-    public SimpleStatement orderBy(String columnName) {
-        this.orders.add(columnName);
+    public SelectStatement orderBy(String columnName) {
+        return orderBy(columnName, true);
+    }
+
+    public SelectStatement orderBy(String columnName, boolean asc) {
+        if (asc) {
+            this.orders.add(columnName);
+        }
+        else {
+            this.orders.add(columnName + " desc");
+        }
         return this;
     }
 
@@ -64,38 +80,20 @@ public class SimpleStatement {
         String where = this.where == null ? null : this.where.generate();
         PreparedStatement ps;
         if (where == null || where.length() == 0) {
-            ps = conn.prepareStatement(String.format("%s%s%s",
-            		this.selectSql,
-            		groupBy(),
-            		orderBy()));
+            String sql = String.format("%s where %s%s%s",
+                    this.selectSql,
+                    groupBy(),
+                    orderBy());
+            ps = conn.prepareStatement(sql);
         }
         else {
-            ps = conn.prepareStatement(String.format("%s where %s%s%s",
-            		this.selectSql,
-            		where,
-            		groupBy(),
-            		orderBy()));
+            String sql = String.format("%s where %s%s%s",
+                    this.selectSql,
+                    where,
+                    groupBy(),
+                    orderBy());
+            ps = conn.prepareStatement(sql);
             this.where.accept(ps, 1);
-        }
-
-        return ps;
-    }
-
-    public PreparedStatement prepareNoBinding(Connection conn, String selectSql) throws SQLException {
-        String where = this.where == null ? null : this.where.generate();
-        PreparedStatement ps;
-        if (where == null || where.length() == 0) {
-            ps = conn.prepareStatement(String.format("%s%s%s",
-            		this.selectSql,
-            		groupBy(),
-            		orderBy()));
-        }
-        else {
-            ps = conn.prepareStatement(String.format("%s where %s%s%s",
-            		this.selectSql,
-            		where,
-            		groupBy(),
-            		orderBy()));
         }
 
         return ps;

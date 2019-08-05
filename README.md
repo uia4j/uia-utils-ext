@@ -8,11 +8,13 @@ UIA Utils extension
 [![License](https://img.shields.io/github/license/uia4j/uia-utils-ext.svg)](LICENSE)
 
 
-Common utilities extension. Need JDK 1.8 or above. extension includes 4 sub projects:
+Some useful solution for system integration. Need JDK 1.8 or above.
+
+The package incldues 3 sub packages:
 
 * Cube - Multi dimension to query and view data.
-* States - Implementation of state machine pattern.
-* DAO - DAO pattern implementation and some helpers.
+* States - __State machine pattern__ implementation.
+* DAO - __DAO pattern__ implementation and some helpers to access databases.
 
 ## Cube
 ### key classes
@@ -89,8 +91,8 @@ Datebases the API supports are:
 * Oracle
 * HANA
 
-### PreparedStatement Builder
-#### AND statement
+### Where Statement
+#### AND
 Example: *c1=? __and__ (c2 between ? and ?) __and__ c3 like ? __and__ c4<>?*
 ```java
 SimpleWhere and = Where.simpleAnd()
@@ -100,7 +102,7 @@ SimpleWhere and = Where.simpleAnd()
     .notEq("c4", "def");
 ```
 
-#### OR statement
+#### OR
 Example: *c1=? __or__ (c2 between ? and ?) __or__ c3 like ? __or__ c4<>?*
 ```java
 SimpleWhere or = Where.simpleOr()
@@ -110,8 +112,8 @@ SimpleWhere or = Where.simpleOr()
     .notEq("c4", "def");
 ```
 
-#### AND + OR statement
-Example: *(A=? __and__ B=?) __or__ (C=? __and__ D=?)*
+#### AND + OR
+Example #1: *(A=? __and__ B=?) __or__ (C=? __and__ D=?)*
 ```java
 SimpleWhere and1 = Where.simpleAnd()
         .eq("A", "A1")
@@ -124,7 +126,7 @@ SimpleWhere and2 = Where.simpleAnd()
 WhereOr where = Where.or(and1, and2);
 ```
 
-Example: *(A=? __or__ B=?) __and__ (C=? __or__ D=?)*
+Example #2: *(A=? __or__ B=?) __and__ (C=? __or__ D=?)*
 ```java
 SimpleWhere or1 = Where.simpleOr()
         .eq("A", "A1")
@@ -137,62 +139,72 @@ SimpleWhere or2 = Where.simpleOr()
 WhereAnd where = Where.and(or1, or2);
 ```
 
-#### PreparedStatement
+### Select Statement
 Create a __READY TO EXECUTE__ PreparedStatement object.
 
-Example: *select F1, F2, F3, F4 from TABLE_NAME where F1=? and F2=? order by F3, F4*
+Example: __*SELECT id,revision,sch_name FROM pms_schedule WHERE state_name=? ORDER BY id*__
 ```java
 // where
 SimpleWhere where = Where.simpleAnd()
-    .eq("F1", "abc")
-    .eq("F2", "123");
+        .notEq("state_name", "on");
 
-// statement
-PreparedStatement ps = SimpleStatement("select F1,F2,F3,F4 from TABLE_NAME")
-    .where(where)
-    .orderBy("F3")
-    .orderBy("F4")
-    .prepare(conn);
+// select
+SelectStatement select = new SelectStatement("SELECT id,revision,sch_name FROM pms_schedule")
+    	.where(where)
+    	.orderBy("id");
+try (PreparedStatement ps = select.prepare(conn)) {
+    try (ResultSet rs = ps.executeQuery()) {
+    	while (rs.next()) {
+        	System.out.println(rs.getObject(3));
+    	}
+    }
+}
 ```
 
 ### DAO and DTO generator
-#### Generate for a Table
+
+#### Generate from Table
+
 ```java
 Database db = new PostgreSQL(host, port, dbName, user, password);
-String dtoPath = "/some/where/project/db/";     // save path
+String dtoPath = "src/java/main/project/db/";     // save path
 String daoPath = dtoPath + "dao/";
 
 // table
 String tableName = "user_profile";              // table name
-String dtoName = CamelNaming.upper(tableName);
+String dtoName = CamelNaming.upper(tableName);  // 'UserProfile'
 String dtoPackage = "project.db";               // package name
 String daoPackage = dtoPackage + ".dao";
 
-// print
+// printer
 JavaClassPrinter printer = new JavaClassPrinter(db, tableName);
 String dto = printer.generateDTO(dtoPackage, dtoName);
 String dao = printer.generateDAO(daoPackage, dtoPackage, dtoName);
 
+// save
 Files.write(Paths.get(dtoPath + dtoName + ".java"), dto.getBytes());
 Files.write(Paths.get(daoPath + dtoName + "Dao.java"), dao.getBytes());
 ```
-#### Generate for a View
+
+#### Generate from View
+
 ```java
 Database db = new PostgreSQL(host, port, dbName, user, password);
-String dtoPath = "/some/where/project/db/";     // save path
+String dtoPath = "src/java/main/project/db/";     // save path
 String daoPath = dtoPath + "dao/";
 
 // view
 String viewName = "view_user_profile";          // view path
-String dtoName = CamelNaming.upper(viewName);
+String dtoName = CamelNaming.upper(viewName);   // 'ViewUserProfile'
 String dtoPackage = "project.db";               // package name
 String daoPackage = dtoPackage + ".dao";
 
-// print
+// printer
 JavaClassPrinter printer = new JavaClassPrinter(db, viewName);
 String dto = printer.generateDTO(dtoPackage, dtoName);
 String dao = printer.generateDAO4View(daoPackage, dtoPackage, dtoName);
 
+// save
 Files.write(Paths.get(dtoPath + dtoName + ".java"), dto.getBytes());
 Files.write(Paths.get(daoPath + dtoName + "Dao.java"), dao.getBytes());
 ```

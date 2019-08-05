@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2018 UIA
+ * Copyright 2019 UIA
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -23,6 +23,11 @@ import org.junit.Test;
 
 import uia.utils.states.StateMachine.RunResultType;
 
+/**
+ *
+ * @author Kyle K. Lin
+ *
+ */
 public class AbstractStateWorkerTest extends AbstractStateWorker<AbstractStateWorkerTest, Object> {
 
     private static String IDLE = "IDLE";

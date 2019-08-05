@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2018 UIA
+ * Copyright 2019 UIA
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 public class TableType {
 
     private final String tableName;
-    
+
     private final String remark;
 
     private final List<ColumnType> columns;
@@ -62,10 +62,10 @@ public class TableType {
      * @return Table comment.
      */
     public String getRemark() {
-		return this.remark;
-	}
+        return this.remark;
+    }
 
-	/**
+    /**
      * select columns of primary key.
      * @return Columns.
      */

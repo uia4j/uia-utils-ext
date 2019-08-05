@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2018 UIA
+ * Copyright 2019 UIA
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -26,7 +26,12 @@ import uia.utils.dao.where.Where;
 import uia.utils.dao.where.WhereAnd;
 import uia.utils.dao.where.WhereOr;
 
-public class WhereTest {
+/**
+ *
+ * @author Kyle K. Lin
+ *
+ */
+public class WhereAndOrTest {
 
     @Test
     public void testOr() {
@@ -70,10 +75,10 @@ public class WhereTest {
         Assert.assertEquals("", where.generate());
         Assert.assertEquals("", and1.generate());
         Assert.assertEquals("", or2.generate());
-        
+
         where.add(and1);
         Assert.assertFalse(where.hasConditions());
-        
+
         and1.eq("a", "10");
         Assert.assertTrue(and1.hasConditions());
         Assert.assertTrue(where.hasConditions());
@@ -84,7 +89,6 @@ public class WhereTest {
         or2.eq("b", "20");
         Assert.assertEquals("(a=?) or (b=?)", where.generate());
     }
-
 
     @Test
     public void testAndEmpty() {
@@ -98,10 +102,10 @@ public class WhereTest {
         Assert.assertEquals("", where.generate());
         Assert.assertEquals("", and1.generate());
         Assert.assertEquals("", or2.generate());
-        
+
         where.add(and1);
         Assert.assertFalse(where.hasConditions());
-        
+
         and1.eq("a", "10");
         Assert.assertTrue(and1.hasConditions());
         Assert.assertTrue(where.hasConditions());

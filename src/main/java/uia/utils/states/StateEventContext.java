@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2018 UIA
+ * Copyright 2019 UIA
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -20,16 +20,16 @@ package uia.utils.states;
 
 /**
  * State event arguments.
- * 
+ *
  * @author Kyle K. Lin
  *
  * @param <X> Context data.
  */
 public class StateEventContext<X> {
 
-	/**
-	 * Event name.
-	 */
+    /**
+     * Event name.
+     */
     public final String eventName;
 
     /**

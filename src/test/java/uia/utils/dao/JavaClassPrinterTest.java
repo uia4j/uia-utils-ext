@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2018 UIA
+ * Copyright 2019 UIA
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -22,22 +22,27 @@ import java.sql.SQLException;
 
 import org.junit.Test;
 
-import uia.utils.dao.pg.PostgreSQL;
+import uia.utils.dao.sqlite.SQLite;
 
+/**
+ *
+ * @author Kyle K. Lin
+ *
+ */
 public class JavaClassPrinterTest {
 
     @Test
     public void testGenerateTable() throws Exception {
-    	Database db = createDB();
-    	String daoPackage = "project.db.dao";
-    	String dtoPackage = "project.db";
-    	String tableName = "user_profile";
+        Database db = createDB();
+        String tableName = "equip";
+        String dtoPackage = "uia.utils";
+        String daoPackage = "uia.utils.dao";
 
-    	JavaClassPrinter printer = new JavaClassPrinter(db, tableName);
-    	JavaClassPrinter.Result result = printer.generate(
-    	    daoPackage,
-    	    dtoPackage,
-    	    CamelNaming.upper(tableName));
+        JavaClassPrinter printer = new JavaClassPrinter(db, tableName);
+        JavaClassPrinter.Result result = printer.generate(
+                daoPackage,
+                dtoPackage,
+                CamelNaming.upper(tableName));
 
         System.out.println("=========================");
         System.out.println(result.dto);
@@ -47,16 +52,16 @@ public class JavaClassPrinterTest {
 
     @Test
     public void testGenerateView() throws Exception {
-    	Database db = createDB();
-    	String daoPackage = "project.db.dao";
-    	String dtoPackage = "project.db";
-    	String viewName = "user_profile";
+        Database db = createDB();
+        String viewName = "view_equip";
+        String dtoPackage = "uia.utils";
+        String daoPackage = "uia.utils.dao";
 
-    	JavaClassPrinter printer = new JavaClassPrinter(db, viewName);
-    	JavaClassPrinter.Result result = printer.generate4View(
-    	    daoPackage,
-    	    dtoPackage,
-    	    CamelNaming.upper(viewName));
+        JavaClassPrinter printer = new JavaClassPrinter(db, viewName);
+        JavaClassPrinter.Result result = printer.generate4View(
+                daoPackage,
+                dtoPackage,
+                CamelNaming.upper(viewName));
 
         System.out.println("=========================");
         System.out.println(result.dto);
@@ -64,27 +69,8 @@ public class JavaClassPrinterTest {
         System.out.println(result.dao);
     }
 
-    @Test
-    public void testGenerateDTO() throws Exception {
-        System.out.println(new JavaClassPrinter(createDB(), "ivp_raw_event_view")
-                .generateDTO("uia.utils.dao", "DispatchSfc"));
-    }
-
-    @Test
-    public void testGenerateDAO() throws Exception {
-        System.out.println(new JavaClassPrinter(createDB(), "ivp_raw_event_view")
-                .generateDAO("uia.utils.dao", "uia.utils.dao", "DispatchSfc"));
-    }
-
-    @Test
-    public void testGenerateDAO4View() throws Exception {
-        System.out.println(new JavaClassPrinter(createDB(), "ivp_raw_event_view")
-                .generateDAO4View("uia.utils.dao", "uia.utils.dao", "ivp_raw_event_view"));
-    }
-
     private Database createDB() throws SQLException {
-        //return new PostgreSQL("localhost", "5432", "tmd", "postgres", "pgAdmin");
-        return new PostgreSQL("localhost", "5432", "scmdb", "scm", "scmAdmin");
+        return new SQLite("test/sqlite1");
     }
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2018 UIA
+ * Copyright 2019 UIA
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -20,16 +20,16 @@ package uia.utils.states;
 
 /**
  * State listener.
- * 
+ *
  * @author Kyle K. Lin
  *
  * @param <T> Context data.
  */
 public interface StateListener<T> {
 
-	/**
-	 * Run the state.
-	 * @param ctx Event context.
-	 */
+    /**
+     * Run the state.
+     * @param ctx Event context.
+     */
     public void run(StateEventContext<T> ctx);
 }

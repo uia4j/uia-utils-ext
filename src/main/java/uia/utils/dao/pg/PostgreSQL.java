@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2018 UIA
+ * Copyright 2019 UIA
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -29,6 +29,11 @@ import uia.utils.dao.ColumnType;
 import uia.utils.dao.ColumnType.DataType;
 import uia.utils.dao.TableType;
 
+/**
+ *
+ * @author Kyle K. Lin
+ *
+ */
 public class PostgreSQL extends AbstractDatabase {
 
     static {
@@ -41,7 +46,7 @@ public class PostgreSQL extends AbstractDatabase {
     }
 
     public PostgreSQL() throws SQLException {
-		super(null, null, null, null, null);
+        super(null, null, null, null, null);
     }
 
     public PostgreSQL(String host, String port, String service, String user, String pwd) throws SQLException {
@@ -51,9 +56,9 @@ public class PostgreSQL extends AbstractDatabase {
 
     @Override
     public int createView(String viewName, String sql) throws SQLException {
-        String script = String.format("CREATE VIEW \"%s\" AS \n%s", viewName.toLowerCase(), sql);
-        try(PreparedStatement ps = this.conn.prepareStatement(script)) {
-        	return ps.executeUpdate();
+        String script = String.format("CREATE VIEW \"%s\" AS %n%s", viewName.toLowerCase(), sql);
+        try (PreparedStatement ps = this.conn.prepareStatement(script)) {
+            return ps.executeUpdate();
         }
     }
 
@@ -61,22 +66,22 @@ public class PostgreSQL extends AbstractDatabase {
     public String selectViewScript(String viewName) throws SQLException {
         String script = null;
 
-        try(PreparedStatement ps = this.conn.prepareStatement("select pg_get_viewdef(?, true)")) {
-        	ps.setString(1, viewName);
-	        try(ResultSet rs = ps.executeQuery()) {
-		        if (rs.next()) {
-		            script = rs.getString(1);
-		            script = script.replace("::text", "").trim();
-		            script = script.substring(0, script.length() - 1);
-		        }
-		        return script;
-	        }
+        try (PreparedStatement ps = this.conn.prepareStatement("select pg_get_viewdef(?, true)")) {
+            ps.setString(1, viewName);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    script = rs.getString(1);
+                    script = script.replace("::text", "").trim();
+                    script = script.substring(0, script.length() - 1);
+                }
+                return script;
+            }
         }
     }
 
     @Override
     public String generateCreateViewSQL(String viewName, String sql) {
-        return String.format("CREATE VIEW \"%s\" AS \n%s", viewName.toLowerCase(), sql);
+        return String.format("CREATE VIEW \"%s\" AS %n%s", viewName.toLowerCase(), sql);
     }
 
     @Override
@@ -88,23 +93,23 @@ public class PostgreSQL extends AbstractDatabase {
         ArrayList<String> pks = new ArrayList<String>();
         ArrayList<String> cols = new ArrayList<String>();
         ArrayList<String> comments = new ArrayList<String>();
-        if(table.getRemark() != null) {
-        	comments.add(String.format("COMMENT ON TABLE %s is '%s';\n", 
-        			table.getTableName().toLowerCase(), 
-        			table.getRemark()));
+        if (table.getRemark() != null) {
+            comments.add(String.format("COMMENT ON TABLE %s is '%s';%n",
+                    table.getTableName().toLowerCase(),
+                    table.getRemark()));
         }
-        
+
         for (ColumnType ct : table.getColumns()) {
             if (ct.isPk()) {
                 pks.add(ct.getColumnName().toLowerCase());
             }
             cols.add(prepareColumnDef(ct));
-            if (ct.getRemark() != null && 
-                ct.getRemark().trim().length() > 0) {
-            	comments.add(String.format("COMMENT ON COLUMN %s.%s is '%s';\n", 
-            			table.getTableName().toLowerCase(), 
-            			ct.getColumnName().toLowerCase(),
-            			ct.getRemark()));
+            if (ct.getRemark() != null &&
+                    ct.getRemark().trim().length() > 0) {
+                comments.add(String.format("COMMENT ON COLUMN %s.%s is '%s';%n",
+                        table.getTableName().toLowerCase(),
+                        ct.getColumnName().toLowerCase(),
+                        ct.getRemark()));
             }
         }
 
@@ -115,14 +120,14 @@ public class PostgreSQL extends AbstractDatabase {
             sb.append("\n);\n");
         }
         else {
-            String pkSQL = String.format(",\n CONSTRAINT %s_pkey PRIMARY KEY (%s)\n",
+            String pkSQL = String.format(",%n CONSTRAINT %s_pkey PRIMARY KEY (%s)%n",
                     table.getTableName().toLowerCase(),
                     String.join(",", pks));
             sb.append(pkSQL).append(");\n");
         }
-        
-        for(String comment : comments) {
-        	sb.append(comment);
+
+        for (String comment : comments) {
+            sb.append(comment);
         }
 
         return sb.toString();

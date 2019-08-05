@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2018 UIA
+ * Copyright 2019 UIA
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -24,6 +24,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ *
+ * @author Kyle K. Lin
+ *
+ */
 public class WhereOr extends Where {
 
     private ArrayList<Where> wheres;
@@ -31,12 +36,13 @@ public class WhereOr extends Where {
     WhereOr() {
         this.wheres = new ArrayList<Where>();
     }
-    
+
+    @Override
     public boolean hasConditions() {
-    	return this.wheres.stream()
-    			.filter(w -> w.hasConditions())
-    			.findAny()
-    			.isPresent();
+        return this.wheres.stream()
+                .filter(w -> w.hasConditions())
+                .findAny()
+                .isPresent();
     }
 
     public WhereOr add(Where where) {
@@ -47,9 +53,9 @@ public class WhereOr extends Where {
     @Override
     public String generate() {
         List<String> ws = this.wheres.stream()
-        		.filter(w -> w.hasConditions())
-        		.map(w -> "(" + w.generate() + ")")
-        		.collect(Collectors.toList());
+                .filter(w -> w.hasConditions())
+                .map(w -> "(" + w.generate() + ")")
+                .collect(Collectors.toList());
         return String.join(" or ", ws);
     }
 

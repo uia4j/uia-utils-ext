@@ -1,26 +1,9 @@
-/*******************************************************************************
- * Copyright 2019 UIA
- *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *******************************************************************************/
-package uia.utils.dao.hana;
+package uia.utils.dao.sqlite;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,35 +11,31 @@ import uia.utils.dao.AbstractDatabase;
 import uia.utils.dao.ColumnType;
 import uia.utils.dao.ColumnType.DataType;
 import uia.utils.dao.TableType;
+import uia.utils.dao.pg.PostgreSQLColumnType;
 
-/**
- *
- * @author Kyle K. Lin
- *
- */
-public class Hana extends AbstractDatabase {
+public class SQLite extends AbstractDatabase {
 
     static {
         try {
-            Class.forName("com.sap.db.jdbc.Driver");
+            Class.forName("org.sqlite.JDBC").newInstance();
         }
         catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public Hana() throws SQLException {
+    public SQLite() throws SQLException {
         super(null, null, null, null, null);
     }
 
-    public Hana(String host, String port, String schema, String user, String pwd) throws SQLException {
-        // jdbc:sap://host:port?reconnect=true
-        super("com.sap.db.jdbc.Driver", String.format("jdbc:sap://%s:%s", host, port), user, pwd, schema == null ? user : schema);
+    public SQLite(String file) throws SQLException {
+        // jdbc:sqlite:{file}
+        super("org.sqlite.JDBC", "jdbc:sqlite:" + file, null, null, null);
     }
 
     @Override
     public int createView(String viewName, String sql) throws SQLException {
-        String script = String.format("CREATE VIEW \"%s\" AS %n%s", viewName.toUpperCase(), sql);
+        String script = String.format("CREATE VIEW \"%s\" AS %n%s", viewName.toLowerCase(), sql);
         try (PreparedStatement ps = this.conn.prepareStatement(script)) {
             return ps.executeUpdate();
         }
@@ -64,23 +43,13 @@ public class Hana extends AbstractDatabase {
 
     @Override
     public String selectViewScript(String viewName) throws SQLException {
-        String script = null;
-        try (PreparedStatement ps = this.conn.prepareStatement("SELECT definition FROM VIEWS WHERE schema_name=? AND view_name=?")) {
-            ps.setString(1, this.schema);
-            ps.setString(2, viewName.toUpperCase());
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    script = rs.getString(1);
-                }
-                return script;
-            }
-        }
+        // TODO:
+        return null;
     }
 
     @Override
     public String generateCreateViewSQL(String viewName, String sql) {
-        return String.format("CREATE VIEW \"%s\" AS %n%s", viewName.toUpperCase(), sql);
+        return String.format("CREATE VIEW \"%s\" AS %n%s", viewName.toLowerCase(), sql);
     }
 
     @Override
@@ -100,26 +69,29 @@ public class Hana extends AbstractDatabase {
 
         for (ColumnType ct : table.getColumns()) {
             if (ct.isPk()) {
-                pks.add(ct.getColumnName().toUpperCase());
+                pks.add(ct.getColumnName().toLowerCase());
             }
             cols.add(prepareColumnDef(ct));
             if (ct.getRemark() != null &&
                     ct.getRemark().trim().length() > 0) {
                 comments.add(String.format("COMMENT ON COLUMN %s.%s is '%s';%n",
-                        table.getTableName().toUpperCase(),
-                        ct.getColumnName().toUpperCase(),
+                        table.getTableName().toLowerCase(),
+                        ct.getColumnName().toLowerCase(),
                         ct.getRemark()));
             }
         }
 
         StringBuilder sb = new StringBuilder();
-        sb.append("CREATE COLUMN TABLE \"" + table.getTableName().toUpperCase() + "\"\n(\n");
+        sb.append("CREATE TABLE \"" + table.getTableName().toLowerCase() + "\"\n(\n");
         sb.append(String.join(",\n", cols));
         if (pks.isEmpty()) {
             sb.append("\n);\n");
         }
         else {
-            sb.append(",\n PRIMARY KEY (\"" + String.join("\",\"", pks) + "\")\n);\n");
+            String pkSQL = String.format(",%n CONSTRAINT %s_pkey PRIMARY KEY (%s)%n",
+                    table.getTableName().toLowerCase(),
+                    String.join(",", pks));
+            sb.append(pkSQL).append(");\n");
         }
 
         for (String comment : comments) {
@@ -177,7 +149,7 @@ public class Hana extends AbstractDatabase {
             while (rs.next()) {
                 if (tableName.equalsIgnoreCase(rs.getString("TABLE_NAME"))) {
                     String columnName = rs.getString("COLUMN_NAME");
-                    ColumnType ct = new HanaColumnType();
+                    ColumnType ct = new PostgreSQLColumnType();
                     ct.setPk(pks.contains(columnName));
                     ct.setColumnName(columnName);
                     ct.setDecimalDigits(rs.getInt("DECIMAL_DIGITS"));
@@ -188,47 +160,29 @@ public class Hana extends AbstractDatabase {
                     ct.setRemark(rs.getString("REMARKS"));
 
                     switch (rs.getInt("DATA_TYPE")) {
-                        case -9:    // NVARCHAR
-                            ct.setDataType(DataType.NVARCHAR);
-                            break;
-                        case -6:    // TINYINT
+                        case Types.TINYINT:
+                        case Types.SMALLINT:
+                        case Types.INTEGER:
+                        case Types.BIGINT:
                             ct.setDataType(DataType.INTEGER);
                             break;
-                        case -5:    // BIGINT
-                            ct.setDataType(DataType.LONG);
+                        case Types.VARCHAR:
+                        case Types.NVARCHAR:
+                        case Types.CLOB:
+                        case Types.NCLOB:
+                            ct.setDataType(DataType.VARCHAR2);
                             break;
-                        case 3:     // DECIMAL, SMALLDECIMAL
-                            ct.setDataType(DataType.NUMERIC);
-                            break;
-                        case 4:     // INTEGER
-                            ct.setDataType(DataType.INTEGER);
-                            break;
-                        case 5:     // SMALLINT
-                            ct.setDataType(DataType.INTEGER);
-                            break;
-                        case 7:     // REAL
-                            ct.setDataType(DataType.NUMERIC);
-                            break;
-                        case 12:    // VARCHAR
-                            ct.setDataType(DataType.VARCHAR);
-                            break;
-                        case 91:    // DATE
-                            ct.setDataType(DataType.DATE);
-                            break;
-                        case 92:    // TIME
-                            ct.setDataType(DataType.TIME);
-                            break;
-                        case 93:    // SECONDDATE, TIMESTAMP
-                            ct.setDataType(DataType.TIMESTAMP);
-                            break;
-                        case 2004:  // BLOB
+                        case Types.BLOB:
                             ct.setDataType(DataType.BLOB);
                             break;
-                        case 2005:  // CLOB
-                            ct.setDataType(DataType.CLOB);
+                        case Types.FLOAT:
+                        case Types.DOUBLE:
+                            ct.setDataType(DataType.DOUBLE);
                             break;
-                        case 2011:  // NCLOB, TEXT
-                            ct.setDataType(DataType.NCLOB);
+                        case Types.REAL:
+                        case Types.DECIMAL:
+                        case Types.NUMERIC:
+                            ct.setDataType(DataType.NUMERIC);
                             break;
                         default:
                             ct.setDataType(DataType.OTHERS);
@@ -248,47 +202,42 @@ public class Hana extends AbstractDatabase {
 
     @Override
     protected String upperOrLower(String value) {
-        return value.toUpperCase();
+        return value.toLowerCase();
     }
 
     private String prepareColumnDef(ColumnType ct) {
         String type = "";
         switch (ct.getDataType()) {
-            case INTEGER:
             case LONG:
+                type = "INT";
+                break;
             case NUMERIC:
+                type = "NUMERIC";
+                break;
             case FLOAT:
             case DOUBLE:
-                long cs = ct.getColumnSize();
-                type = "DECIMAL("
-                        + (cs >= 38 || cs <= 0 ? 38 : ct.getColumnSize())
-                        + ","
-                        + ct.getDecimalDigits()
-                        + ")";
+                type = "REAL";
+                break;
+            case INTEGER:
+                type = "INT";
                 break;
             case DATE:
-                type = "SECONDDATE";
-                break;
             case TIME:
             case TIMESTAMP:
-                type = "TIMESTAMP";
+                type = "TEXT";
                 break;
             case NVARCHAR:
             case NVARCHAR2:
-                type = "VARCHAR(" + (ct.getColumnSize() == 0 ? 32 : ct.getColumnSize()) + ")";
-                break;
             case VARCHAR:
             case VARCHAR2:
-                type = "NVARCHAR(" + (ct.getColumnSize() == 0 ? 32 : ct.getColumnSize()) + ")";
+                type = "TEXT";
+                break;
+            case CLOB:
+            case NCLOB:
+                type = "TEXT";
                 break;
             case BLOB:
                 type = "BLOB";
-                break;
-            case CLOB:
-                type = "CLOB";
-                break;
-            case NCLOB:
-                type = "NCLOB";
                 break;
             default:
                 throw new NullPointerException(ct.getColumnName() + " type not found");
@@ -300,6 +249,6 @@ public class Hana extends AbstractDatabase {
             nullable = " NOT NULL";
         }
 
-        return " \"" + ct.getColumnName().toUpperCase() + "\" " + type + nullable;
+        return " \"" + ct.getColumnName().toLowerCase() + "\" " + type + nullable;
     }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2018 UIA
+ * Copyright 2019 UIA
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -23,6 +23,11 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
 
+/**
+ *
+ * @author Kyle K. Lin
+ *
+ */
 public class EqType implements ConditionType {
 
     private final String key;

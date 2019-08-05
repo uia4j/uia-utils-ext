@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2018 UIA
+ * Copyright 2019 UIA
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -26,18 +26,18 @@ import java.util.stream.Stream;
 
 /**
  * Cube.
- * 
+ *
  * @author Kyle K. Lin
  *
  * @param <T> Type of value.
  */
 public interface Cube<T> {
 
-	/**
-	 * Create cubes grouping by tag.
-	 * @param tagName Tag name.
-	 * @return Cubes.
-	 */
+    /**
+     * Create cubes grouping by tag.
+     * @param tagName Tag name.
+     * @return Cubes.
+     */
     public Map<String, Cube<T>> cubes(String tagName);
 
     /**
@@ -109,7 +109,7 @@ public interface Cube<T> {
 
     /**
      * Data.
-     * 
+     *
      * @author Kyle K. Lin
      *
      * @param <T> Type of value.

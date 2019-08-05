@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2018 UIA
+ * Copyright 2019 UIA
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -16,16 +16,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package uia.utils.dao;
+package uia.utils.dao.hana;
 
 import java.util.List;
 
 import org.junit.Test;
 
-import uia.utils.dao.hana.Hana;
+import uia.utils.dao.Database;
+import uia.utils.dao.TableType;
 import uia.utils.dao.ora.Oracle;
 import uia.utils.dao.pg.PostgreSQL;
 
+/**
+ *
+ * @author Kyle K. Lin
+ *
+ */
 public class HanaSQLTest {
 
     @Test

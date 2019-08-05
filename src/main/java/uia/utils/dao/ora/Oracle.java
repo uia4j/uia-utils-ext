@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2018 UIA
+ * Copyright 2019 UIA
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -29,6 +29,11 @@ import uia.utils.dao.ColumnType;
 import uia.utils.dao.ColumnType.DataType;
 import uia.utils.dao.TableType;
 
+/**
+ *
+ * @author Kyle K. Lin
+ *
+ */
 public class Oracle extends AbstractDatabase {
 
     static {
@@ -38,10 +43,10 @@ public class Oracle extends AbstractDatabase {
         catch (Exception e) {
             e.printStackTrace();
         }
-    }    
+    }
 
     public Oracle() throws SQLException {
-		super(null, null, null, null, null);
+        super(null, null, null, null, null);
     }
 
     public Oracle(String host, String port, String service, String user, String pwd) throws SQLException {
@@ -52,24 +57,23 @@ public class Oracle extends AbstractDatabase {
     @Override
     public String selectViewScript(String viewName) throws SQLException {
         String script = null;
-        try(PreparedStatement ps = this.conn.prepareStatement("select DBMS_METADATA.GET_DDL('VIEW',?) from DUAL")) {
-        	ps.setString(1,  viewName);
-	        try(ResultSet rs = ps.executeQuery()) {
-		        if (rs.next()) {
-		            script = rs.getString(1);
-		            int i = script.indexOf(") AS");
-		            script = script.substring(i + 5, script.length()).trim();
-		        }
-		        return script;
-		    }
+        try (PreparedStatement ps = this.conn.prepareStatement("select DBMS_METADATA.GET_DDL('VIEW',?) from DUAL")) {
+            ps.setString(1, viewName);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    script = rs.getString(1);
+                    int i = script.indexOf(") AS");
+                    script = script.substring(i + 5, script.length()).trim();
+                }
+                return script;
+            }
         }
     }
 
     @Override
     public String generateCreateViewSQL(String viewName, String sql) {
-        return String.format("CREATE VIEW \"%s\" (\n%s\n)", upperOrLower(viewName), sql);
+        return String.format("CREATE VIEW \"%s\" (%n%s%n)", upperOrLower(viewName), sql);
     }
-
 
     @Override
     public String generateCreateTableSQL(TableType table) {
@@ -80,10 +84,10 @@ public class Oracle extends AbstractDatabase {
         ArrayList<String> pks = new ArrayList<String>();
         ArrayList<String> cols = new ArrayList<String>();
         ArrayList<String> comments = new ArrayList<String>();
-        if(table.getRemark() != null) {
-        	comments.add(String.format("COMMENT ON TABLE %s is '%s';\n", 
-        			table.getTableName().toLowerCase(), 
-        			table.getRemark()));
+        if (table.getRemark() != null) {
+            comments.add(String.format("COMMENT ON TABLE %s is '%s';%n",
+                    table.getTableName().toLowerCase(),
+                    table.getRemark()));
         }
 
         for (ColumnType ct : table.getColumns()) {
@@ -91,11 +95,11 @@ public class Oracle extends AbstractDatabase {
                 pks.add(ct.getColumnName().toUpperCase());
             }
             cols.add(prepareColumnDef(ct));
-            if(ct.getRemark() != null && ct.getRemark().trim().length() > 0) {
-            	comments.add(String.format("COMMENT ON COLUMN %s.%s is '%s';\n", 
-            			table.getTableName().toUpperCase(), 
-            			ct.getColumnName().toUpperCase(),
-            			ct.getRemark()));
+            if (ct.getRemark() != null && ct.getRemark().trim().length() > 0) {
+                comments.add(String.format("COMMENT ON COLUMN %s.%s is '%s';%n",
+                        table.getTableName().toUpperCase(),
+                        ct.getColumnName().toUpperCase(),
+                        ct.getRemark()));
             }
         }
 
@@ -106,14 +110,14 @@ public class Oracle extends AbstractDatabase {
             sb.append("\n);\n");
         }
         else {
-            String pkSQL = String.format(",\n CONSTRAINT %s_pkey PRIMARY KEY (\"%s\")\n",
+            String pkSQL = String.format(",%n CONSTRAINT %s_pkey PRIMARY KEY (\"%s\")%n",
                     table.getTableName().toUpperCase(),
                     String.join("\",\"", pks));
             sb.append(pkSQL).append(");\n");
         }
-        
-        for(String comment : comments) {
-        	sb.append(comment);
+
+        for (String comment : comments) {
+            sb.append(comment);
         }
 
         return sb.toString();

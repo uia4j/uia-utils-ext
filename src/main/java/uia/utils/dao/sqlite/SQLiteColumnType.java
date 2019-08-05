@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package uia.utils.dao.pg;
+package uia.utils.dao.sqlite;
 
 import uia.utils.dao.ColumnType;
 import uia.utils.dao.ComparePlan;
@@ -27,7 +27,7 @@ import uia.utils.dao.CompareResult;
  * @author Kyle K. Lin
  *
  */
-public class PostgreSQLColumnType extends ColumnType {
+public class SQLiteColumnType extends ColumnType {
 
     @Override
     public boolean sameAs(ColumnType targetColumn, ComparePlan plan, CompareResult cr) {
