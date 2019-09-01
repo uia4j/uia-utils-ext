@@ -29,7 +29,10 @@ import java.util.TimeZone;
  * @author Kyle K. Lin
  *
  */
-public class DateUtils {
+public final class DateUtils {
+
+    private DateUtils() {
+    }
 
     public static void setDate(PreparedStatement ps, int index, Date value) throws SQLException {
         if (value == null) {

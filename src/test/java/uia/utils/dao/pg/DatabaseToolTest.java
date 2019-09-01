@@ -16,34 +16,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package uia.utils.dao;
+package uia.utils.dao.pg;
+
+import java.sql.SQLException;
+
+import org.junit.Test;
+
+import uia.utils.dao.Database;
+import uia.utils.dao.DatabaseTool;
 
 /**
  *
  * @author Kyle K. Lin
  *
  */
-public final class CamelNaming {
+public class DatabaseToolTest {
 
-    private CamelNaming() {
+    @Test
+    public void testToTableScript() throws Exception {
+        Database db = pg();
+        DatabaseTool tool = new DatabaseTool(db);
+        tool.toTableScript("d:/temp/authdb.sql");
     }
 
-    public static String lower(String value) {
-        String[] data = value.split("_");
-        StringBuilder b = new StringBuilder();
-        b.append(data[0].toLowerCase());
-        for (int i = 1; i < data.length; i++) {
-            b.append(data[i].substring(0, 1).toUpperCase()).append(data[i].substring(1).toLowerCase());
-        }
-        return b.toString();
+    @Test
+    public void testToJava() throws Exception {
+        Database db = pg();
+        DatabaseTool tool = new DatabaseTool(db);
+        tool.table2Java("d:/temp/test", "a", false);
     }
 
-    public static String upper(String value) {
-        String[] data = value.split("_");
-        StringBuilder b = new StringBuilder();
-        for (int i = 0; i < data.length; i++) {
-            b.append(data[i].substring(0, 1).toUpperCase()).append(data[i].substring(1).toLowerCase());
-        }
-        return b.toString();
+    @Test
+    public void testToDAO() throws Exception {
+        Database db = pg();
+        DatabaseTool tool = new DatabaseTool(db);
+        tool.table2DAO("d:/temp/test", "a.dao", "a");
     }
+
+    private Database pg() throws SQLException {
+        return new PostgreSQL("localhost", "5432", "scmdb", "scm", "scmAdmin");
+    }
+
 }

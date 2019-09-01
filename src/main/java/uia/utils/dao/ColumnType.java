@@ -476,7 +476,7 @@ public abstract class ColumnType {
     }
 
     String genRsGet(String index) {
-        String type = "String";
+        String type = null;
         switch (this.dataType) {
             case INTEGER:
                 type = "Int";
@@ -507,11 +507,10 @@ public abstract class ColumnType {
                 type = "String";
         }
 
-        String rsGet = String.format("data.set%s(rs.get%s(%s));",
+        return String.format("data.set%s(rs.get%s(%s));",
                 CamelNaming.upper(this.columnName),
                 type,
                 index);
-        return rsGet;
     }
 
     @Override

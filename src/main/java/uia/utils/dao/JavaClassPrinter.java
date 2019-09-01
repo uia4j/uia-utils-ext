@@ -36,6 +36,8 @@ public class JavaClassPrinter {
 
     private final String templateDTO;
 
+    private final String templateDTO2;
+
     private final String templateDAOTable;
 
     private final String templateDAOTable2;
@@ -48,6 +50,7 @@ public class JavaClassPrinter {
 
     public JavaClassPrinter(TableType table) throws IOException {
         this.templateDTO = readContent("dto.template.txt");
+        this.templateDTO2 = readContent("dto.template2.txt");
         this.templateDAOTable = readContent("dao_table.template.txt");
         this.templateDAOTable2 = readContent("dao_table.template2.txt");
         this.templateDAOView = readContent("dao_view.template.txt");
@@ -55,8 +58,12 @@ public class JavaClassPrinter {
     }
 
     public Result generate(String daoPackageName, String dtoPackageName, String dtoName) {
+        return generate(daoPackageName, dtoPackageName, dtoName, false);
+    }
+
+    public Result generate(String daoPackageName, String dtoPackageName, String dtoName, boolean jpa) {
         return new Result(
-                generateDTO(dtoPackageName, dtoName),
+                generateDTO(dtoPackageName, dtoName, jpa),
                 generateDAO(daoPackageName, dtoPackageName, dtoName));
     }
 
@@ -67,44 +74,94 @@ public class JavaClassPrinter {
     }
 
     public String generateDTO(String dtoPackageName, String dtoName) {
-        ArrayList<String> toString = new ArrayList<String>();
+        return generateDTO(dtoPackageName, dtoName, false);
+    }
+
+    public String generateDTO(String dtoPackageName, String dtoName, boolean jpa) {
+        ArrayList<String> toString = new ArrayList<>();
         StringBuilder codeMember = new StringBuilder();
         StringBuilder codeConstr = new StringBuilder();
         StringBuilder codeGetSet = new StringBuilder();
         List<ColumnType> columnTypes = this.table.getColumns();
         for (int i = 0; i < columnTypes.size(); i++) {
-            String propNameLower = CamelNaming.lower(columnTypes.get(i).columnName);
-            String propNameUpper = CamelNaming.upper(columnTypes.get(i).columnName);
-            String javaType = columnTypes.get(i).getJavaTypeName();
-            if (columnTypes.get(i).isPk()) {
+            ColumnType ct = columnTypes.get(i);
+            String propNameLower = CamelNaming.lower(ct.columnName);
+            String propNameUpper = CamelNaming.upper(ct.columnName);
+            String javaType = ct.getJavaTypeName();
+
+            if (ct.isPk()) {
                 toString.add("this." + propNameLower);
             }
-            codeMember.append(String.format("%n    private %s %s", javaType, propNameLower)).append(";\n");
+
+            codeMember.append("\n");
+            if (jpa) {
+                if (ct.isPk()) {
+                    codeMember.append("    @Id").append("\n");
+                }
+                if (ct.isStringType()) {
+                    codeMember.append(String.format("    @Column(name = \"%s\", length=%s, nullable=%s)%n",
+                            ct.getColumnName(),
+                            ct.getColumnSize(),
+                            ct.isNullable()));
+                }
+                else {
+                    codeMember.append(String.format("    @Column(name = \"%s\", nullable=%s)%n",
+                            ct.columnName,
+                            ct.isNullable()));
+                }
+            }
+
+            codeMember.append(String.format("    private %s %s;%n", javaType, propNameLower));
             codeConstr.append("        this.").append(propNameLower).append(" = data.").append(propNameLower).append(";\n");
 
             codeGetSet.append("\n");
             if ("Date".equals(javaType)) {
-                codeGetSet.append(String.format("    public %s get%s()", javaType, propNameUpper)).append(" {\n");
-                codeGetSet.append(String.format("        return this.%s == null ? null : new Date(this.%s.getTime());", propNameLower, propNameLower)).append("\n    }\n\n");
-                codeGetSet.append(String.format("    public void set%s(%s %s)", propNameUpper, javaType, propNameLower)).append(" {\n");
-                codeGetSet.append(String.format("        this.%s = %s == null ? null : new Date(%s.getTime());", propNameLower, propNameLower, propNameLower)).append("\n    }\n");
+                if (ct.getRemark() != null) {
+                    codeGetSet.append(String.format("    /**%n     * Returns %s.%n     *%n     * @return %s.%n     */%n", ct.getRemark(), ct.getRemark()));
+                }
+                codeGetSet.append(String.format("    public %s get%s() {%n", javaType, propNameUpper));
+                codeGetSet.append(String.format("        return this.%s == null ? null : new Date(this.%s.getTime());%n    }%n%n", propNameLower, propNameLower));
+                if (ct.getRemark() != null) {
+                    codeGetSet.append(String.format("    /**%n     * Sets %s.%n     *%n     * @param %s %s.%n     */%n", ct.getRemark(), propNameLower, ct.getRemark()));
+                }
+                codeGetSet.append(String.format("    public void set%s(%s %s) {%n", propNameUpper, javaType, propNameLower));
+                codeGetSet.append(String.format("        this.%s = %s == null ? null : new Date(%s.getTime());%n    }%n%n", propNameLower, propNameLower, propNameLower));
             }
             else {
-                codeGetSet.append(String.format("    public %s get%s()", javaType, propNameUpper)).append(" {\n");
-                codeGetSet.append(String.format("        return this.%s;", propNameLower)).append("\n    }\n\n");
-                codeGetSet.append(String.format("    public void set%s(%s %s)", propNameUpper, javaType, propNameLower)).append(" {\n");
-                codeGetSet.append(String.format("        this.%s = %s;", propNameLower, propNameLower)).append("\n    }\n");
+                if (ct.getRemark() != null) {
+                    codeGetSet.append(String.format("    /**%n     * Returns %s.%n     *%n     * @return %s.%n     */%n", ct.getRemark(), ct.getRemark()));
+                }
+                codeGetSet.append(String.format("    public %s get%s() {%n", javaType, propNameUpper));
+                codeGetSet.append(String.format("        return this.%s;%n    }%n%n", propNameLower));
+                if (ct.getRemark() != null) {
+                    codeGetSet.append(String.format("    /**%n     * Sets %s.%n     *%n     * @param %s %s.%n     */%n", ct.getRemark(), propNameLower, ct.getRemark()));
+                }
+                codeGetSet.append(String.format("    public void set%s(%s %s) {%n", propNameUpper, javaType, propNameLower));
+                codeGetSet.append(String.format("        this.%s = %s;%n    }%n%n", propNameLower, propNameLower));
             }
-
         }
 
-        return this.templateDTO
-                .replace("{DTO_PACKAGE}", dtoPackageName)
-                .replace("{DTO}", dtoName)
-                .replace("{CODE_INITIAL}", codeConstr.toString())
-                .replace("{CODE_GETSET}", codeGetSet.toString())
-                .replace("{MEMBER}", codeMember.toString())
-                .replace("{TOSTRING}", String.join(" + \", \" + ", toString));
+        if (jpa) {
+            return this.templateDTO2
+                    .replace("{DTO_PACKAGE}", dtoPackageName)
+                    .replace("{DTO}", dtoName)
+                    .replace("{TABLE_NAME}", this.table.getTableName())
+                    .replace("{CODE_INITIAL}", codeConstr.toString())
+                    .replace("{CODE_GETSET}", codeGetSet.toString())
+                    .replace("{MEMBER}", codeMember.toString())
+                    .replace("{TOSTRING}", String.join(" + \", \" + ", toString));
+        }
+        else {
+            return this.templateDTO
+                    .replace("{DTO_PACKAGE}", dtoPackageName)
+                    .replace("{DTO}", dtoName)
+                    .replace("{TABLE_NAME}", this.table.getTableName())
+                    .replace("{CODE_INITIAL}", codeConstr.toString())
+                    .replace("{CODE_GETSET}", codeGetSet.toString())
+                    .replace("{MEMBER}", codeMember.toString())
+                    .replace("{TOSTRING}", String.join(" + \", \" + ", toString));
+        }
+
     }
 
     public String generateDAO4View(String daoPackageName, String dtoPackageName, String dtoName) {
@@ -117,6 +174,7 @@ public class JavaClassPrinter {
         }
 
         return this.templateDAOView
+                .replace("{VIEW_NAME}", this.table.getTableName().toLowerCase())
                 .replace("{DAO_PACKAGE}", daoPackageName)
                 .replace("{DTO_PACKAGE}", dtoPackageName)
                 .replace("{DTO}", dtoName)
@@ -131,8 +189,8 @@ public class JavaClassPrinter {
         StringBuilder codeIns = new StringBuilder();
         StringBuilder codeUpd = new StringBuilder();
         StringBuilder codeSelPk = new StringBuilder();
-        ArrayList<String> codeSelPkArgs = new ArrayList<String>();
-        ArrayList<String> pkWhere = new ArrayList<String>();
+        ArrayList<String> codeSelPkArgs = new ArrayList<>();
+        ArrayList<String> pkWhere = new ArrayList<>();
 
         codeConvert.append("        int index = 1;").append("\n");
         for (int i = 0; i < columnTypes.size(); i++) {
@@ -140,7 +198,7 @@ public class JavaClassPrinter {
             codeConvert.append("        ").append(columnTypes.get(i).genRsGet("index++")).append("\n");
         }
 
-        List<ColumnType> pk = columnTypes.stream().filter(c -> c.isPk()).collect(Collectors.toList());
+        List<ColumnType> pk = columnTypes.stream().filter(ColumnType::isPk).collect(Collectors.toList());
         List<ColumnType> nonPK = columnTypes.stream().filter(c -> !c.isPk()).collect(Collectors.toList());
         for (int i = 0; i < nonPK.size(); i++) {
             codeUpd.append("            ").append(nonPK.get(i).genPsSet(i + 1)).append("\n");
@@ -196,7 +254,7 @@ public class JavaClassPrinter {
         }
     }
 
-    static class Result {
+    static public class Result {
 
         public final String dto;
 

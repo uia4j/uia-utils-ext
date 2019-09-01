@@ -1,12 +1,16 @@
 package {DTO_PACKAGE};
 
 import java.util.Date;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
 
 /**
  * Table: {TABLE_NAME}.
- 
+ * 
  * @author UIA
  */
+@Entity(name = "{TABLE_NAME}")
 public class {DTO} {
 {MEMBER}
     /**

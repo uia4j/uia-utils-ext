@@ -40,14 +40,14 @@ public class CompareResult {
         this.tableName = tableName;
         this.missing = false;
         this.passed = true;
-        this.messages = new ArrayList<String>();
+        this.messages = new ArrayList<>();
     }
 
     public CompareResult(String tableName, boolean passed, String message) {
         this.tableName = tableName;
         this.missing = false;
         this.passed = passed;
-        this.messages = new ArrayList<String>();
+        this.messages = new ArrayList<>();
         this.messages.add(message);
     }
 
@@ -83,8 +83,11 @@ public class CompareResult {
 
     @Override
     public String toString() {
-        String yn = this.missing ? "(?) " : this.passed ? "(v) " : "(x) ";
-        return this.messages.size() == 0
+        String yn = "(?) ";
+        if (!this.missing) {
+            yn = this.passed ? "(v) " : "(x) ";
+        }
+        return this.messages.isEmpty()
                 ? yn + this.tableName
                 : yn + this.tableName + "\n    " + String.join("\n    ", this.messages);
     }

@@ -74,6 +74,7 @@ public abstract class Where {
     /**
      * Create a AND statement.
      *
+     * @param ws Where list.
      * @return AND statement.
      */
     public static WhereAnd and(Where... ws) {
@@ -87,6 +88,7 @@ public abstract class Where {
     /**
      * Create a OR statement.
      *
+     * @param ws Where list.
      * @return OR statement.
      */
     public static WhereOr or(Where... ws) {

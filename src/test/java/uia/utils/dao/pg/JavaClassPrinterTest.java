@@ -16,13 +16,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package uia.utils.dao;
+package uia.utils.dao.pg;
 
 import java.sql.SQLException;
 
 import org.junit.Test;
 
-import uia.utils.dao.sqlite.SQLite;
+import uia.utils.dao.CamelNaming;
+import uia.utils.dao.Database;
+import uia.utils.dao.JavaClassPrinter;
 
 /**
  *
@@ -33,47 +35,52 @@ public class JavaClassPrinterTest {
 
     @Test
     public void testGenerateTable1() throws Exception {
-        Database db = sqlite();
-        String tableName = "equip";
+        Database db = pg();
+        String tableName = "factory";
+        String dtoPackage = "gs.swim.db";
+        String daoPackage = "gs.swim.db.dao";
+
+        JavaClassPrinter.Result result = new JavaClassPrinter(db, tableName).generate(
+                daoPackage,
+                dtoPackage,
+                CamelNaming.upper(tableName),
+                false);
+        System.out.println(result.dao);
+        System.out.println(result.dto);
+    }
+
+    @Test
+    public void testGenerateTable2() throws Exception {
+        Database db = pg();
+        String tableName = "part_group_part";
         String dtoPackage = "uia.utils";
         String daoPackage = "uia.utils.dao";
 
         JavaClassPrinter.Result result = new JavaClassPrinter(db, tableName).generate(
                 daoPackage,
                 dtoPackage,
-                CamelNaming.upper(tableName),
-                true);
+                CamelNaming.upper(tableName));
+        System.out.println(result.dao);
         System.out.println(result.dto);
     }
 
     @Test
-    public void testGenerateTable2() throws Exception {
-        Database db = sqlite();
-        String tableName = "part_group_part";
-        String dtoPackage = "uia.utils";
-        String daoPackage = "uia.utils.dao";
-
-        new JavaClassPrinter(db, tableName).generate(
-                daoPackage,
-                dtoPackage,
-                CamelNaming.upper(tableName));
-    }
-
-    @Test
     public void testGenerateView() throws Exception {
-        Database db = sqlite();
-        String viewName = "view_equip";
-        String dtoPackage = "uia.utils";
-        String daoPackage = "uia.utils.dao";
+        Database db = pg();
+        String viewName = "view_factory";
+        String dtoPackage = "gs.swim.db";
+        String daoPackage = "gs.swim.db.dao";
 
-        new JavaClassPrinter(db, viewName).generate4View(
+        JavaClassPrinter.Result result = new JavaClassPrinter(db, viewName).generate4View(
                 daoPackage,
                 dtoPackage,
                 CamelNaming.upper(viewName));
+        System.out.println(result.dao);
+        System.out.println(result.dto);
     }
 
-    private Database sqlite() throws SQLException {
-        return new SQLite("test/sqlite1");
+    private Database pg() throws SQLException {
+        return new PostgreSQL("localhost", "5432", "scmdb", "scm", "scmAdmin");
     }
 
 }

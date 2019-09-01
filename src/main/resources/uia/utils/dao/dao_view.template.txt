@@ -10,12 +10,25 @@ import java.util.List;
 
 import {DTO_PACKAGE}.{DTO};
 
+/**
+ * View: {VIEW_NAME}.
+ * 
+ * @author UIA
+ */
 public class {DTO}Dao {
 
+    /**
+     * Select statement.
+     */
     private static final String SQL_SEL = "{SQL_SEL} ";
     
     private final Connection conn;
 
+    /**
+     * Constructor.
+     *
+     * @param conn The connection.
+     */
     public {DTO}Dao(Connection conn) {
         this.conn = conn;
     }

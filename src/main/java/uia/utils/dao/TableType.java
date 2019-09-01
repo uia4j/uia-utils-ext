@@ -81,7 +81,7 @@ public class TableType {
      */
     public List<String> selectPkNames() {
         return this.columns.stream()
-                .filter(c -> c.isPk())
+                .filter(ColumnType::isPk)
                 .map(c -> c.columnName)
                 .collect(Collectors.toList());
     }
@@ -142,7 +142,7 @@ public class TableType {
     }
 
     public String generateSelectSQL() {
-        ArrayList<String> cs = new ArrayList<String>();
+        ArrayList<String> cs = new ArrayList<>();
         for (ColumnType column : this.columns) {
             cs.add(column.getColumnName().toLowerCase());
         }
@@ -151,8 +151,8 @@ public class TableType {
     }
 
     public String generateInsertSQL() {
-        ArrayList<String> cs = new ArrayList<String>();
-        ArrayList<String> ps = new ArrayList<String>();
+        ArrayList<String> cs = new ArrayList<>();
+        ArrayList<String> ps = new ArrayList<>();
         for (ColumnType column : this.columns) {
             cs.add(column.getColumnName().toLowerCase());
             ps.add("?");
@@ -165,18 +165,18 @@ public class TableType {
     }
 
     public String generateUpdateSQL() {
-        ArrayList<String> pks = new ArrayList<String>();
+        ArrayList<String> pks = new ArrayList<>();
         for (ColumnType column : this.columns) {
             if (column.isPk()) {
                 pks.add(column.getColumnName().toLowerCase());
             }
         }
 
-        ArrayList<String> cs = new ArrayList<String>();
-        ArrayList<String> ws = new ArrayList<String>();
+        ArrayList<String> cs = new ArrayList<>();
+        ArrayList<String> ws = new ArrayList<>();
         for (ColumnType column : this.columns) {
             String columnName = column.getColumnName().toLowerCase();
-            if (pks.size() == 0 || pks.contains(columnName)) {
+            if (pks.isEmpty() || pks.contains(columnName)) {
                 pks.add(columnName);
                 ws.add(columnName + "=?");
             }
@@ -196,17 +196,17 @@ public class TableType {
     }
 
     public String generateDeleteSQL() {
-        ArrayList<String> pks = new ArrayList<String>();
+        ArrayList<String> pks = new ArrayList<>();
         for (ColumnType column : this.columns) {
             if (column.isPk()) {
                 pks.add(column.getColumnName().toLowerCase());
             }
         }
 
-        ArrayList<String> ws = new ArrayList<String>();
+        ArrayList<String> ws = new ArrayList<>();
         for (ColumnType column : this.columns) {
             String columnName = column.getColumnName().toLowerCase();
-            if (pks.size() == 0 || pks.contains(columnName)) {
+            if (pks.isEmpty() || pks.contains(columnName)) {
                 ws.add(columnName + "=?");
             }
         }

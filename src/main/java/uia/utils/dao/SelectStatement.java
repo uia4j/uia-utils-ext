@@ -43,8 +43,8 @@ public class SelectStatement {
 
     public SelectStatement(String selectSql) {
         this.selectSql = selectSql;
-        this.groups = new ArrayList<String>();
-        this.orders = new ArrayList<String>();
+        this.groups = new ArrayList<>();
+        this.orders = new ArrayList<>();
     }
 
     public void reset() {
@@ -77,9 +77,10 @@ public class SelectStatement {
     }
 
     public PreparedStatement prepare(Connection conn) throws SQLException {
-        String where = this.where == null ? null : this.where.generate();
-        PreparedStatement ps;
-        if (where == null || where.length() == 0) {
+        final PreparedStatement ps;
+
+        String whereSQL = this.where == null ? null : this.where.generate();
+        if (whereSQL == null || whereSQL.length() == 0) {
             String sql = String.format("%s%s%s",
                     this.selectSql,
                     groupBy(),
@@ -89,7 +90,7 @@ public class SelectStatement {
         else {
             String sql = String.format("%s where %s%s%s",
                     this.selectSql,
-                    where,
+                    whereSQL,
                     groupBy(),
                     orderBy());
             ps = conn.prepareStatement(sql);
@@ -100,11 +101,11 @@ public class SelectStatement {
     }
 
     protected String groupBy() {
-        return this.groups.size() == 0 ? "" : " group by " + String.join(",", this.groups);
+        return this.groups.isEmpty() ? "" : " group by " + String.join(",", this.groups);
     }
 
     protected String orderBy() {
-        return this.orders.size() == 0 ? "" : " order by " + String.join(",", this.orders);
+        return this.orders.isEmpty() ? "" : " order by " + String.join(",", this.orders);
     }
 
     protected boolean isEmpty(Object value) {

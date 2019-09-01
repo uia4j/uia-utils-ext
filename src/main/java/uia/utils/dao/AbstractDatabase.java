@@ -37,6 +37,10 @@ import org.apache.commons.dbcp2.BasicDataSource;
  */
 public abstract class AbstractDatabase implements Database {
 
+    private static final String TABLE = "TABLE";
+
+    private static final String VIEW = "VIEW";
+
     protected final Connection conn;
 
     protected String schema;
@@ -85,8 +89,8 @@ public abstract class AbstractDatabase implements Database {
 
     @Override
     public List<String> selectTableNames() throws SQLException {
-        ArrayList<String> tables = new ArrayList<String>();
-        try (ResultSet rs = this.conn.getMetaData().getTables(null, this.schema, null, new String[] { "TABLE" })) {
+        ArrayList<String> tables = new ArrayList<>();
+        try (ResultSet rs = this.conn.getMetaData().getTables(null, this.schema, null, new String[] { TABLE })) {
             while (rs.next()) {
                 tables.add(rs.getString(3));
             }
@@ -100,8 +104,8 @@ public abstract class AbstractDatabase implements Database {
             return selectTableNames();
         }
 
-        ArrayList<String> tables = new ArrayList<String>();
-        try (ResultSet rs = this.conn.getMetaData().getTables(null, this.schema, upperOrLower(prefix) + "%", new String[] { "TABLE" })) {
+        ArrayList<String> tables = new ArrayList<>();
+        try (ResultSet rs = this.conn.getMetaData().getTables(null, this.schema, upperOrLower(prefix) + "%", new String[] { TABLE })) {
             while (rs.next()) {
                 String tn = rs.getString(3);
                 if (tn.startsWith(prefix)) {
@@ -114,8 +118,8 @@ public abstract class AbstractDatabase implements Database {
 
     @Override
     public List<String> selectViewNames() throws SQLException {
-        ArrayList<String> tables = new ArrayList<String>();
-        try (ResultSet rs = this.conn.getMetaData().getTables(null, this.schema, null, new String[] { "VIEW" })) {
+        ArrayList<String> tables = new ArrayList<>();
+        try (ResultSet rs = this.conn.getMetaData().getTables(null, this.schema, null, new String[] { VIEW })) {
             while (rs.next()) {
                 tables.add(rs.getString(3));
             }
@@ -129,8 +133,8 @@ public abstract class AbstractDatabase implements Database {
             return selectViewNames();
         }
 
-        ArrayList<String> views = new ArrayList<String>();
-        try (ResultSet rs = this.conn.getMetaData().getTables(null, this.schema, upperOrLower(prefix) + "%", new String[] { "VIEW" })) {
+        ArrayList<String> views = new ArrayList<>();
+        try (ResultSet rs = this.conn.getMetaData().getTables(null, this.schema, upperOrLower(prefix) + "%", new String[] { VIEW })) {
             while (rs.next()) {
                 String vn = rs.getString(3);
                 if (vn.startsWith(prefix)) {
@@ -143,7 +147,7 @@ public abstract class AbstractDatabase implements Database {
 
     @Override
     public boolean exists(String tableOrView) throws SQLException {
-        try (ResultSet rs = this.conn.getMetaData().getTables(null, this.schema, upperOrLower(tableOrView), new String[] { "TABLE", "VIEW" })) {
+        try (ResultSet rs = this.conn.getMetaData().getTables(null, this.schema, upperOrLower(tableOrView), new String[] { TABLE, VIEW })) {
             return rs.next();
         }
     }
@@ -151,7 +155,7 @@ public abstract class AbstractDatabase implements Database {
     @Override
     public TableType selectTable(String tableOrView, boolean firstAsPk) throws SQLException {
         String comment = null;
-        try (ResultSet rs = this.conn.getMetaData().getTables(null, this.schema, upperOrLower(tableOrView), new String[] { "TABLE", "VIEW" })) {
+        try (ResultSet rs = this.conn.getMetaData().getTables(null, this.schema, upperOrLower(tableOrView), new String[] { TABLE, VIEW })) {
             if (!rs.next()) {
                 return null;
             }
@@ -159,7 +163,7 @@ public abstract class AbstractDatabase implements Database {
         }
 
         List<ColumnType> columns = selectColumns(upperOrLower(tableOrView), firstAsPk);
-        return columns.size() == 0 ? null : new TableType(upperOrLower(tableOrView), comment, columns);
+        return columns.isEmpty() ? null : new TableType(upperOrLower(tableOrView), comment, columns);
     }
 
     @Override
@@ -235,13 +239,13 @@ public abstract class AbstractDatabase implements Database {
     protected abstract String upperOrLower(String value);
 
     private DataSource createDataSource(String driverName, String connectUrl, String user, String pwd) {
-        BasicDataSource dataSource = new BasicDataSource();
-        dataSource.setUrl(connectUrl);
-        dataSource.setUsername(user);
-        dataSource.setPassword(pwd);
-        dataSource.setInitialSize(10);
-        dataSource.setDriverClassName(driverName);
-        dataSource.setMaxTotal(50);
-        return dataSource;
+        BasicDataSource bds = new BasicDataSource();
+        bds.setUrl(connectUrl);
+        bds.setUsername(user);
+        bds.setPassword(pwd);
+        bds.setInitialSize(10);
+        bds.setDriverClassName(driverName);
+        bds.setMaxTotal(50);
+        return bds;
     }
 }
