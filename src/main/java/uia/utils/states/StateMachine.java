@@ -68,10 +68,10 @@ public class StateMachine<C, X> {
      */
     public StateMachine(String name) {
         this.name = name;
-        this.states = new TreeMap<String, State<C, X>>();
-        this.stateChangedListeners = new TreeMap<String, List<StateListener<X>>>();
-        this.eventListeners = new TreeMap<String, List<StateListener<X>>>();
-        this.prevState = new State<C, X>("NULL");
+        this.states = new TreeMap<>();
+        this.stateChangedListeners = new TreeMap<>();
+        this.eventListeners = new TreeMap<>();
+        this.prevState = new State<>("NULL");
         this.currState = this.prevState;
     }
 
@@ -140,7 +140,7 @@ public class StateMachine<C, X> {
     public void addEventListener(String eventName, StateListener<X> listener) {
         List<StateListener<X>> listeners = this.eventListeners.get(eventName);
         if (listeners == null) {
-            listeners = new ArrayList<StateListener<X>>();
+            listeners = new ArrayList<>();
             this.eventListeners.put(eventName, listeners);
         }
         listeners.add(listener);
@@ -156,7 +156,7 @@ public class StateMachine<C, X> {
         String key = genKey(fromStateName, toStateName);
         List<StateListener<X>> listeners = this.stateChangedListeners.get(key);
         if (listeners == null) {
-            listeners = new ArrayList<StateListener<X>>();
+            listeners = new ArrayList<>();
             this.stateChangedListeners.put(key, listeners);
         }
         listeners.add(listener);

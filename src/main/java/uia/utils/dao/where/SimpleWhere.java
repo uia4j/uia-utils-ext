@@ -44,13 +44,13 @@ public class SimpleWhere extends Where {
     private final String op;
 
     SimpleWhere(String op) {
-        this.conds = new ArrayList<ConditionType>();
+        this.conds = new ArrayList<>();
         this.op = op;
     }
 
     @Override
     public boolean hasConditions() {
-        return this.conds.size() > 0;
+        return !this.conds.isEmpty();
     }
 
     public SimpleWhere eq(String key, Object value) {
@@ -102,10 +102,19 @@ public class SimpleWhere extends Where {
     }
 
     public SimpleWhere between(String key, Object value1, Object value2) {
-        if (isEmpty(key) || isEmpty(value1) || isEmpty(value2)) {
+        if (isEmpty(key)) {
             return this;
         }
-        this.conds.add(new BetweenType(key, value1, value2));
+
+        if (!isEmpty(value1) && !isEmpty(value2)) {
+            this.conds.add(new BetweenType(key, value1, value2));
+        }
+        else if (!isEmpty(value1)) {
+            return moreThan(key, value1, true);
+        }
+        else if (!isEmpty(value2)) {
+            return lessThan(key, value2, true);
+        }
         return this;
     }
 
@@ -131,7 +140,7 @@ public class SimpleWhere extends Where {
     }
 
     public SimpleWhere moreThan(String key, Object value, boolean eq) {
-        if (isEmpty(key)) {
+        if (isEmpty(key) || isEmpty(value)) {
             return this;
         }
         this.conds.add(new MoreThanType(key, value, eq));
@@ -139,7 +148,7 @@ public class SimpleWhere extends Where {
     }
 
     public SimpleWhere lessThan(String key, Object value, boolean eq) {
-        if (isEmpty(key)) {
+        if (isEmpty(key) || isEmpty(value)) {
             return this;
         }
         this.conds.add(new LessThanType(key, value, eq));
@@ -148,11 +157,11 @@ public class SimpleWhere extends Where {
 
     @Override
     public String generate() {
-        if (this.conds.size() == 0) {
+        if (this.conds.isEmpty()) {
             return "";
         }
         List<String> data = this.conds.stream()
-                .map(c -> c.getStatement())
+                .map(ConditionType::getStatement)
                 .collect(Collectors.toList());
         return String.join(this.op, data);
     }
@@ -168,10 +177,10 @@ public class SimpleWhere extends Where {
 
     @Override
     public String toString() {
-        if (this.conds.size() == 0) {
+        if (this.conds.isEmpty()) {
             return "";
         }
-        List<String> data = this.conds.stream().map(c -> c.toString()).collect(Collectors.toList());
+        List<String> data = this.conds.stream().map(ConditionType::toString).collect(Collectors.toList());
         return String.join(this.op, data);
     }
 }

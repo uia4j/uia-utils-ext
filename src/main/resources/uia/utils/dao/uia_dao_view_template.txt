@@ -1,0 +1,48 @@
+package {DAO_PACKAGE};
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+
+import uia.utils.dao.DaoException;
+import uia.utils.dao.DaoFactory;
+import uia.utils.dao.DaoMethod;
+import uia.utils.dao.DaoView;
+
+import {DTO_PACKAGE}.{DTO};
+
+
+/**
+ * View: {VIEW_NAME}.
+ * 
+ * @author UIA
+ */
+public class {DTO}Dao {
+
+    private final Connection conn;
+
+    private final DaoView dao;
+
+    /**
+     * Constructor.
+     *
+     * @param conn The connection.
+     */
+    public {DTO}Dao(Connection conn, DaoFactory factory) {
+        this.conn = conn;
+        this.dao = factory.forView("{VIEW_NAME}");
+    }
+    
+    public List<{DTO}> selectAll() throws SQLException, DaoException {
+        DaoMethod method = this.dao.forSelect();
+        try (PreparedStatement ps = this.conn.prepareStatement(method.getSql())) {
+            try(ResultSet rs = ps.executeQuery()) {
+            	return method.toList(rs);
+            }
+        }
+    }    
+}

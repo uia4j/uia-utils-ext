@@ -34,15 +34,13 @@ public class WhereAnd extends Where {
     private ArrayList<Where> wheres;
 
     WhereAnd() {
-        this.wheres = new ArrayList<Where>();
+        this.wheres = new ArrayList<>();
     }
 
     @Override
     public boolean hasConditions() {
         return this.wheres.stream()
-                .filter(w -> w.hasConditions())
-                .findAny()
-                .isPresent();
+                .anyMatch(Where::hasConditions);
     }
 
     public WhereAnd add(Where where) {
@@ -53,7 +51,7 @@ public class WhereAnd extends Where {
     @Override
     public String generate() {
         List<String> ws = this.wheres.stream()
-                .filter(w -> w.hasConditions())
+                .filter(Where::hasConditions)
                 .map(w -> "(" + w.generate() + ")")
                 .collect(Collectors.toList());
         return String.join(" and ", ws);

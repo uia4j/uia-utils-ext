@@ -29,7 +29,7 @@ import uia.utils.dao.sqlite.SQLite;
  * @author Kyle K. Lin
  *
  */
-public class JavaClassPrinterTest {
+public class SimpleDaoClassPrinterTest {
 
     @Test
     public void testGenerateTable1() throws Exception {
@@ -38,12 +38,12 @@ public class JavaClassPrinterTest {
         String dtoPackage = "uia.utils";
         String daoPackage = "uia.utils.dao";
 
-        JavaClassPrinter.Result result = new JavaClassPrinter(db, tableName).generate(
+        SimpleDaoClassPrinter.Result result = new SimpleDaoClassPrinter(db, tableName).generate(
                 daoPackage,
                 dtoPackage,
-                CamelNaming.upper(tableName),
-                true);
+                CamelNaming.upper(tableName));
         System.out.println(result.dto);
+        System.out.println(result.dao);
     }
 
     @Test
@@ -53,10 +53,12 @@ public class JavaClassPrinterTest {
         String dtoPackage = "uia.utils";
         String daoPackage = "uia.utils.dao";
 
-        new JavaClassPrinter(db, tableName).generate(
+        SimpleDaoClassPrinter.Result result = new SimpleDaoClassPrinter(db, tableName).generate(
                 daoPackage,
                 dtoPackage,
                 CamelNaming.upper(tableName));
+        System.out.println(result.dto);
+        System.out.println(result.dao);
     }
 
     @Test
@@ -66,10 +68,12 @@ public class JavaClassPrinterTest {
         String dtoPackage = "uia.utils";
         String daoPackage = "uia.utils.dao";
 
-        new JavaClassPrinter(db, viewName).generate4View(
+        SimpleDaoClassPrinter.Result result = new SimpleDaoClassPrinter(db, viewName).generate(
                 daoPackage,
                 dtoPackage,
                 CamelNaming.upper(viewName));
+        System.out.println(result.dto);
+        System.out.println(result.dao);
     }
 
     private Database sqlite() throws SQLException {

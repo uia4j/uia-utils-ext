@@ -62,8 +62,11 @@ public class SelectStatement {
         return this;
     }
 
-    public SelectStatement orderBy(String columnName) {
-        return orderBy(columnName, true);
+    public SelectStatement orderBy(String... columns) {
+        for (String col : columns) {
+            orderBy(col, true);
+        }
+        return this;
     }
 
     public SelectStatement orderBy(String columnName, boolean asc) {

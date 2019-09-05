@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.uia.solution</groupId>
 	<artifactId>uia-utils-ext</artifactId>
-	<version>0.3.0</version>
+	<version>0.4.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>uia-utils-ext</name>
 	<url>https://github.com/uia4j/uia-utils-ext</url>
@@ -41,6 +41,11 @@
 		    <artifactId>sqlite-jdbc</artifactId>
 		    <version>3.28.0</version>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>28.1-jre</version>
 		</dependency>
 		<!-- 
 		<dependency>

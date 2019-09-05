@@ -37,7 +37,7 @@ public class CubeBuilder<T> {
      * Constructor.
      */
     public CubeBuilder() {
-        this.data = new ArrayList<Data<T>>();
+        this.data = new ArrayList<>();
     }
 
     /**
@@ -45,7 +45,7 @@ public class CubeBuilder<T> {
      * @return Cube.
      */
     public Cube<T> build() {
-        return new ListCube<T>(this.data);
+        return new ListCube<>(this.data);
     }
 
     /**
@@ -54,8 +54,8 @@ public class CubeBuilder<T> {
      * @return Data.
      */
     public Data<T> put(T value) {
-        Data<T> data = new Data<T>(value);
-        this.data.add(data);
-        return data;
+        Data<T> d = new Data<>(value);
+        this.data.add(d);
+        return d;
     }
 }

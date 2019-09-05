@@ -43,132 +43,6 @@ public class DatabaseTool {
     }
 
     /**
-     * Save DTO structure of all tables to Java files.
-     *
-     * @param dir The source folder.
-     * @param packageName The package.
-     * @param jpa Add JPA annotation or not.
-     * @throws SQLException Failed to execute SQL statements.
-     * @throws IOException Failed to save files.
-     */
-    public void table2Java(String dir, String packageName, boolean jpa) throws SQLException, IOException {
-        for (String t : this.source.selectTableNames()) {
-            table2Java(dir, packageName, t, jpa);
-        }
-    }
-
-    /**
-     * Save DTO structure of all view to Java files.
-     *
-     * @param dir The source folder.
-     * @param packageName The package.
-     * @throws SQLException Failed to execute SQL statements.
-     * @throws IOException Failed to save files.
-     */
-    public void view2Java(String dir, String packageName) throws SQLException, IOException {
-        for (String v : this.source.selectViewNames()) {
-            table2Java(dir, packageName, v, false);
-        }
-    }
-
-    /**
-     * Save DTO structure of a table or view to a Java file.
-     *
-     * @param dir The source folder.
-     * @param packageName The package.
-     * @param tableOrView The table name or view name.
-     * @param jpa Add JPA annotation or not.
-     * @throws SQLException Failed to execute SQL statements.
-     * @throws IOException Failed to save files.
-     */
-    private void table2Java(String dir, String packageName, String tableOrView, boolean jpa) throws IOException, SQLException {
-        String dtoName = CamelNaming.upper(tableOrView);
-        JavaClassPrinter printer = new JavaClassPrinter(this.source, tableOrView);
-        String cls = printer.generateDTO(packageName, dtoName, jpa);
-        String file = new StringBuilder(dir)
-                .append("/")
-                .append(packageName.replace('.', '/'))
-                .append("/")
-                .append(dtoName)
-                .append(".java").toString();
-        Files.write(Paths.get(file), cls.getBytes());
-    }
-
-    /**
-     * Save DTO and DAO structure of a view to the Java files.
-     *
-     * @param dir The source folder.
-     * @param daoPackageName The package for DAO Java files.
-     * @param dtoPackageName The package for DTO Java files.
-     * @throws SQLException Failed to execute SQL statements.
-     * @throws IOException Failed to save files.
-     */
-    public void table2DAO(String dir, String daoPackageName, String dtoPackageName) throws IOException, SQLException {
-        for (String t : this.source.selectTableNames()) {
-            table2DAO(dir, daoPackageName, dtoPackageName, t);
-        }
-    }
-
-    /**
-     * Save DTO and DAO structure of a view to the Java files.
-     *
-     * @param dir The source folder.
-     * @param daoPackageName The package for DAO Java files.
-     * @param dtoPackageName The package for DTO Java files.
-     * @param tableName The table name.
-     * @throws SQLException Failed to execute SQL statements.
-     * @throws IOException Failed to save files.
-     */
-    public void table2DAO(String dir, String daoPackageName, String dtoPackageName, String tableName) throws IOException, SQLException {
-        String dtoName = CamelNaming.upper(tableName);
-        JavaClassPrinter printer = new JavaClassPrinter(this.source, tableName);
-        JavaClassPrinter.Result result = printer.generate(daoPackageName, dtoPackageName, dtoName, false);
-
-        String file1 = String.format("%s/%s/%sDao.java", dir, daoPackageName.replace('.', '/'), dtoName);
-        String file2 = String.format("%s/%s/%s.java", dir, dtoPackageName.replace('.', '/'), dtoName);
-
-        Files.write(Paths.get(file1), result.dao.getBytes());
-        Files.write(Paths.get(file2), result.dto.getBytes());
-    }
-
-    /**
-     * Save DTO and DAO structure of all views to the Java files.
-     *
-     * @param dir The source folder.
-     * @param daoPackageName The package for DAO Java files.
-     * @param dtoPackageName The package for DTO Java files.
-     * @throws SQLException Failed to execute SQL statements.
-     * @throws IOException Failed to save files.
-     */
-    public void view2DAO(String dir, String daoPackageName, String dtoPackageName) throws SQLException, IOException {
-        for (String v : this.source.selectTableNames()) {
-            view2DAO(dir, daoPackageName, dtoPackageName, v);
-        }
-    }
-
-    /**
-     * Save DTO and DAO structure of a view to the Java files.
-     *
-     * @param dir The source folder.
-     * @param daoPackageName The package for DAO Java files.
-     * @param dtoPackageName The package for DTO Java files.
-     * @param viewName The view name.
-     * @throws SQLException Failed to execute SQL statements.
-     * @throws IOException Failed to save files.
-     */
-    public void view2DAO(String dir, String daoPackageName, String dtoPackageName, String viewName) throws IOException, SQLException {
-        String dtoName = CamelNaming.upper(viewName);
-        JavaClassPrinter printer = new JavaClassPrinter(this.source, viewName);
-        JavaClassPrinter.Result result = printer.generate4View(daoPackageName, dtoPackageName, dtoName);
-
-        String file1 = String.format("%s/%s/%sDao.java", dir, daoPackageName.replace('.', '/'), dtoName);
-        String file2 = String.format("%s/%s/%s.java", dir, dtoPackageName.replace('.', '/'), dtoName);
-
-        Files.write(Paths.get(file1), result.dao.getBytes());
-        Files.write(Paths.get(file2), result.dto.getBytes());
-    }
-
-    /**
      * Output a script to generate all tables.
      *
      * @param file The file name.
@@ -200,31 +74,28 @@ public class DatabaseTool {
      * Output a script to generate all view.
      *
      * @param file The file name.
-     * @param viewPrefix The prefix of view name.
      * @throws SQLException Failed to execute SQL statements.
      * @throws IOException Failed to save files.
      */
-    public void toViewScript(String file, String viewPrefix) throws IOException, SQLException {
-        toViewScript(file, viewPrefix, this.source);
+    public void toViewScript(String file) throws IOException, SQLException {
+        toViewScript(file, this.source);
     }
 
     /**
      * Output a script to generate all tables.
      *
      * @param file The file name.
-     * @param viewPrefix The prefix of view name.
      * @param target The database the script is executed on.
      * @throws SQLException Failed to execute SQL statements.
      * @throws IOException Failed to save files.
      */
-    public void toViewScript(String file, String viewPrefix, Database target) throws IOException, SQLException {
+    public void toViewScript(String file, Database target) throws IOException, SQLException {
         StringBuilder scripts = new StringBuilder();
-        for (String v : this.source.selectViewNames(viewPrefix)) {
+        for (String v : this.source.selectViewNames()) {
             String sql = this.source.selectViewScript(v);
             String script = target.generateCreateViewSQL(v, sql);
             scripts.append(script).append(";\n\n");
         }
         Files.write(Paths.get(file), scripts.toString().getBytes());
     }
-
 }

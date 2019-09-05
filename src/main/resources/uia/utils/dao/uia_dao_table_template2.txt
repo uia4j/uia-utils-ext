@@ -1,0 +1,85 @@
+package {DAO_PACKAGE};
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+
+import uia.utils.dao.DaoException;
+import uia.utils.dao.DaoFactory;
+import uia.utils.dao.DaoMethod;
+import uia.utils.dao.DaoTable;
+
+import {DTO_PACKAGE}.{DTO};
+
+
+/**
+ * Table: {TABLE_NAME}.
+ * 
+ * @author UIA
+ */
+public class {DTO}Dao {
+
+    private final Connection conn;
+
+    private final DaoTable dao;
+
+    /**
+     * Constructor.
+     *
+     * @param conn The connection.
+     */
+    public {DTO}Dao(Connection conn, DaoFactory factory) {
+        this.conn = conn;
+        this.dao = factory.forTable("{TABLE_NAME}");
+    }
+    
+    public int insert({DTO} data) throws SQLException, DaoException {
+        DaoMethod method = this.dao.forInsert();
+        try (PreparedStatement ps = this.conn.prepareStatement(method.getSql())) {
+            method.assign(ps, data);
+            return ps.executeUpdate();
+        }
+    }    
+    
+    public int insert(List<{DTO}> dataList) throws SQLException, DaoException {
+        DaoMethod method = this.dao.forInsert();
+        try (PreparedStatement ps = this.conn.prepareStatement(method.getSql())) {
+            for({DTO} data : dataList) {
+                method.assign(ps, data);
+                ps.addBatch();
+            }
+            return ps.executeUpdate();
+        }
+    }    
+
+    public int delete({CODE_SEL_PK_ARGS}) throws SQLException {
+        DaoMethod method = this.dao.forDelete();
+        try (PreparedStatement ps = this.conn.prepareStatement(method.getSql())) {
+{CODE_SEL_PK}
+            return ps.executeUpdate();
+        }
+    }    
+
+    public {DTO} selectByPK({CODE_SEL_PK_ARGS}) throws SQLException, DaoException {
+        DaoMethod method = this.dao.forSelect();
+        try (PreparedStatement ps = this.conn.prepareStatement(method.getSql() + "WHERE {WHERE_PK}")) {
+{CODE_SEL_PK}
+            try(ResultSet rs = ps.executeQuery()) {
+            	return method.toOne(rs);
+            }
+        }
+    }    
+
+    public List<{DTO}> selectAll() throws SQLException, DaoException {
+        DaoMethod method = this.dao.forSelect();
+        try (PreparedStatement ps = this.conn.prepareStatement(method.getSql())) {
+            try(ResultSet rs = ps.executeQuery()) {
+            	return method.toList(rs);
+            }
+        }
+    }    
+}

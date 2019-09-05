@@ -44,7 +44,7 @@ public abstract class AbstractStateWorker<C, X> {
      * @param stateName State name.
      */
     protected AbstractStateWorker(String workerName, String stateName) {
-        this.stateMachine = new StateMachine<C, X>(workerName);
+        this.stateMachine = new StateMachine<>(workerName);
         initial();
         changeState(stateName);
     }

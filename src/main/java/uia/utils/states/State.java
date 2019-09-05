@@ -59,9 +59,9 @@ public class State<C, X> {
     public State(String name, int seq) {
         this.name = name;
         this.seq = seq;
-        this.executors = new TreeMap<String, EventExecutor<C, X>>();
-        this.inListeners = new ArrayList<StateListener<X>>();
-        this.outListeners = new ArrayList<StateListener<X>>();
+        this.executors = new TreeMap<>();
+        this.inListeners = new ArrayList<>();
+        this.outListeners = new ArrayList<>();
     }
 
     /**

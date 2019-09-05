@@ -154,16 +154,18 @@ public abstract class AbstractDatabase implements Database {
 
     @Override
     public TableType selectTable(String tableOrView, boolean firstAsPk) throws SQLException {
+        boolean table = true;
         String comment = null;
         try (ResultSet rs = this.conn.getMetaData().getTables(null, this.schema, upperOrLower(tableOrView), new String[] { TABLE, VIEW })) {
             if (!rs.next()) {
                 return null;
             }
+            table = "TABLE".equalsIgnoreCase(rs.getString(4));
             comment = rs.getString("REMARKS");
         }
 
         List<ColumnType> columns = selectColumns(upperOrLower(tableOrView), firstAsPk);
-        return columns.isEmpty() ? null : new TableType(upperOrLower(tableOrView), comment, columns);
+        return columns.isEmpty() ? null : new TableType(upperOrLower(tableOrView), comment, columns, table);
     }
 
     @Override

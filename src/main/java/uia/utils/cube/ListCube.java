@@ -42,7 +42,7 @@ public class ListCube<T> implements Cube<T> {
 
     @Override
     public T single() {
-        return this.data.size() > 0 ? this.data.get(0).value : null;
+        return !this.data.isEmpty() ? this.data.get(0).value : null;
     }
 
     @Override
@@ -68,38 +68,38 @@ public class ListCube<T> implements Cube<T> {
 
     @Override
     public Map<String, T> singleMapping(final String tagName) {
-        TreeMap<String, T> result = new TreeMap<String, T>();
+        TreeMap<String, T> result = new TreeMap<>();
         valuesMapping(tagName).forEach((k, v) -> result.put(k, v.get(0)));
         return result;
     }
 
     @Override
     public <R> Map<String, R> singleMapping(String tagName, Function<T, R> f) {
-        TreeMap<String, R> result = new TreeMap<String, R>();
+        TreeMap<String, R> result = new TreeMap<>();
         valuesMapping(tagName).forEach((k, v) -> result.put(k, f.apply(v.get(0))));
         return result;
     }
 
     @Override
     public Cube<T> select(String tagName, String tagValue) {
-        return new StreamCube<T>(this.data.stream().filter(d -> tagValue.equals(d.getTag(tagName))));
+        return new StreamCube<>(this.data.stream().filter(d -> tagValue.equals(d.getTag(tagName))));
     }
 
     @Override
     public Cube<T> selectNot(String tagName, String tagValue) {
-        return new StreamCube<T>(this.data.stream().filter(d -> !tagValue.equals(d.getTag(tagName))));
+        return new StreamCube<>(this.data.stream().filter(d -> !tagValue.equals(d.getTag(tagName))));
     }
 
     @Override
     public Cube<T> select(Function<Data<T>, Boolean> function) {
-        return new StreamCube<T>(this.data.stream().filter(function::apply));
+        return new StreamCube<>(this.data.stream().filter(function::apply));
     }
 
     @Override
     public Map<String, Cube<T>> cubes(String tagName) {
-        final TreeMap<String, Cube<T>> result = new TreeMap<String, Cube<T>>();
-        Map<String, List<Data<T>>> data = this.data.stream().collect(Collectors.groupingBy(d -> d.getTag(tagName)));
-        data.forEach((k, v) -> result.put(k, new ListCube<T>(v)));
+        final TreeMap<String, Cube<T>> result = new TreeMap<>();
+        Map<String, List<Data<T>>> raw = this.data.stream().collect(Collectors.groupingBy(d -> d.getTag(tagName)));
+        raw.forEach((k, v) -> result.put(k, new ListCube<T>(v)));
         return result;
     }
 }

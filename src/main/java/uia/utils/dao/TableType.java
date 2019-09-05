@@ -37,16 +37,20 @@ public class TableType {
 
     private final List<ColumnType> columns;
 
+    private final boolean table;
+
     /**
      * Constructor.
      * @param tableName Table name.
      * @param remark Table comment.
      * @param columns Definition of columns.
+     * @param table Is table or not.
      */
-    public TableType(String tableName, String remark, List<ColumnType> columns) {
+    public TableType(String tableName, String remark, List<ColumnType> columns, boolean table) {
         this.tableName = tableName;
         this.remark = remark;
         this.columns = columns;
+        this.table = table;
     }
 
     /**
@@ -63,6 +67,15 @@ public class TableType {
      */
     public String getRemark() {
         return this.remark;
+    }
+
+    /**
+     * Tests if this is table or view.
+     *
+     * @return True if this is a table.
+     */
+    public boolean isTable() {
+        return this.table;
     }
 
     /**

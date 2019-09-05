@@ -16,71 +16,61 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package uia.utils.dao.pg;
+package uia.utils.dao;
 
 import java.sql.SQLException;
 
 import org.junit.Test;
 
-import uia.utils.dao.CamelNaming;
-import uia.utils.dao.Database;
-import uia.utils.dao.JavaClassPrinter;
+import uia.utils.dao.sqlite.SQLite;
 
 /**
  *
  * @author Kyle K. Lin
  *
  */
-public class JavaClassPrinterTest {
+public class DaoFactoryClassPrinterTest {
+
+    private static final String DTO_PACKAGE = "uia.utils";
 
     @Test
     public void testGenerateTable1() throws Exception {
-        Database db = pg();
-        String tableName = "factory";
-        String dtoPackage = "gs.swim.db";
-        String daoPackage = "gs.swim.db.dao";
-
-        JavaClassPrinter.Result result = new JavaClassPrinter(db, tableName).generate(
-                daoPackage,
-                dtoPackage,
-                CamelNaming.upper(tableName),
-                false);
-        System.out.println(result.dao);
+        Database db = sqlite();
+        String tableName = "equip";
+        DaoFactoryClassPrinter.Result result = new DaoFactoryClassPrinter(db, tableName).generate(
+                DTO_PACKAGE,
+                DTO_PACKAGE,
+                CamelNaming.upper(tableName));
         System.out.println(result.dto);
+        System.out.println(result.dao);
     }
 
     @Test
     public void testGenerateTable2() throws Exception {
-        Database db = pg();
+        Database db = sqlite();
         String tableName = "part_group_part";
-        String dtoPackage = "uia.utils";
-        String daoPackage = "uia.utils.dao";
-
-        JavaClassPrinter.Result result = new JavaClassPrinter(db, tableName).generate(
-                daoPackage,
-                dtoPackage,
+        DaoFactoryClassPrinter.Result result = new DaoFactoryClassPrinter(db, tableName).generate(
+                DTO_PACKAGE,
+                DTO_PACKAGE,
                 CamelNaming.upper(tableName));
-        System.out.println(result.dao);
         System.out.println(result.dto);
+        System.out.println(result.dao);
     }
 
     @Test
     public void testGenerateView() throws Exception {
-        Database db = pg();
-        String viewName = "view_factory";
-        String dtoPackage = "gs.swim.db";
-        String daoPackage = "gs.swim.db.dao";
-
-        JavaClassPrinter.Result result = new JavaClassPrinter(db, viewName).generate4View(
-                daoPackage,
-                dtoPackage,
+        Database db = sqlite();
+        String viewName = "view_equip";
+        DaoFactoryClassPrinter.Result result = new DaoFactoryClassPrinter(db, viewName).generate(
+                DTO_PACKAGE,
+                DTO_PACKAGE,
                 CamelNaming.upper(viewName));
-        System.out.println(result.dao);
         System.out.println(result.dto);
+        System.out.println(result.dao);
     }
 
-    private Database pg() throws SQLException {
-        return new PostgreSQL("localhost", "5432", "scmdb", "scm", "scmAdmin");
+    private Database sqlite() throws SQLException {
+        return new SQLite("test/sqlite1");
     }
 
 }
