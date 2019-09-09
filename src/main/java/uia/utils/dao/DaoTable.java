@@ -7,10 +7,11 @@ import uia.utils.dao.annotation.ColumnInfo;
 import uia.utils.dao.annotation.TableInfo;
 
 /**
-*
-* @author Kyle K. Lin
-*
-*/
+ * The DAO helper for a table.
+ *
+ * @author Kyle K. Lin
+ *
+ */
 public final class DaoTable<T> {
 
     private final String tableName;
@@ -22,6 +23,8 @@ public final class DaoTable<T> {
     private final DaoMethod<T> delete;
 
     private final DaoMethod<T> select;
+
+    private final String wherePK;
 
     DaoTable(DaoFactory factory, Class<T> clz) {
         TableInfo ti = clz.getDeclaredAnnotation(TableInfo.class);
@@ -83,31 +86,68 @@ public final class DaoTable<T> {
                     String.join(",", updateColNames),
                     String.join(" AND ", prikeyColNames)));
         }
-        this.delete.setSql(String.format("DELETE FROM %s WHERE %s",
-                this.tableName,
-                String.join(" AND ", prikeyColNames)));
+        this.delete.setSql(String.format("DELETE FROM %s ",
+                this.tableName));
         this.select.setSql(String.format("SELECT %s FROM %s ",
                 String.join(",", selectColNames),
                 this.tableName));
+        this.wherePK = String.join(" AND ", prikeyColNames);
     }
 
+    /**
+     * Returns the table name.
+     *
+     * @return The table name.
+     */
     public String getTableName() {
         return this.tableName;
     }
 
+    /**
+     * Returns a method for INSERT which contains all columns of the table.<br>
+     * The SQL will be 'INSERT INTO table_name(pk1,pk2,c1,c2...) VALUES (?,?,?,?...)'.
+     *
+     * @return The INSERT method.
+     */
     public DaoMethod<T> forInsert() {
         return this.insert;
     }
 
+    /**
+     * Returns a method for UPDATE contains all columns of the table.<br>
+     * The SQL will be 'UPDATE table_name SET c1=?,c2=?... WHERE pk1=? AND pk2=?'.
+     *
+     * @return The UPDATE method.
+     */
     public DaoMethod<T> forUpdate() {
+        if (this.update == null) {
+            throw new UnsupportedOperationException(this.tableName + " does not support update feature");
+        }
         return this.update;
     }
 
+    /**
+     * Returns a method for DELETE.<br>
+     * The SQL will be 'DELETE FROM table_name'.
+     *
+     * @return The DELETE method.
+     */
     public DaoMethod<T> forDelete() {
         return this.delete;
     }
 
+    /**
+     * Returns a method for SELECT which contains all columns of the table.<br>
+     * The SQL will be 'SELECT pk1,pk2,c1,c2... FROM table_name'.
+     *
+     * @return The SELECT method.
+     */
     public DaoMethod<T> forSelect() {
         return this.select;
     }
+
+    String forWherePK() {
+        return this.wherePK;
+    }
+
 }

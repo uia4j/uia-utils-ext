@@ -41,7 +41,7 @@ public class Oracle extends AbstractDatabase {
             Class.forName("oracle.jdbc.driver.OracleDriver").newInstance();
         }
         catch (Exception e) {
-            e.printStackTrace();
+
         }
     }
 
@@ -81,9 +81,9 @@ public class Oracle extends AbstractDatabase {
             return null;
         }
 
-        ArrayList<String> pks = new ArrayList<String>();
-        ArrayList<String> cols = new ArrayList<String>();
-        ArrayList<String> comments = new ArrayList<String>();
+        ArrayList<String> pks = new ArrayList<>();
+        ArrayList<String> cols = new ArrayList<>();
+        ArrayList<String> comments = new ArrayList<>();
         if (table.getRemark() != null) {
             comments.add(String.format("COMMENT ON TABLE %s is '%s';%n",
                     table.getTableName().toLowerCase(),
@@ -125,7 +125,7 @@ public class Oracle extends AbstractDatabase {
 
     @Override
     public String generateAlterTableSQL(String tableName, List<ColumnType> columns) {
-        ArrayList<String> cols = new ArrayList<String>();
+        ArrayList<String> cols = new ArrayList<>();
         for (ColumnType column : columns) {
             cols.add(prepareColumnDef(column));
         }
@@ -134,7 +134,7 @@ public class Oracle extends AbstractDatabase {
 
     @Override
     public List<ColumnType> selectColumns(String tableName, boolean firstAsPK) throws SQLException {
-        ArrayList<String> pks = new ArrayList<String>();
+        ArrayList<String> pks = new ArrayList<>();
         try (ResultSet rs = this.conn.getMetaData().getPrimaryKeys(null, null, tableName)) {
             while (rs.next()) {
                 pks.add(rs.getString("COLUMN_NAME"));
@@ -166,7 +166,7 @@ public class Oracle extends AbstractDatabase {
          * SOURCE_DATA_TYPE
          * IS_AUTOINCREMENT         *
          */
-        List<ColumnType> cts = new ArrayList<ColumnType>();
+        List<ColumnType> cts = new ArrayList<>();
         try (ResultSet rs = this.conn.getMetaData().getColumns(null, null, tableName, null)) {
             while (rs.next()) {
                 if (tableName.equalsIgnoreCase(rs.getString("TABLE_NAME"))) {
@@ -225,7 +225,7 @@ public class Oracle extends AbstractDatabase {
                 }
             }
         }
-        if (pks.size() == 0 && firstAsPK && cts.size() > 0) {
+        if (pks.isEmpty() && firstAsPK && !cts.isEmpty()) {
             cts.get(0).setPk(true);
             pks.add(cts.get(0).getColumnName());
         }

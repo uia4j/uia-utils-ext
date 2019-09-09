@@ -24,7 +24,7 @@ import java.nio.file.Paths;
 import java.sql.SQLException;
 
 /**
- * Database tool.
+ * DAO Factory tool.
  *
  * @author Kyle K. Lin
  *

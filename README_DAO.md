@@ -1,13 +1,122 @@
 DAO Simple Solution
 ================
 The API provides two simple solutions:
+* DAO Factory API
 * Statement Builder
-* DAO Pattern Builder
+* Simple DAO Builder
 
 Datebases the API supports are:
 * PostgreSQL
 * Oracle
 * HANA
+
+## DAO Factory API
+根據 DTO 上的 Annotation 動態產生 CRUD SQL statements 並執行。
+
+### Table
+#### Key Points
+* TableInfo - annotate a class for a view.
+* ColumnInfo - annotate attributes for the columns.
+* DaoTableDao<T> - generic DAO for a table.
+
+#### Example
+1. Define a DTO for a table.
+
+    ```java
+    package a.b.c;
+
+    @TableName(name = "job_detail")
+    public class JobDetail {
+
+        @ColumnName(name = "id", primaryKey = true)
+        private Stirng id;
+
+        @ColumnName(name = "job_id")
+        private String jobId;
+
+        @ColumnName(name = "job_detail_name")
+        private String jobDetailName;
+    }
+    ```
+2. Load DTO classes into the factory.
+
+    ```java
+    DaoFactory factory = new DaoFactory();
+    factory.load("a.b.c");
+    ```
+
+3. CRUD
+
+    ```java
+    DaoTable<JobDetail> daoTable = factory.forTable(JobDetail.class);
+    DaoTableDao<JobDetail> dao = new DaoTableDao(conn, daoTable);
+    dao.insert(...);
+    dao.udpate(...);
+    dao.delete(...);
+    List<JobDetail> result = dao.selectAll();
+    ```
+
+### Custom DAO
+1. Inherit from DaoTableDao<T>
+
+    ```java
+    public class JobDetailDao exttends DaoTableDao<JobDetail> {
+
+        public JobDetailDetail(Connection conn) {
+            super(conn, factory.forTable(JobDetail.class));
+        }
+    }
+    ```
+
+2. Implement a custom `SELECT` statement
+
+    ```java
+    public List<JobDtail> selectByName(String name) {
+        DaoMethod<JobDtail> method = this.daoTable.forSelect();
+        try(PreparedStatement ps = this.conn.prepareStatement(method.getSql() + "WHERE job_detail_name=? ORDER BY id")) {
+            ps.setString(1, name);
+            try(ResultSet rs = ps.executeQuery()) {
+                return method.toList(rs);
+            }
+        }
+    }
+    ```
+
+
+### View
+#### Annotations
+* ViewInfo - annotate a class for a view.
+* ColumnInfo - annotate attributes for the columns.
+* DaoViewDao<T> - generic DAO for a view.
+
+#### Example
+1. Define a DTO for a view.
+
+    ```java
+    package a.b.c;
+
+    @ViewName(name = "view_job_detail")
+    public class ViewJobDetail extends JobDetail {
+
+        @ColumnName(name = "job_name")
+        private String jobName;
+    }
+    ```
+2. Load DTO classes into the factory.
+
+    ```java
+    DaoFactory factory = new DaoFactory();
+    factory.load("a.b.c");
+    ```
+
+3. Query
+
+    ```java
+    DaoView<ViewJobDetail> daoView = factory.forView(ViewJobDetail.class);
+    DaoViewDao<ViewJobDetail> dao = new DaoViewDao(conn, daoView);
+    List<ViewJobDetail> result = dao.selectAll();
+    ```
+
 
 ## Statement Builder
 ### AND
@@ -79,7 +188,7 @@ try (PreparedStatement ps = select.prepare(conn)) {
 }
 ```
 
-## DAO Pattern Builder
+## Simple DAO Builder
 You can also do same things below using `DatabaseTool` class.
 
 ### Generate from Table
@@ -95,9 +204,9 @@ String dtoPackage = "project.db";               // package name
 String daoPackage = dtoPackage + ".dao";
 
 // printer
-JavaClassPrinter printer = new JavaClassPrinter(db, tableName);
+SimpleDaoClassPrinter printer = new SimpleDaoClassPrinter(db, tableName);
 String dto = printer.generateDTO(dtoPackage, dtoName);
-String dao = printer.generateDAO(daoPackage, dtoPackage, dtoName);
+String dao = printer.generateDAO4Table(daoPackage, dtoPackage, dtoName);
 
 // save
 Files.write(Paths.get(dtoPath + dtoName + ".java"), dto.getBytes());
@@ -117,7 +226,7 @@ String dtoPackage = "project.db";               // package name
 String daoPackage = dtoPackage + ".dao";
 
 // printer
-JavaClassPrinter printer = new JavaClassPrinter(db, viewName);
+SimpleDaoClassPrinter printer = new SimpleDaoClassPrinter(db, viewName);
 String dto = printer.generateDTO(dtoPackage, dtoName);
 String dao = printer.generateDAO4View(daoPackage, dtoPackage, dtoName);
 

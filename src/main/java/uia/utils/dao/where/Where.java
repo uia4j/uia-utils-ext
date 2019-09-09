@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 /**
+ * The WHERE statement builder.
  *
  * @author Kyle K. Lin
  *

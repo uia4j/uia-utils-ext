@@ -19,6 +19,7 @@
 package uia.utils.dao;
 
 /**
+ * Camel naming tool.
  *
  * @author Kyle K. Lin
  *
@@ -28,6 +29,12 @@ public final class CamelNaming {
     private CamelNaming() {
     }
 
+    /**
+     * Change value to camel naming. First character is lower case.
+     *
+     * @param value The value.
+     * @return Result.
+     */
     public static String lower(String value) {
         String[] data = value.split("_");
         StringBuilder b = new StringBuilder();
@@ -38,6 +45,12 @@ public final class CamelNaming {
         return b.toString();
     }
 
+    /**
+     * Change value to camel naming. First character is upper case.
+     *
+     * @param value The value.
+     * @return Result.
+     */
     public static String upper(String value) {
         String[] data = value.split("_");
         StringBuilder b = new StringBuilder();

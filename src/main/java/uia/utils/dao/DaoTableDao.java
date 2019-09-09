@@ -9,15 +9,22 @@ import java.util.List;
 import uia.utils.dao.where.Where;
 
 /**
+ * The common DAO implementation.
  *
  * @author Kyle K. Lin
  *
- * @param <T> DTO class type.
+ * @param <T> The DTO class type.
  */
 public class DaoTableDao<T> {
 
+    /**
+     * The JDBC connection.
+     */
     protected final Connection conn;
 
+    /**
+     * The DAO helper for the table.
+     */
     protected final DaoTable<T> daoTable;
 
     /**
@@ -31,6 +38,14 @@ public class DaoTableDao<T> {
         this.daoTable = dao;
     }
 
+    /**
+     * Inserts a row.
+     *
+     * @param data The row.
+     * @return Result.
+     * @throws SQLException Failed to insert.
+     * @throws DaoException Failed or ORM.
+     */
     public int insert(T data) throws SQLException, DaoException {
         DaoMethod<T> method = this.daoTable.forInsert();
         try (PreparedStatement ps = this.conn.prepareStatement(method.getSql())) {
@@ -39,7 +54,19 @@ public class DaoTableDao<T> {
         }
     }
 
+    /**
+     * Inserts rows.
+     *
+     * @param data The rows.
+     * @return Result.
+     * @throws SQLException Failed to insert.
+     * @throws DaoException Failed or ORM.
+     */
     public int insert(List<T> data) throws SQLException, DaoException {
+        if (data.isEmpty()) {
+            return 0;
+        }
+
         DaoMethod<T> method = this.daoTable.forInsert();
         try (PreparedStatement ps = this.conn.prepareStatement(method.getSql())) {
             for (T t : data) {
@@ -50,6 +77,14 @@ public class DaoTableDao<T> {
         }
     }
 
+    /**
+     * Updates a row.
+     *
+     * @param data The rows.
+     * @return Result.
+     * @throws SQLException Failed to update.
+     * @throws DaoException Failed or ORM.
+     */
     public int update(T data) throws SQLException, DaoException {
         DaoMethod<T> method = this.daoTable.forUpdate();
         try (PreparedStatement ps = this.conn.prepareStatement(method.getSql())) {
@@ -58,7 +93,19 @@ public class DaoTableDao<T> {
         }
     }
 
+    /**
+     * Updates rows.
+     *
+     * @param data The rows.
+     * @return Result.
+     * @throws SQLException Failed to update.
+     * @throws DaoException Failed or ORM.
+     */
     public int update(List<T> data) throws SQLException, DaoException {
+        if (data.isEmpty()) {
+            return 0;
+        }
+
         DaoMethod<T> method = this.daoTable.forUpdate();
         try (PreparedStatement ps = this.conn.prepareStatement(method.getSql())) {
             for (T t : data) {
@@ -69,20 +116,35 @@ public class DaoTableDao<T> {
         }
     }
 
-    public int deleteByPK(String... pks) throws SQLException {
+    /**
+     * Deletes a row.
+     *
+     * @param pks Values of primary keys.
+     * @return Result.
+     * @throws SQLException Failed to update.
+     * @throws DaoException Failed or ORM.
+     */
+    public int deleteByPK(Object... pks) throws SQLException {
         if (pks.length == 0) {
             return 0;
         }
 
         DaoMethod<T> method = this.daoTable.forDelete();
-        try (PreparedStatement ps = this.conn.prepareStatement(method.getSql())) {
+        try (PreparedStatement ps = this.conn.prepareStatement(method.getSql() + "WHERE " + this.daoTable.forWherePK())) {
             for (int i = 0; i < pks.length; i++) {
-                ps.setObject(i, pks[i]);
+                ps.setObject(i + 1, pks[i]);
             }
             return ps.executeUpdate();
         }
     }
 
+    /**
+     * Select all rows.
+     *
+     * @return Result.
+     * @throws SQLException Failed to update.
+     * @throws DaoException Failed or ORM.
+     */
     public List<T> selectAll() throws SQLException, DaoException {
         DaoMethod<T> method = this.daoTable.forSelect();
         try (PreparedStatement ps = this.conn.prepareStatement(method.getSql())) {
@@ -92,6 +154,39 @@ public class DaoTableDao<T> {
         }
     }
 
+    /**
+     * Select a row.
+     *
+     * @param pks Values of primary keys.
+     * @return Result.
+     * @throws SQLException Failed to update.
+     * @throws DaoException Failed or ORM.
+     */
+    public T selectByPK(Object... pks) throws SQLException, DaoException {
+        if (pks.length == 0) {
+            return null;
+        }
+
+        DaoMethod<T> method = this.daoTable.forSelect();
+        try (PreparedStatement ps = this.conn.prepareStatement(method.getSql() + "WHERE " + this.daoTable.forWherePK())) {
+            for (int i = 0; i < pks.length; i++) {
+                ps.setObject(i + 1, pks[i]);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                return method.toOne(rs);
+            }
+        }
+    }
+
+    /**
+     * Select rows.
+     *
+     * @param where The WHERE statement.
+     * @param orders The ORDER BY statement.
+     * @return Result.
+     * @throws SQLException Failed to update.
+     * @throws DaoException Failed or ORM.
+     */
     public List<T> select(Where where, String... orders) throws SQLException, DaoException {
         DaoMethod<T> method = this.daoTable.forSelect();
         SelectStatement sql = new SelectStatement(method.getSql())

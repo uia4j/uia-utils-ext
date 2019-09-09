@@ -31,6 +31,7 @@ import javax.sql.DataSource;
 import org.apache.commons.dbcp2.BasicDataSource;
 
 /**
+ * Abstract implementation for all databases.
  *
  * @author Kyle K. Lin
  *
@@ -47,6 +48,16 @@ public abstract class AbstractDatabase implements Database {
 
     private DataSource dataSource;
 
+    /**
+     * Constructor.
+     *
+     * @param driverName The driver calss.
+     * @param url The JDBC connection string.
+     * @param user The user id.
+     * @param pwd The password.
+     * @param schema The schema.
+     * @throws SQLException Failed to initial.
+     */
     protected AbstractDatabase(String driverName, String url, String user, String pwd, String schema) throws SQLException {
         if (url != null) {
             this.conn = DriverManager.getConnection(url, user, pwd);
@@ -233,9 +244,9 @@ public abstract class AbstractDatabase implements Database {
     }
 
     /**
-     * Change value to upper case or lower case.
+     * Change value to upper case or lower case. Implementation for a database can change the value depending on its naming rule.
      *
-     * @param value Value.
+     * @param value The table name or view name.
      * @return Result.
      */
     protected abstract String upperOrLower(String value);

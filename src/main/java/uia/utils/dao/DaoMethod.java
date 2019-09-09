@@ -7,19 +7,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+* The DaoMthod includes a full columns SQL statement and provide methods to set DTO object into PreparedStatement or get DTO objects from a ResultSet.
 *
 * @author Kyle K. Lin
 *
 */
-public class DaoMethod<T> {
+public final class DaoMethod<T> {
 
-    private Class<T> clz;
+    private final Class<T> clz;
+
+    private final ArrayList<DaoColumn> columns;
 
     private String sql;
 
-    private ArrayList<DaoColumn> columns;
-
-    public DaoMethod(Class<T> clz) {
+    DaoMethod(Class<T> clz) {
         this.clz = clz;
         this.columns = new ArrayList<>();
     }
