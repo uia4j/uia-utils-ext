@@ -1,6 +1,6 @@
 DAO Simple Solution
 ================
-The API provides two simple solutions:
+The API provides three simple solutions:
 * DAO Factory API
 * Statement Builder
 * Simple DAO Builder
@@ -11,11 +11,16 @@ Datebases the API supports are:
 * HANA
 
 ## DAO Factory API
-根據 DTO 上的 Annotation 動態產生 CRUD SQL statements 並執行。
+Generate CRUD SQL statements depending on Annotations in the DTO class. 
+
+* Focus on the design of DTO classes only. No XML, no configuration.
+* No need to modify the SQL statement.
+* No need to implement standard CRUD methods.
+* Least implementation of DAO classes.
 
 ### Table
 #### Key Points
-* TableInfo - annotate a class for a view.
+* TableInfo - annotate a class for a table.
 * ColumnInfo - annotate attributes for the columns.
 * DaoTableDao<T> - generic DAO for a table.
 
@@ -52,8 +57,9 @@ Datebases the API supports are:
     DaoTableDao<JobDetail> dao = new DaoTableDao(conn, daoTable);
     dao.insert(...);
     dao.udpate(...);
-    dao.delete(...);
+    dao.deleteByPK(...);
     List<JobDetail> result = dao.selectAll();
+    JobDetail one = dao.selectByPK(...);
     ```
 
 ### Custom DAO
