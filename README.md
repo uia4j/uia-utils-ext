@@ -10,11 +10,12 @@ UIA Utils extension
 
 Some useful solution for system integration. Need JDK 1.8 or above.
 
-The package incldues 3 sub packages:
+The package incldues 2 sub packages:
 
 * Cube - Multi dimension to query and view data.
 * States - __State machine pattern__ implementation.
-* [DAO](README_DAO.md) - Generate __DAO/DTO__ files and some helpers to access databases.
+
+Remark: `uia.utis.dao` in 0.3.x is moved to new porject [uia-dao](https://github.com/uia4j/uia-dao).
 
 ## Cube
 ### key classes
