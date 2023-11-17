@@ -20,7 +20,10 @@ package uia.utils.cube;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -33,35 +36,13 @@ import java.util.stream.Stream;
  */
 public interface Cube<T> {
 
-    /**
-     * Create cubes grouping by tag.
-     * @param tagName Tag name.
-     * @return Cubes.
-     */
-    public Map<String, Cube<T>> cubes(String tagName);
+    public long count();
 
     /**
-     * Select subset of cube depending on function.
-     * @param function Function.
-     * @return Cube.
+     * Get all data in the cube.
+     * @return Values.
      */
-    public Cube<T> select(Function<Data<T>, Boolean> function);
-
-    /**
-     * Select subset of cube depending on tag.
-     * @param tagName Tag name.
-     * @param tagValue Tag value.
-     * @return Cube.
-     */
-    public Cube<T> select(String tagName, String tagValue);
-
-    /**
-     * Select subset of cube depending on tag.
-     * @param tagName Tag name.
-     * @param tagValue Tag value.
-     * @return Cube.
-     */
-    public Cube<T> selectNot(String tagName, String tagValue);
+    public List<Data<T>> data();
 
     /**
      * Get all values in the cube.
@@ -70,20 +51,51 @@ public interface Cube<T> {
     public Stream<T> values();
 
     /**
+     * Create cubes grouping by tag.
+     * @param tagName Tag name.
+     * @return Cubes.
+     */
+    public Map<String, Cube<T>> cubes(String tagName);
+
+    public Map<String, Cube<T>> cubes(Function<Data<T>, String> f);
+
+    public Map<String, Set<String>> tags(String... tags);
+
+    public Map<String, Set<String>> tags(List<String> tags);
+
+    /**
      * Get values grouping by tag.
      * @param tagName Tag name.
      * @return Values.
      */
-    public Map<String, List<T>> valuesMapping(final String tagName);
+    public Map<String, List<Data<T>>> grouping(final String tagName);
+
+    public <R> Map<String, List<R>> grouping(final String tagName, Function<Data<T>, R> f);
+
+    public <R> Map<String, R> mapping(final String tagName, BiFunction<Data<T>, R, R> f);
 
     /**
-     * Get converted values grouping by tag.
-     * @param tagName Tag name.
-     * @param f Function used to convert value.
-     * @param <R> Converted type.
-     * @return Values.
+     * Filter the cube depending on function.
+     * @param function Function.
+     * @return Cube.
      */
-    public <R> Map<String, List<R>> valuesMapping(final String tagName, Function<T, R> f);
+    public Cube<T> filter(Function<Data<T>, Boolean> function);
+
+    /**
+     * Select subset of cube depending on tag.
+     * @param tagName Tag name.
+     * @param tagValue Tag value.
+     * @return Cube.
+     */
+    public Cube<T> eq(String tagName, String tagValue);
+
+    /**
+     * Select subset of cube depending on tag.
+     * @param tagName Tag name.
+     * @param tagValue Tag value.
+     * @return Cube.
+     */
+    public Cube<T> neq(String tagName, String tagValue);
 
     /**
      * Get first value in cube.
@@ -96,7 +108,7 @@ public interface Cube<T> {
      * @param tagName Tag name.
      * @return Values.
      */
-    public Map<String, T> singleMapping(final String tagName);
+    public Map<String, T> single(final String tagName);
 
     /**
      * Get first value grouping by tag.
@@ -105,7 +117,7 @@ public interface Cube<T> {
      * @param <R> Converted type.
      * @return Value.
      */
-    public <R> Map<String, R> singleMapping(final String tagName, Function<T, R> f);
+    public <R> Map<String, R> single(final String tagName, Function<T, R> f);
 
     /**
      * Data.
@@ -128,6 +140,10 @@ public interface Cube<T> {
             this.value = value;
         }
 
+        public Set<Entry<String, String>> getTags() {
+            return this.tags.entrySet();
+        }
+
         /**
          * Add tag.
          * @param tagName Tag name.
@@ -146,6 +162,11 @@ public interface Cube<T> {
          */
         public String getTag(String tagName) {
             return this.tags.get(tagName);
+        }
+
+        @Override
+        public String toString() {
+            return this.value.toString();
         }
     }
 }

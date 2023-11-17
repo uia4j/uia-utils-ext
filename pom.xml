@@ -84,8 +84,13 @@
 	</scm>
 	<distributionManagement>
 		<repository>
-			<id>bintray-my-maven</id>
-			<url>https://api.bintray.com/maven/uia4j/maven/uia-utils-ext/;publish=1</url>
+			<id>HTKS</id>
+			<url>http://10.160.1.56:17002/repository/sapme4j-releases/</url>
 		</repository>
+		<snapshotRepository>
+			<uniqueVersion>false</uniqueVersion>
+			<id>HTKS</id>
+			<url>http://10.160.1.56:17002/repository/sapme4j-snapshots/</url>
+		</snapshotRepository>
 	</distributionManagement>
 </project>
