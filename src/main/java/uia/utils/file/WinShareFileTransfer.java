@@ -199,8 +199,8 @@ public class WinShareFileTransfer implements FileTransfer {
                 dstPath += ("\\" + folders[folders.length - 1]);
 
                 this.progress.start(dstPath);
+                String fileName = dstPath.substring(dstPath.lastIndexOf("\\"));
                 if (this.zipEnabled) {
-                    String fileName = dstPath.substring(dstPath.lastIndexOf("\\"));
                     final File dstFile = share.openFile(
                             dstPath + ".zip",
                             EnumSet.of(AccessMask.FILE_ADD_FILE),
@@ -222,20 +222,21 @@ public class WinShareFileTransfer implements FileTransfer {
                     }
                     zo.close();
                     out.close();
+                    dstFile.close();
+
                     this.progress.done(dstPath, size);
 
                     return true;
                 }
                 else {
                     final File dstFile = share.openFile(
-                            dstPath,
-                            EnumSet.of(AccessMask.FILE_ADD_FILE),
+                            dstPath + ".temp",
+                            EnumSet.of(AccessMask.MAXIMUM_ALLOWED),
                             null,
                             SMB2ShareAccess.ALL,
                             SMB2CreateDisposition.FILE_OVERWRITE_IF,
                             EnumSet.of(SMB2CreateOptions.FILE_NON_DIRECTORY_FILE, SMB2CreateOptions.FILE_WRITE_THROUGH));
 
-                    MessageDigest md = MessageDigest.getInstance("MD5");
                     OutputStream out = dstFile.getOutputStream();
                     byte[] buf = new byte[1024 * 1024];
                     int length = 0;
@@ -243,10 +244,19 @@ public class WinShareFileTransfer implements FileTransfer {
                         out.write(buf, 0, length);
                         size += length;
                         this.progress.uploading(dstPath, size);
-                        md.update(buf, 0, length);
                     }
                     out.flush();
                     out.close();
+
+                    /**
+                     * important
+                     *
+                     * \folder\filename DOES NOT work
+                     *  folder\filename works
+                     **/
+                    dstFile.rename(dstPath.substring(1));
+                    dstFile.close();
+
                     this.progress.done(dstPath, size);
 
                     return true;

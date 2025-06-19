@@ -21,7 +21,17 @@ public class WinShareFileTransferTest {
     }
 
     @Test
-    public void testConnect() throws Exception {
+    public void testPLP() throws Exception {
+        WinShareFileTransfer trans = new WinShareFileTransfer("PLP_File");
+        trans.login("10.170.110.85", "pg_plp_admin", "gMkVGw7G", "js");
+        try (InputStream local = Files.newInputStream(Paths.get("d:/temp/P25530050001-A-P0SZ79PQ0003-Q2_FL1-IT.gbr"))) {
+            trans.upload(local, "\\DSM_INPUT\\P25530050001-A-P0SZ79PQ0003-Q2_FL1-IT.gbr", true);
+        }
+        trans.close();
+    }
+
+    @Test
+    public void testCP1() throws Exception {
         WinShareFileTransfer trans = new WinShareFileTransfer("CP_Test_DATA_Archive");
         trans.login("10.160.1.166", "ks015971_rw", "Qj015971", "HT-TECH");
         trans.list().forEach(System.out::println);
@@ -29,7 +39,7 @@ public class WinShareFileTransferTest {
     }
 
     @Test
-    public void testUpload1() throws Exception {
+    public void testCP2() throws Exception {
         WinShareFileTransfer trans = new WinShareFileTransfer("CP_Test_DATA_Archive");
         trans.setParentPath("\\CP测试1.69网盘数据备份");
         trans.login("10.160.1.166", "ks015971_rw", "Qj015971", "HT-TECH");
