@@ -32,28 +32,28 @@ public class CubeTest {
 
     @Test
     public void testCase1() {
-        CubeBuilder<String> b = new CubeBuilder<String>();
-        b.put("Kan Lin")
+        CubeBuilder<String> b = new CubeBuilder<>();
+        b.add("Kan Lin")
                 .addTag("lastName", "Lin")
                 .addTag("Sex", "M")
                 .addTag("Job", "Engineer");
-        b.put("Patrick Lin")
+        b.add("Patrick Lin")
                 .addTag("lastName", "Lin")
                 .addTag("Sex", "M")
                 .addTag("Job", "Project Manager");
-        b.put("Qin Lin")
+        b.add("Qin Lin")
                 .addTag("lastName", "Lin")
                 .addTag("Sex", "F")
                 .addTag("Job", "Student");
-        b.put("Yue Lin")
+        b.add("Yue Lin")
                 .addTag("lastName", "Lin")
                 .addTag("Sex", "F")
                 .addTag("Job", "Student");
-        b.put("Charlotte Chang")
+        b.add("Charlotte Chang")
                 .addTag("lastName", "Chang")
                 .addTag("Sex", "F")
                 .addTag("Job", "Engineer");
-        b.put("Cathy Tsai")
+        b.add("Cathy Tsai")
                 .addTag("lastName", "Tsai")
                 .addTag("Sex", "F")
                 .addTag("Job", "Sales");
@@ -84,12 +84,12 @@ public class CubeTest {
 
     @Test
     public void testCase2() {
-        CubeBuilder<String> b1 = new CubeBuilder<String>();
-        b1.put("Kan Lin")
+        CubeBuilder<String> b1 = new CubeBuilder<>();
+        b1.add("Kan Lin")
                 .addTag("lastName", "Lin")
                 .addTag("Sex", "M")
                 .addTag("Job", "Engineer");
-        b1.put("Patrick Lin")
+        b1.add("Patrick Lin")
                 .addTag("lastName", "Lin")
                 .addTag("Sex", "M")
                 .addTag("Job", "Project Manager");
@@ -99,7 +99,7 @@ public class CubeTest {
         Assert.assertEquals(0, c1.eq("Sex", "F").grouping("lastName").size());
         Assert.assertEquals(null, c1.eq("Sex", "F").single());
 
-        CubeBuilder<String> b2 = new CubeBuilder<String>();
+        CubeBuilder<String> b2 = new CubeBuilder<>();
         Cube<String> c2 = b2.build();
         Assert.assertNull(c2.single());
         Assert.assertEquals(0, c2.single("Job").size());
@@ -109,20 +109,20 @@ public class CubeTest {
 
     @Test
     public void testCase3() {
-        CubeBuilder<String> b1 = new CubeBuilder<String>();
-        b1.put("sfc1")
+        CubeBuilder<String> b1 = new CubeBuilder<>();
+        b1.add("sfc1")
                 .addTag("op", "op1")
                 .addTag("item", "item1")
                 .addTag("mask", "mask1");
-        b1.put("sfc2")
+        b1.add("sfc2")
                 .addTag("op", "op1")
                 .addTag("item", "item2")
                 .addTag("mask", "mask1");
-        b1.put("sfc3")
+        b1.add("sfc3")
                 .addTag("op", "op2")
                 .addTag("item", "item1")
                 .addTag("mask", "mask2");
-        b1.put("sfc4")
+        b1.add("sfc4")
                 .addTag("op", "op2")
                 .addTag("item", "item2")
                 .addTag("mask", "mask3");
@@ -131,5 +131,26 @@ public class CubeTest {
         System.out.println(c1.grouping("op"));
         System.out.println(c1.grouping("item"));
         System.out.println(c1.grouping("mask"));
+    }
+
+    @Test
+    public void testCase4() {
+        CubeBuilder<String> data = new CubeBuilder<>();
+        data.add("1,1").addTag("site", "1").addTag("soft", "1").addTag("hard", "1");
+        data.add("1,2").addTag("site", "2").addTag("soft", "1").addTag("hard", "1");
+        data.add("1,3").addTag("site", "1").addTag("soft", "1").addTag("hard", "1");
+        data.add("1,4").addTag("site", "2").addTag("soft", "2").addTag("hard", "2");
+        data.add("1,5").addTag("site", "1").addTag("soft", "3").addTag("hard", "2");
+        data.add("1,6").addTag("site", "2").addTag("soft", "4").addTag("hard", "4");
+
+        Cube<String> dies = data.build();
+        System.out.println(dies.tag("site"));
+        System.out.println(dies.tag("soft"));
+        System.out.println(dies.tag("hard"));
+        dies.cubes("soft").forEach((k, v) -> {
+            System.out.println(k + ":");
+            System.out.println(" " + v.grouping("site"));
+        });
+
     }
 }

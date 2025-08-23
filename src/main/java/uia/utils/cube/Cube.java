@@ -59,6 +59,8 @@ public interface Cube<T> {
 
     public Map<String, Cube<T>> cubes(Function<Data<T>, String> f);
 
+    public Set<String> tag(String tagName);
+
     public Map<String, Set<String>> tags(String... tags);
 
     public Map<String, Set<String>> tags(List<String> tags);

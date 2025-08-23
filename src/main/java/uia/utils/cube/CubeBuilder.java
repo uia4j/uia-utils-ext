@@ -19,6 +19,7 @@
 package uia.utils.cube;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import uia.utils.cube.Cube.Data;
 
@@ -31,7 +32,7 @@ import uia.utils.cube.Cube.Data;
  */
 public class CubeBuilder<T> {
 
-    private final ArrayList<Data<T>> data;
+    private final List<Data<T>> data;
 
     /**
      * Constructor.
@@ -53,7 +54,7 @@ public class CubeBuilder<T> {
      * @param value Value.
      * @return Data.
      */
-    public Data<T> put(T value) {
+    public Data<T> add(T value) {
         Data<T> d = new Data<>(value);
         this.data.add(d);
         return d;

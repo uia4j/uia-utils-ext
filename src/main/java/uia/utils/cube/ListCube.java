@@ -70,6 +70,21 @@ public class ListCube<T> implements Cube<T> {
     }
 
     @Override
+    public Set<String> tag(String tagName) {
+        Set<String> result = new TreeSet<>();
+        this.data.forEach(d -> {
+            d.getTags().forEach(e -> {
+                String k = e.getKey();
+                if (!tagName.equals(k)) {
+                    return;
+                }
+                result.add(e.getValue());
+            });
+        });
+        return result;
+    }
+
+    @Override
     public Map<String, Set<String>> tags(String... tags) {
         return tags(Arrays.asList(tags));
     }
