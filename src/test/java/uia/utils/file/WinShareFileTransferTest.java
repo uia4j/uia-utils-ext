@@ -132,4 +132,15 @@ public class WinShareFileTransferTest {
         scanner.login("10.160.1.69", "administrator", "bG~(7xd6Cyghw@H8", "HT-TECH");
         scanner.copyTo(trans, syncFolder);
     }
+
+    @Test
+    public void testBackup() throws Exception {
+        WinShareFileTransfer trans = new WinShareFileTransfer("trek");
+        trans.setZipEnabled(true);
+        trans.login("10.160.240.67", "kstrek_rw", "Fnf7dv7s", "HT-TECH");
+        try (InputStream local = Files.newInputStream(Paths.get("d:/temp/wafer.gbr"))) {
+            trans.uploadZip(local, "\\CUSTOMER\\DEVICE\\abc.zip", "wafer.gbr", true);
+        }
+        trans.close();
+    }
 }

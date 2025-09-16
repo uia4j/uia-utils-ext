@@ -75,6 +75,10 @@ public class WinShareFileTransfer implements FileTransfer {
         this.zipEnabled = false;
     }
 
+    public String getShareFolder() {
+        return this.shareFolder;
+    }
+
     public String getParentPath() {
         return this.parentPath;
     }
@@ -180,10 +184,10 @@ public class WinShareFileTransfer implements FileTransfer {
             return false;
         }
 
+        final String[] folders = remotePath.split("\\\\");
         int count = Math.max(0, this.retry);
         while (count >= 0) {
             count--;
-            String[] folders = remotePath.split("\\\\");
             String dstPath = this.parentPath == null ? "" : this.parentPath;
             int size = 0;
             try (final DiskShare share = (DiskShare) this.session.connectShare(this.shareFolder)) {
@@ -263,6 +267,67 @@ public class WinShareFileTransfer implements FileTransfer {
 
                     // return verify(share, dstPath, new BigInteger(md.digest()).toString(16));
                 }
+            }
+            catch (Exception ex) {
+                this.progress.error(dstPath, size, ex);
+                close();
+                connect();
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean uploadZip(InputStream local, String zipFilePath, String fileName, boolean overwrite) throws IOException {
+        if (zipFilePath == null || zipFilePath.trim().isEmpty()) {
+            return false;
+        }
+
+        final String[] folders = zipFilePath.replace("/", "\\").split("\\\\");
+        int count = Math.max(0, this.retry);
+        while (count >= 0) {
+            count--;
+            String dstPath = this.parentPath == null ? "" : this.parentPath;
+            int size = 0;
+            try (final DiskShare share = (DiskShare) this.session.connectShare(this.shareFolder)) {
+                // create folder
+                for (int i = 0; i < folders.length - 1; i++) {
+                    if (folders[i].trim().length() > 0) {
+                        dstPath += ("\\" + folders[i]);
+                        if (!share.folderExists(dstPath)) {
+                            share.mkdir(dstPath);
+                        }
+                    }
+                }
+                dstPath += ("\\" + folders[folders.length - 1]);
+
+                this.progress.start(dstPath);
+                final File dstFile = share.openFile(
+                        dstPath,
+                        EnumSet.of(AccessMask.FILE_ADD_FILE),
+                        null,
+                        SMB2ShareAccess.ALL,
+                        SMB2CreateDisposition.FILE_OVERWRITE_IF,
+                        EnumSet.of(SMB2CreateOptions.FILE_NON_DIRECTORY_FILE, SMB2CreateOptions.FILE_WRITE_THROUGH));
+
+                OutputStream out = dstFile.getOutputStream();
+                ZipOutputStream zo = new ZipOutputStream(out);
+                zo.putNextEntry(new ZipEntry(fileName));
+
+                byte[] buf = new byte[1024 * 1024];
+                int length = 0;
+                while ((length = local.read(buf)) != -1) {
+                    zo.write(buf, 0, length);
+                    size += length;
+                    this.progress.uploading(dstPath, size);
+                }
+                zo.close();
+                out.close();
+                dstFile.close();
+
+                this.progress.done(dstPath, size);
+
+                return true;
             }
             catch (Exception ex) {
                 this.progress.error(dstPath, size, ex);
